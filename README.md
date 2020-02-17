@@ -21,7 +21,7 @@ There are four steps to starting the service from scratch:
 
 3. Configures the FLINK_HOME environment variable using the following command (and add the same into ~/.bashrc): export FLINK_HOME=<flink-install-dir>
 
-4. Downloads (or builds) the Flink SQL gateway package and executes `./bin/sql-gateway.sh`
+4. [Downloads](https://github.com/ververica/flink-sql-gateway/releases/tag/v0.1-snapshot) (or builds) the Flink SQL gateway package and executes `./bin/sql-gateway.sh`
 
 The gateway can be started with the following optional CLI commands.
 ```
