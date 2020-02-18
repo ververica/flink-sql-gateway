@@ -24,6 +24,7 @@
 
 if [ -z "$FLINK_HOME" ]; then
    (>&2  echo "FLINK_HOME is not found in environment variable.")
+   (>&2  echo "Configures the FLINK_HOME environment variable using the following command: export FLINK_HOME=<flink-install-dir>")
 
     # exit to force process failure
     exit 1
