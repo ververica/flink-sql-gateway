@@ -19,7 +19,7 @@ There are four steps to starting the service from scratch:
 
 2. Starts up a Flink cluster. Flink SQL gateway requires a running Flink cluster where table programs can be executed. For more information about setting up a Flink cluster see the [Cluster & Deployment](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html) part.
 
-3. Configures the FLINK_HOME environment variable using the following command (and add the same into ~/.bashrc): export FLINK_HOME=<flink-install-dir>
+3. Configures the FLINK_HOME environment variable using the following command (and add the same into ~/.bashrc): export FLINK_HOME=&lt;flink-install-dir&gt;
 
 4. [Downloads](https://github.com/ververica/flink-sql-gateway/releases/tag/v0.1-snapshot) (or builds) the Flink SQL gateway package and executes `./bin/sql-gateway.sh`
 
