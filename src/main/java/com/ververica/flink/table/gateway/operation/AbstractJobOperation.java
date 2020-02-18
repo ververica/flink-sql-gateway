@@ -72,9 +72,9 @@ public abstract class AbstractJobOperation implements JobOperation {
 	protected String getJobName(String statement) {
 		Optional<String> sessionName = context.getSessionName();
 		if (sessionName.isPresent()) {
-			return String.format("{}:{}:{}", sessionName.get(), sessionId, statement);
+			return String.format("%s:%s:%s", sessionName.get(), sessionId, statement);
 		} else {
-			return String.format("{}:{}", sessionId, statement);
+			return String.format("%s:%s", sessionId, statement);
 		}
 	}
 
