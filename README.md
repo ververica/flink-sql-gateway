@@ -6,24 +6,24 @@ User applications (e.g. Java/Python/Shell program, Postman) can use the REST API
 
 [Flink JDBC driver](https://github.com/ververica/flink-jdbc-driver) enables JDBC clients to connect to Flink SQL gateway based on the REST API.
 
-Currently, the REST API is internal API and we recommend users to interact with the gateway through JDBC API. 
-Flink SQL gateway stores the session properties in memory now. If the service is stopped or crashed, all properties are lost. We will improve this in future.
+Currently, the REST API is a set of internal API and we recommend users to interact with the gateway through JDBC API. 
+Flink SQL gateway stores the session properties in memory now. If the service is stopped or crashed, all properties are lost. We will improve this in the future.
 
 This project is at an early stage. Feel free to file an issue if you meet any problems or have any suggestions.
 
-# Startup gateway service
+# Startup Gateway Service
 
-There are four steps to starting the service from scratch:
+There are four steps to start the service from scratch:
 
-1. Downloads (or builds) the Flink package. Flink SQL gateway only supports Apache Flink-1.10 now, you can download it through https://flink.apache.org/downloads.html#apache-flink-1100.
+1. Download (or build) the Flink package. Flink SQL gateway currently only supports Apache Flink 1.10, you can download Flink 1.10 from [here](https://flink.apache.org/downloads.html#apache-flink-1100).
 
-2. Starts up a Flink cluster. Flink SQL gateway requires a running Flink cluster where table programs can be executed. For more information about setting up a Flink cluster see the [Cluster & Deployment](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html) part.
+2. Start up a Flink cluster. Flink SQL gateway requires a running Flink cluster where table programs can be executed. For more information about setting up a Flink cluster see the [Cluster & Deployment](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html) part.
 
-3. Configures the FLINK_HOME environment variable using the following command (and add the same into ~/.bashrc): export FLINK_HOME=&lt;flink-install-dir&gt;
+3. Configure the `FLINK_HOME` environment variable: `export FLINK_HOME=<flink-install-dir>`
 
-4. [Downloads](https://github.com/ververica/flink-sql-gateway/releases/tag/v0.1-snapshot) (or builds) the Flink SQL gateway package and executes `./bin/sql-gateway.sh`
+4. Download from the [download page](https://github.com/ververica/flink-sql-gateway/releases) (or build) the Flink SQL gateway package and execute `./bin/sql-gateway.sh`
 
-The gateway can be started with the following optional CLI commands.
+The gateway can be started with the following options.
 ```
 ./bin/sql-gateway.sh -h
 
@@ -42,15 +42,15 @@ The following options are available:
      -p,--port <service port>                     The port to which the REST client connects to.
 ```
 
-If no configuration file is specified, the gateway will read its default configuration from the file located in ./conf/sql-gateway-defaults.yaml. See the [configuration](#Configuration) part for more information about the structure of environment files. 
-If no port is specified in CLI commands or in the configuration file, the gateway will be started with the default port 8083. 
+If no configuration file is specified, the gateway will read its default configuration from the file located in `./conf/sql-gateway-defaults.yaml`. See the [configuration](#Configuration) part for more information about the structure of environment files. 
+If no port is specified in CLI commands or in the configuration file, the gateway will be started with the default port `8083`. 
 
 
 # Configuration
 
-A SQL query needs a configuration environment in which it is executed. The so-called environment file defines server properties, session properties, available catalogs, table sources and sinks, user-defined functions, and other properties required for execution and deployment.
+A SQL query needs a configuration environment in which it is executed. The so-called environment file defines server properties, session properties, available catalogs, table sources and sinks, user-defined functions and other properties required for execution and deployment.
 
-Every environment file is a regular [YAML file](http://yaml.org/). An example of such a file is presented below.
+Every environment file is a regular [YAML file](http://yaml.org/). An example of such file is presented below.
 
 ```
 # Define server properties.
@@ -170,31 +170,44 @@ The full list of offered SQL JARs and documentation about how to use them can be
 The following statements are supported now.
 |  statement   | comment  |
 |  ----  | ----  |
-| SHOW CATALOGS | Lists all registered catalogs |
-| SHOW CURRENT_CATALOG | Shows current catalog |
-| SHOW DATABASES | Lists all databases in the current catalog |
-| SHOW CURRENT DATABASE | Shows current database in current catalog |
-| SHOW TABLES | Lists all tables in the current database of the current catalog |
-| SHOW FUNCTIONS | Lists all functions |
-| SHOW MODULES | Lists all modules |
-| USE CATALOG catalog_name | Sets a catalog with given name as the current catalog |
-| USE database_name | Sets a database with given name as the current database of the current catalog |
-| CREATE TABLE table_name ... | Creates a table with a DDL statement |
-| DROP TABLE table_name | Drops a table with given name |
-| ALTER TABLE table_name | Alters a table with given name |
-| CREATE DATABASE database_name ... | Creates a database in current catalog with given name |
-| DROP DATABASE database_name ... | Drops a database with given name |
-| ALTER DATABASE database_name ... | Alters a database with given name |
-| CREATE VIEW view_name AS ... | Adds a view in current session with SELECT statement |
-| DROP VIEW view_name ... | Drops a table with given name |
-| SET xx=yy | Sets given key's session property to the specific value |
-| SET | Lists all session's properties |
-| RESET | Resets all session's properties set by `SET` command |
-| DESCRIBE table_name | Shows the schema of a table |
-| EXPLAIN ... | Shows string-based explanation about AST and execution plan of the given statement |
-| SELECT ... | Submits a Flink `SELECT` SQL job |
-| INSERT INTO ... | Submits a Flink `INSERT INTO` SQL job |
-| INSERT OVERWRITE ... | Submits a Flink `INSERT OVERWRITE` SQL job |
+| SHOW CATALOGS | List all registered catalogs |
+| SHOW CURRENT_CATALOG | Show current catalog |
+| SHOW DATABASES | List all databases in the current catalog |
+| SHOW CURRENT DATABASE | Show current database in current catalog |
+| SHOW TABLES | List all tables in the current database of the current catalog |
+| SHOW FUNCTIONS | List all functions |
+| SHOW MODULES | List all modules |
+| USE CATALOG catalog_name | Set a catalog with given name as the current catalog |
+| USE database_name | Set a database with given name as the current database of the current catalog |
+| CREATE TABLE table_name ... | Create a table with a DDL statement |
+| DROP TABLE table_name | Drop a table with given name |
+| ALTER TABLE table_name | Alter a table with given name |
+| CREATE DATABASE database_name ... | Create a database in current catalog with given name |
+| DROP DATABASE database_name ... | Drop a database with given name |
+| ALTER DATABASE database_name ... | Alter a database with given name |
+| CREATE VIEW view_name AS ... | Add a view in current session with SELECT statement |
+| DROP VIEW view_name ... | Drop a table with given name |
+| SET xx=yy | Set given key's session property to the specific value |
+| SET | List all session's properties |
+| RESET | Reset all session's properties set by `SET` command |
+| DESCRIBE table_name | Show the schema of a table |
+| EXPLAIN ... | Show string-based explanation about AST and execution plan of the given statement |
+| SELECT ... | Submit a Flink `SELECT` SQL job |
+| INSERT INTO ... | Submit a Flink `INSERT INTO` SQL job |
+| INSERT OVERWRITE ... | Submit a Flink `INSERT OVERWRITE` SQL job |
 
+# Run Gateway with Different Executors
+You might want to run the gateway with a Flink on Yarn or Kubernetes deployment. Flink SQL gateway currently supports the following executors:
+* **[Standalone Flink Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html)**: This is the default executor in Flink. No further configuration is needed.
+* **[Flink on Yarn Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
+    ```
+    execution.target: yarn-session
+    ```
+* **[Standalone Flink Session on Kubernetes](https://ci.apache.org/projects/flink/flink-docs-stable/ops/deployment/kubernetes.html)**: This is the same with the normal standalone Flink session. No further configuration is needed.
+* **[Native Flink Session on Kubernetes](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/native_kubernetes.html)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
+    ```
+    execution.target: kubernetes-session
+    kubernetes.cluster-id: <your-flink-cluster-id>
+    ```
 
-
+Flink SQL gateway currently hasn't been tested against per-job execution mode. We'll test and support this in the future.
