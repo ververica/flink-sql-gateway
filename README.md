@@ -6,7 +6,7 @@ User applications (e.g. Java/Python/Shell program, Postman) can use the REST API
 
 [Flink JDBC driver](https://github.com/ververica/flink-jdbc-driver) enables JDBC clients to connect to Flink SQL gateway based on the REST API.
 
-Currently, the REST API is a set of internal API and we recommend users to interact with the gateway through JDBC API. 
+Currently, the REST API is a set of internal APIs and we recommend users to interact with the gateway through JDBC API. 
 Flink SQL gateway stores the session properties in memory now. If the service is stopped or crashed, all properties are lost. We will improve this in the future.
 
 This project is at an early stage. Feel free to file an issue if you meet any problems or have any suggestions.
@@ -19,11 +19,11 @@ There are four steps to start the service from scratch:
 
 2. Start up a Flink cluster. Flink SQL gateway requires a running Flink cluster where table programs can be executed. For more information about setting up a Flink cluster see the [Cluster & Deployment](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html) part.
 
-3. Configure the `FLINK_HOME` environment variable: `export FLINK_HOME=<flink-install-dir>`
+3. Configure the `FLINK_HOME` environment variable with the command: `export FLINK_HOME=<flink-install-dir>` and add the same command to your bash configuration file like `~/.bashrc` or `~/.bash_profile`
 
-4. Download from the [download page](https://github.com/ververica/flink-sql-gateway/releases) (or build) the Flink SQL gateway package and execute `./bin/sql-gateway.sh`
+4. Download from the [download page](https://github.com/ververica/flink-sql-gateway/releases) (or build) the Flink SQL gateway package, make sure that the current working directory is `bin` and execute `./sql-gateway.sh`
 
-The gateway can be started with the following options.
+The gateway can be started with the following optional command line arguments.
 ```
 ./bin/sql-gateway.sh -h
 
@@ -50,7 +50,7 @@ If no port is specified in CLI commands or in the configuration file, the gatewa
 
 A SQL query needs a configuration environment in which it is executed. The so-called environment file defines server properties, session properties, available catalogs, table sources and sinks, user-defined functions and other properties required for execution and deployment.
 
-Every environment file is a regular [YAML file](http://yaml.org/). An example of such file is presented below.
+Every environment file is a regular [YAML file](http://yaml.org/). An example of such a file is presented below.
 
 ```
 # Define server properties.
@@ -197,7 +197,7 @@ The following statements are supported now.
 | INSERT OVERWRITE ... | Submit a Flink `INSERT OVERWRITE` SQL job |
 
 # Run Gateway with Different Executors
-You might want to run the gateway with a Flink on Yarn or Kubernetes deployment. Flink SQL gateway currently supports the following executors:
+You might want to run the gateway on a standalone Flink cluster or with Yarn / Kubernetes deployment. Flink SQL gateway currently supports the following executors:
 * **[Standalone Flink Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html)**: This is the default executor in Flink. No further configuration is needed.
 * **[Flink on Yarn Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
     ```
