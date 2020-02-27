@@ -33,23 +33,19 @@ public class OperationFactory {
 			case SELECT:
 				operation = new SelectOperation(context, call.operands[0]);
 				break;
-			case CREATE_TABLE:
-				operation = new CreateTableOperation(context, call.operands[0]);
-				break;
-			case DROP_TABLE:
-				operation = new DropTableOperation(context, call.operands[0]);
-				break;
 			case CREATE_VIEW:
 				operation = new CreateViewOperation(context, call.operands[0], call.operands[1]);
 				break;
 			case DROP_VIEW:
 				operation = new DropViewOperation(context, call.operands[0]);
 				break;
+			case CREATE_TABLE:
+			case DROP_TABLE:
+			case ALTER_TABLE:
 			case CREATE_DATABASE:
 			case DROP_DATABASE:
 			case ALTER_DATABASE:
-			case ALTER_TABLE:
-				operation = new UpdateOperation(context, call.operands[0]);
+				operation = new DDLOperation(context, call.operands[0], call.command);
 				break;
 			case SET:
 				// list all properties

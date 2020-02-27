@@ -18,23 +18,46 @@
 
 package com.ververica.flink.table.gateway.operation;
 
+import com.ververica.flink.table.gateway.rest.result.ResultSet;
+
 import org.junit.Test;
 
+import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_DATABASE;
+import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_TABLE;
+import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.DROP_TABLE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests for {@link DropTableOperation}.
+ * Tests for {@link DDLOperation}.
  */
-public class DropTableOperationTest extends OperationTestBase {
+public class DDLOperationTest extends OperationTestBase {
+
+	@Test
+	public void testCreateTable() {
+		final String ddlTemplate = "create table %s(\n" +
+			"  a int,\n" +
+			"  b bigint,\n" +
+			"  c varchar\n" +
+			") with (\n" +
+			"  'connector.type'='filesystem',\n" +
+			"  'format.type'='csv',\n" +
+			"  'connector.path'='xxx'\n" +
+			")\n";
+		DDLOperation operation = new DDLOperation(context, String.format(ddlTemplate, "MyTable1"), CREATE_TABLE);
+		ResultSet resultSet = operation.execute();
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, resultSet);
+
+		String[] tables = context.getExecutionContext().getTableEnvironment().listTables();
+		assertArrayEquals(new String[] { "MyTable1" }, tables);
+	}
 
 	@Test
 	public void testDropTable() {
-
 		String[] tables1 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertEquals(0, tables1.length);
 
-		DropTableOperation operation1 = new DropTableOperation(context, "DROP TABLE IF EXISTS MyTable1");
+		DDLOperation operation1 = new DDLOperation(context, "DROP TABLE IF EXISTS MyTable1", DROP_TABLE);
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation1.execute());
 
 		final String ddlTemplate = "create table %s(\n" +
@@ -46,16 +69,25 @@ public class DropTableOperationTest extends OperationTestBase {
 			"  'format.type'='csv',\n" +
 			"  'connector.path'='xxx'\n" +
 			")\n";
-		CreateTableOperation operation = new CreateTableOperation(context, String.format(ddlTemplate, "MyTable1"));
+		DDLOperation operation = new DDLOperation(context, String.format(ddlTemplate, "MyTable1"), CREATE_TABLE);
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation.execute());
 
 		String[] tables2 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertArrayEquals(new String[] { "MyTable1" }, tables2);
 
-		DropTableOperation operation2 = new DropTableOperation(context, "DROP TABLE MyTable1");
+		DDLOperation operation2 = new DDLOperation(context, "DROP TABLE MyTable1", DROP_TABLE);
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation2.execute());
 
 		String[] tables3 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertEquals(0, tables3.length);
+	}
+
+	@Test
+	public void testCreateDatabase() {
+		DDLOperation operation = new DDLOperation(context, "create database MyDatabase1", CREATE_DATABASE);
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation.execute());
+
+		String[] tables2 = context.getExecutionContext().getTableEnvironment().listDatabases();
+		assertArrayEquals(new String[] { "default_database", "MyDatabase1" }, tables2);
 	}
 }
