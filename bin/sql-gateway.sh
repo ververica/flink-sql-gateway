@@ -63,11 +63,7 @@ FLINK_SQL_GATEWAY_LOG="$FLINK_SQL_GATEWAY_HOME"/log
 
 FLINK_SQL_GATEWAY_DEFAULT_CONF="$FLINK_SQL_GATEWAY_CONF"/sql-gateway-defaults.yaml
 
-# TODO use find -regex
-FLINK_SQL_GATEWAY_JAR=$(ls "$FLINK_SQL_GATEWAY_LIB" | grep "flink-sql-gateway" | grep ".jar")
-if [ -n "$FLINK_SQL_GATEWAY_JAR" ]; then
-    FLINK_SQL_GATEWAY_JAR="$FLINK_SQL_GATEWAY_LIB"/"$FLINK_SQL_GATEWAY_JAR"
-fi
+FLINK_SQL_GATEWAY_JAR=$(find "$FLINK_SQL_GATEWAY_LIB" -regex ".*flink-sql-gateway.*.jar")
 
 # build flink-sql-gateway classpath
 FLINK_SQL_GATEWAY_CLASSPATH=""
