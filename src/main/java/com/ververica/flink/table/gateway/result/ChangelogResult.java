@@ -62,8 +62,7 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 	private final Object resultLock;
 	private AtomicReference<SqlExecutionException> executionException = new AtomicReference<>();
 	private final List<Tuple2<Boolean, Row>> changeRecordBuffer;
-	// TODO add this to config
-	private static final int CHANGE_RECORD_BUFFER_SIZE = 5_000;
+	private final int maxBufferSize;
 
 	public ChangelogResult(
 		RowTypeInfo outputType,
@@ -71,7 +70,8 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 		ExecutionConfig config,
 		InetAddress gatewayAddress,
 		int gatewayPort,
-		ClassLoader classLoader) {
+		ClassLoader classLoader,
+		int maxBufferSize) {
 
 		resultLock = new Object();
 
@@ -95,6 +95,7 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 
 		// prepare for changelog
 		changeRecordBuffer = new ArrayList<>();
+		this.maxBufferSize = maxBufferSize;
 	}
 
 	@Override
@@ -178,7 +179,7 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 	private void processRecord(Tuple2<Boolean, Row> change) {
 		synchronized (resultLock) {
 			// wait if the buffer is full
-			if (changeRecordBuffer.size() >= CHANGE_RECORD_BUFFER_SIZE) {
+			if (changeRecordBuffer.size() >= maxBufferSize) {
 				try {
 					resultLock.wait();
 				} catch (InterruptedException e) {
