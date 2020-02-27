@@ -67,6 +67,7 @@ public class ResultUtil {
 		// determine gateway address (and port if possible)
 		final InetAddress gatewayAddress = getGatewayAddress(env.getDeployment(), flinkConfig);
 		final int gatewayPort = getGatewayPort(env.getDeployment());
+		final int maxBufferSize = env.getExecution().getMaxBufferSize();
 
 		return new ChangelogResult<>(
 			outputType,
@@ -74,7 +75,8 @@ public class ResultUtil {
 			config,
 			gatewayAddress,
 			gatewayPort,
-			classLoader);
+			classLoader,
+			maxBufferSize);
 	}
 
 	// --------------------------------------------------------------------------------------------

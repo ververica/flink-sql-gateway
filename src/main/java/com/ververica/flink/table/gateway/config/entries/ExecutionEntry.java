@@ -43,6 +43,7 @@ import static com.ververica.flink.table.gateway.config.Environment.EXECUTION_ENT
  * ExecutionEnvironment/StreamExecutionEnvironment/TableEnvironment or as code in a Flink job.
  *
  * <p>All properties of this entry are optional and evaluated lazily.
+ * TODO remove the useless properties
  */
 public class ExecutionEntry extends ConfigEntry {
 
@@ -84,6 +85,8 @@ public class ExecutionEntry extends ConfigEntry {
 	public static final String EXECUTION_RESULT_MODE_VALUE_CHANGELOG = "changelog";
 
 	public static final String EXECUTION_RESULT_MODE_VALUE_TABLE = "table";
+
+	public static final String EXECUTION_MAX_BUFFER_SIZE = "max_buffer_size";
 
 	private static final String EXECUTION_RESTART_STRATEGY_TYPE = "restart-strategy.type";
 
@@ -150,6 +153,7 @@ public class ExecutionEntry extends ConfigEntry {
 		properties.validateInt(EXECUTION_RESTART_STRATEGY_MAX_FAILURES_PER_INTERVAL, true, 1);
 		properties.validateString(EXECUTION_CURRENT_CATALOG, true, 1);
 		properties.validateString(EXECUTION_CURRENT_DATABASE, true, 1);
+		properties.validateInt(EXECUTION_MAX_BUFFER_SIZE, true, 1);
 	}
 
 	public EnvironmentSettings getEnvironmentSettings() {
@@ -183,10 +187,6 @@ public class ExecutionEntry extends ConfigEntry {
 		return properties.getOptionalString(EXECUTION_TYPE)
 			.map((v) -> v.equals(EXECUTION_TYPE_VALUE_BATCH))
 			.orElse(false);
-	}
-
-	public String getExecutionMode() {
-		return properties.getOptionalString(EXECUTION_TYPE).orElse(EXECUTION_TYPE_VALUE_STREAMING);
 	}
 
 	public boolean isStreamingPlanner() {
@@ -314,20 +314,13 @@ public class ExecutionEntry extends ConfigEntry {
 		return properties.getOptionalString(EXECUTION_CURRENT_DATABASE);
 	}
 
-	public boolean isChangelogMode() {
-		return properties.getOptionalString(EXECUTION_RESULT_MODE)
-			.map((v) -> v.equals(EXECUTION_RESULT_MODE_VALUE_CHANGELOG))
-			.orElse(false);
-	}
-
-	public boolean isTableMode() {
-		return properties.getOptionalString(EXECUTION_RESULT_MODE)
-			.map((v) -> v.equals(EXECUTION_RESULT_MODE_VALUE_TABLE))
-			.orElse(false);
-	}
-
 	public Map<String, String> asTopLevelMap() {
 		return properties.asPrefixedMap(EXECUTION_ENTRY + '.');
+	}
+
+	public int getMaxBufferSize() {
+		return properties.getOptionalInt(EXECUTION_MAX_BUFFER_SIZE)
+			.orElseGet(() -> useDefaultValue(EXECUTION_MAX_BUFFER_SIZE, 5000));
 	}
 
 	private <V> V useDefaultValue(String key, V defaultValue) {
