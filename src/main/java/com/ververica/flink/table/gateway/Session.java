@@ -19,6 +19,7 @@
 package com.ververica.flink.table.gateway;
 
 import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommandCall;
+import com.ververica.flink.table.gateway.config.entries.ExecutionEntry;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.operation.JobOperation;
 import com.ververica.flink.table.gateway.operation.Operation;
@@ -73,13 +74,23 @@ public class Session {
 
 	public Tuple2<ResultSet, SqlCommandParser.SqlCommand> runStatement(String statement) throws SqlGatewayException {
 		LOG.info("Session: {}, run statement: {}", sessionId, statement);
-		Optional<SqlCommandCall> callOpt = SqlCommandParser.parse(statement);
-		if (!callOpt.isPresent()) {
-			LOG.error("Session: {}, Unknown statement: {}", sessionId, statement);
-			throw new SqlGatewayException("Unknown statement: " + statement);
+		boolean isBlinkPlanner = context.getExecutionContext().getEnvironment().getExecution().getPlanner()
+			.equalsIgnoreCase(ExecutionEntry.EXECUTION_PLANNER_VALUE_BLINK);
+
+		SqlCommandCall call;
+		try {
+			Optional<SqlCommandCall> callOpt = SqlCommandParser.parse(statement, isBlinkPlanner);
+			if (!callOpt.isPresent()) {
+				LOG.error("Session: {}, Unknown statement: {}", sessionId, statement);
+				throw new SqlGatewayException("Unknown statement: " + statement);
+			} else {
+				call = callOpt.get();
+			}
+		} catch (SqlParseException e) {
+			LOG.error("Session: {}, Failed to parse statement: {}", sessionId, statement);
+			throw new SqlGatewayException(e.getMessage(), e.getCause());
 		}
 
-		SqlCommandCall call = callOpt.get();
 		Operation operation = OperationFactory.createOperation(call, context);
 		ResultSet resultSet = operation.execute();
 

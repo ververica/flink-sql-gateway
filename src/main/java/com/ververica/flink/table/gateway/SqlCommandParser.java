@@ -18,6 +18,30 @@
 
 package com.ververica.flink.table.gateway;
 
+import org.apache.flink.sql.parser.ddl.SqlAlterDatabase;
+import org.apache.flink.sql.parser.ddl.SqlAlterTable;
+import org.apache.flink.sql.parser.ddl.SqlCreateDatabase;
+import org.apache.flink.sql.parser.ddl.SqlCreateTable;
+import org.apache.flink.sql.parser.ddl.SqlCreateView;
+import org.apache.flink.sql.parser.ddl.SqlDropDatabase;
+import org.apache.flink.sql.parser.ddl.SqlDropTable;
+import org.apache.flink.sql.parser.ddl.SqlDropView;
+import org.apache.flink.sql.parser.ddl.SqlUseCatalog;
+import org.apache.flink.sql.parser.ddl.SqlUseDatabase;
+import org.apache.flink.sql.parser.dml.RichSqlInsert;
+import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
+import org.apache.flink.sql.parser.dql.SqlShowDatabases;
+import org.apache.flink.sql.parser.dql.SqlShowFunctions;
+import org.apache.flink.sql.parser.dql.SqlShowTables;
+import org.apache.flink.sql.parser.impl.FlinkSqlParserImpl;
+import org.apache.flink.sql.parser.validate.FlinkSqlConformance;
+
+import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.parser.SqlParser;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +51,6 @@ import java.util.regex.Pattern;
 
 /**
  * Simple parser for determining the type of command and its parameters.
- * TODO refactor using flink-sql-parser
  */
 public final class SqlCommandParser {
 
@@ -35,27 +58,158 @@ public final class SqlCommandParser {
 		// private
 	}
 
-	public static Optional<SqlCommandCall> parse(String stmt) {
+	/**
+	 * Parse the given statement and return corresponding SqlCommandCall.
+	 *
+	 * <p>only `show current catalog`, `show current database`, `show modules`, `set`, `reset`,
+	 * `describe`, `explain` are parsed through regex matching,
+	 * other commands are parsed through sql parser.
+	 *
+	 * <p>throw {@link SqlParseException} if the statement contains multiple sub-statements separated by semicolon
+	 * or there is a parse error.
+	 *
+	 * <p>NOTES: sql parser only parses the statement to get the corresponding SqlCommand,
+	 * do not check whether the statement is valid here.
+	 */
+	public static Optional<SqlCommandCall> parse(String stmt, boolean isBlinkPlanner) {
 		// normalize
-		stmt = stmt.trim();
+		String stmtForRegexMatch = stmt.trim();
 		// remove ';' at the end
-		if (stmt.endsWith(";")) {
-			stmt = stmt.substring(0, stmt.length() - 1).trim();
+		if (stmtForRegexMatch.endsWith(";")) {
+			stmtForRegexMatch = stmtForRegexMatch.substring(0, stmtForRegexMatch.length() - 1).trim();
 		}
 
-		// parse
+		// only parse gateway specific statements
 		for (SqlCommand cmd : SqlCommand.values()) {
-			final Matcher matcher = cmd.pattern.matcher(stmt);
-			if (matcher.matches()) {
-				final String[] groups = new String[matcher.groupCount()];
-				for (int i = 0; i < groups.length; i++) {
-					groups[i] = matcher.group(i + 1);
+			if (cmd.hasPattern()) {
+				final Matcher matcher = cmd.pattern.matcher(stmtForRegexMatch);
+				if (matcher.matches()) {
+					final String[] groups = new String[matcher.groupCount()];
+					for (int i = 0; i < groups.length; i++) {
+						groups[i] = matcher.group(i + 1);
+					}
+					return cmd.operandConverter.apply(groups)
+						.map((operands) -> new SqlCommandCall(cmd, operands));
 				}
-				return cmd.operandConverter.apply(groups)
-					.map((operands) -> new SqlCommandCall(cmd, operands));
 			}
 		}
-		return Optional.empty();
+
+		return parseStmt(stmt, isBlinkPlanner);
+	}
+
+	/**
+	 * Flink Parser only supports partial Operations, so we directly use Calcite Parser here.
+	 * Once Flink Parser supports all Operations, we should use Flink Parser instead of Calcite Parser.
+	 */
+	private static Optional<SqlCommandCall> parseStmt(String stmt, boolean isBlinkPlanner) {
+		SqlParser.Config config = createSqlParserConfig(isBlinkPlanner);
+		SqlParser sqlParser = SqlParser.create(stmt, config);
+		SqlNodeList sqlNodes;
+		try {
+			sqlNodes = sqlParser.parseStmtList();
+			// no need check the statement is valid here
+		} catch (org.apache.calcite.sql.parser.SqlParseException e) {
+			throw new SqlParseException("Failed to parse statement.", e);
+		}
+		if (sqlNodes.size() != 1) {
+			throw new SqlParseException("Only single statement is supported now");
+		}
+
+		final String operand;
+		final SqlCommand cmd;
+		SqlNode node = sqlNodes.get(0);
+		if (node.getKind().belongsTo(SqlKind.QUERY)) {
+			cmd = SqlCommand.SELECT;
+			operand = stmt;
+		} else if (node instanceof RichSqlInsert) {
+			cmd = ((RichSqlInsert) node).isOverwrite() ? SqlCommand.INSERT_OVERWRITE : SqlCommand.INSERT_INTO;
+			operand = stmt;
+		} else if (node instanceof SqlShowTables) {
+			cmd = SqlCommand.SHOW_TABLES;
+			operand = null;
+		} else if (node instanceof SqlCreateTable) {
+			cmd = SqlCommand.CREATE_TABLE;
+			operand = stmt;
+		} else if (node instanceof SqlDropTable) {
+			cmd = SqlCommand.DROP_TABLE;
+			operand = stmt;
+		} else if (node instanceof SqlAlterTable) {
+			cmd = SqlCommand.ALTER_TABLE;
+			operand = stmt;
+		} else if (node instanceof SqlCreateView) {
+			cmd = SqlCommand.CREATE_VIEW;
+			operand = stmt;
+		} else if (node instanceof SqlDropView) {
+			cmd = SqlCommand.DROP_VIEW;
+			operand = stmt;
+		} else if (node instanceof SqlShowDatabases) {
+			cmd = SqlCommand.SHOW_DATABASES;
+			operand = null;
+		} else if (node instanceof SqlCreateDatabase) {
+			cmd = SqlCommand.CREATE_DATABASE;
+			operand = stmt;
+		} else if (node instanceof SqlDropDatabase) {
+			cmd = SqlCommand.DROP_DATABASE;
+			operand = stmt;
+		} else if (node instanceof SqlAlterDatabase) {
+			cmd = SqlCommand.ALTER_DATABASE;
+			operand = stmt;
+		} else if (node instanceof SqlShowCatalogs) {
+			cmd = SqlCommand.SHOW_CATALOGS;
+			operand = null;
+		} else if (node instanceof SqlShowFunctions) {
+			cmd = SqlCommand.SHOW_FUNCTIONS;
+			operand = null;
+		} else if (node instanceof SqlUseCatalog) {
+			cmd = SqlCommand.USE_CATALOG;
+			operand = ((SqlUseCatalog) node).getCatalogName();
+		} else if (node instanceof SqlUseDatabase) {
+			cmd = SqlCommand.USE;
+			operand = ((SqlUseDatabase) node).getDatabaseName().toString();
+			// TODO remove `DESCRIBE` and supports `DESCRIBE TABLE`
+			// } else if (node instanceof SqlDescribeTable) {
+			//	cmd = SqlCommand.DESCRIBE;
+			// TODO remove `EXPLAIN` and supports `EXPLAIN PLAN`
+			// } else if (node instanceof SqlExplain) {
+			// 	md = SqlCommand.EXPLAIN;
+		} else {
+			cmd = null;
+			operand = null;
+		}
+
+		if (cmd == null) {
+			return Optional.empty();
+		} else {
+			// use the origin given statement to make sure
+			// users can find the correct line number when parsing failed
+			if (operand == null) {
+				return Optional.of(new SqlCommandCall(cmd));
+			} else {
+				return Optional.of(new SqlCommandCall(cmd, new String[] { operand }));
+			}
+		}
+	}
+
+	/**
+	 * A temporary solution. We can't get the default SqlParser config through table environment now.
+	 */
+	private static SqlParser.Config createSqlParserConfig(boolean isBlinkPlanner) {
+		if (isBlinkPlanner) {
+			return SqlParser
+				.configBuilder()
+				.setParserFactory(FlinkSqlParserImpl.FACTORY)
+				.setConformance(FlinkSqlConformance.DEFAULT)
+				.setLex(Lex.JAVA)
+				.setIdentifierMaxLength(256)
+				.build();
+		} else {
+			return SqlParser
+				.configBuilder()
+				.setParserFactory(FlinkSqlParserImpl.FACTORY)
+				.setConformance(FlinkSqlConformance.DEFAULT)
+				.setLex(Lex.JAVA)
+				.build();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -64,7 +218,7 @@ public final class SqlCommandParser {
 		(operands) -> Optional.of(new String[0]);
 
 	private static final Function<String[], Optional<String[]>> SINGLE_OPERAND =
-		(operands) -> Optional.of(new String[]{operands[0]});
+		(operands) -> Optional.of(new String[] { operands[0] });
 
 	private static final int DEFAULT_PATTERN_FLAGS = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
 
@@ -72,94 +226,61 @@ public final class SqlCommandParser {
 	 * Supported SQL commands.
 	 */
 	public enum SqlCommand {
-		SHOW_CATALOGS(
-			"SHOW\\s+CATALOGS",
-			NO_OPERANDS),
+		SELECT,
+
+		INSERT_INTO,
+
+		INSERT_OVERWRITE,
+
+		CREATE_TABLE,
+
+		ALTER_TABLE,
+
+		DROP_TABLE,
+
+		CREATE_VIEW,
+
+		DROP_VIEW,
+
+		CREATE_DATABASE,
+
+		ALTER_DATABASE,
+
+		DROP_DATABASE,
+
+		USE_CATALOG,
+
+		USE,
+
+		SHOW_CATALOGS,
+
+		SHOW_DATABASES,
+
+		SHOW_TABLES,
+
+		SHOW_FUNCTIONS,
+
+		// keep this for compatibility
+		EXPLAIN(
+			"EXPLAIN\\s+(.*)",
+			SINGLE_OPERAND),
+
+		// keep this for compatibility
+		DESCRIBE(
+			"DESCRIBE\\s+(.*)",
+			SINGLE_OPERAND),
 
 		SHOW_CURRENT_CATALOG(
 			"SHOW\\s+CURRENT\\s+CATALOG",
-			NO_OPERANDS),
-
-		SHOW_DATABASES(
-			"SHOW\\s+DATABASES",
 			NO_OPERANDS),
 
 		SHOW_CURRENT_DATABASE(
 			"SHOW\\s+CURRENT\\s+DATABASE",
 			NO_OPERANDS),
 
-		SHOW_TABLES(
-			"SHOW\\s+TABLES",
-			NO_OPERANDS),
-
-		SHOW_FUNCTIONS(
-			"SHOW\\s+FUNCTIONS",
-			NO_OPERANDS),
-
 		SHOW_MODULES(
 			"SHOW\\s+MODULES",
 			NO_OPERANDS),
-
-		USE_CATALOG(
-			"USE\\s+CATALOG\\s+(.*)",
-			SINGLE_OPERAND),
-
-		USE(
-			"USE\\s+(?!CATALOG)(.*)",
-			SINGLE_OPERAND),
-
-		DESCRIBE(
-			"DESCRIBE\\s+(.*)",
-			SINGLE_OPERAND),
-
-		EXPLAIN(
-			"EXPLAIN\\s+(.*)",
-			SINGLE_OPERAND),
-
-		SELECT(
-			"(WITH.*SELECT.*|SELECT.*)",
-			SINGLE_OPERAND),
-
-		INSERT_INTO(
-			"(INSERT\\s+INTO.*)",
-			SINGLE_OPERAND),
-
-		INSERT_OVERWRITE(
-			"(INSERT\\s+OVERWRITE.*)",
-			SINGLE_OPERAND),
-
-		CREATE_TABLE("(CREATE\\s+TABLE\\s+.*)", SINGLE_OPERAND),
-
-		DROP_TABLE("(DROP\\s+TABLE\\s+.*)", SINGLE_OPERAND),
-
-		CREATE_VIEW(
-			"CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(.*)",
-			(operands) -> {
-				if (operands.length < 2) {
-					return Optional.empty();
-				}
-				return Optional.of(new String[]{operands[0], operands[1]});
-			}),
-
-		CREATE_DATABASE(
-				"(CREATE\\s+DATABASE\\s+.*)",
-				SINGLE_OPERAND),
-
-		DROP_DATABASE(
-				"(DROP\\s+DATABASE\\s+.*)",
-				SINGLE_OPERAND),
-
-		DROP_VIEW(
-			"DROP\\s+VIEW\\s+(.*)",
-			SINGLE_OPERAND),
-
-		ALTER_DATABASE(
-				"(ALTER\\s+DATABASE\\s+.*)",
-				SINGLE_OPERAND),
-
-		ALTER_TABLE(
-				"(ALTER\\s+TABLE\\s+.*)",
-				SINGLE_OPERAND),
 
 		SET(
 			"SET(\\s+(\\S+)\\s*=(.*))?", // whitespace is only ignored on the left side of '='
@@ -169,7 +290,7 @@ public final class SqlCommandParser {
 				} else if (operands[0] == null) {
 					return Optional.of(new String[0]);
 				}
-				return Optional.of(new String[]{operands[1], operands[2]});
+				return Optional.of(new String[] { operands[1], operands[2] });
 			}),
 
 		RESET(
@@ -184,13 +305,18 @@ public final class SqlCommandParser {
 			this.operandConverter = operandConverter;
 		}
 
+		SqlCommand() {
+			this.pattern = null;
+			this.operandConverter = null;
+		}
+
 		@Override
 		public String toString() {
 			return super.toString().replace('_', ' ');
 		}
 
-		public boolean hasOperands() {
-			return operandConverter != NO_OPERANDS;
+		boolean hasPattern() {
+			return pattern != null;
 		}
 	}
 
