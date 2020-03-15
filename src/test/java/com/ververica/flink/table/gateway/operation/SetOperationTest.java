@@ -74,6 +74,28 @@ public class SetOperationTest extends OperationTestBase {
 	}
 
 	@Test
+	public void testSetPropertiesWithWhitespace() {
+		SetOperation setOperation = new SetOperation(context, "execution.parallelism", " 10");
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
+
+		SetOperation showSetOperation = new SetOperation(context);
+		ResultSet resultSet = showSetOperation.execute();
+		ResultSet expected = new ResultSet(
+			Arrays.asList(
+				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
+				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
+			Arrays.asList(
+				Row.of("execution.max-parallelism", "16"),
+				Row.of("execution.planner", "old"),
+				Row.of("execution.parallelism", "10"),
+				Row.of("execution.type", "batch"),
+				Row.of("deployment.response-timeout", "5000"),
+				Row.of("table.optimizer.join-reorder-enabled", "false"))
+		);
+		assertEquals(expected, resultSet);
+	}
+
+	@Test
 	public void testShowProperties() {
 		SetOperation operation = new SetOperation(context);
 		ResultSet resultSet = operation.execute();
