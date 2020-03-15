@@ -75,7 +75,7 @@ public class SetOperation implements NonJobOperation {
 		} else {
 			// TODO avoid to build a new Environment for some cases
 			// set a property
-			Environment newEnv = Environment.enrich(env, ImmutableMap.of(key, value), ImmutableMap.of());
+			Environment newEnv = Environment.enrich(env, ImmutableMap.of(key.trim(), value.trim()), ImmutableMap.of());
 			// Renew the ExecutionContext by new environment.
 			// Book keep all the session states of current ExecutionContext then
 			// re-register them into the new one.
