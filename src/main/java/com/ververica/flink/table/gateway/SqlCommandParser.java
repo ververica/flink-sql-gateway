@@ -115,40 +115,57 @@ public final class SqlCommandParser {
 			throw new SqlParseException("Only single statement is supported now");
 		}
 
+		final String operand;
 		final SqlCommand cmd;
 		SqlNode node = sqlNodes.get(0);
 		if (node.getKind().belongsTo(SqlKind.QUERY)) {
 			cmd = SqlCommand.SELECT;
+			operand = stmt;
 		} else if (node instanceof RichSqlInsert) {
 			cmd = ((RichSqlInsert) node).isOverwrite() ? SqlCommand.INSERT_OVERWRITE : SqlCommand.INSERT_INTO;
+			operand = stmt;
 		} else if (node instanceof SqlShowTables) {
 			cmd = SqlCommand.SHOW_TABLES;
+			operand = null;
 		} else if (node instanceof SqlCreateTable) {
 			cmd = SqlCommand.CREATE_TABLE;
+			operand = stmt;
 		} else if (node instanceof SqlDropTable) {
 			cmd = SqlCommand.DROP_TABLE;
+			operand = stmt;
 		} else if (node instanceof SqlAlterTable) {
 			cmd = SqlCommand.ALTER_TABLE;
+			operand = stmt;
 		} else if (node instanceof SqlCreateView) {
 			cmd = SqlCommand.CREATE_VIEW;
+			operand = stmt;
 		} else if (node instanceof SqlDropView) {
 			cmd = SqlCommand.DROP_VIEW;
+			operand = stmt;
 		} else if (node instanceof SqlShowDatabases) {
 			cmd = SqlCommand.SHOW_DATABASES;
+			operand = null;
 		} else if (node instanceof SqlCreateDatabase) {
 			cmd = SqlCommand.CREATE_DATABASE;
+			operand = stmt;
 		} else if (node instanceof SqlDropDatabase) {
 			cmd = SqlCommand.DROP_DATABASE;
+			operand = stmt;
 		} else if (node instanceof SqlAlterDatabase) {
 			cmd = SqlCommand.ALTER_DATABASE;
+			operand = stmt;
 		} else if (node instanceof SqlShowCatalogs) {
 			cmd = SqlCommand.SHOW_CATALOGS;
+			operand = null;
 		} else if (node instanceof SqlShowFunctions) {
 			cmd = SqlCommand.SHOW_FUNCTIONS;
+			operand = null;
 		} else if (node instanceof SqlUseCatalog) {
 			cmd = SqlCommand.USE_CATALOG;
+			operand = ((SqlUseCatalog) node).getCatalogName();
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
+			operand = ((SqlUseDatabase) node).getDatabaseName().toString();
 			// TODO remove `DESCRIBE` and supports `DESCRIBE TABLE`
 			// } else if (node instanceof SqlDescribeTable) {
 			//	cmd = SqlCommand.DESCRIBE;
@@ -157,13 +174,19 @@ public final class SqlCommandParser {
 			// 	md = SqlCommand.EXPLAIN;
 		} else {
 			cmd = null;
+			operand = null;
 		}
+
 		if (cmd == null) {
 			return Optional.empty();
 		} else {
 			// use the origin given statement to make sure
 			// users can find the correct line number when parsing failed
-			return Optional.of(new SqlCommandCall(cmd, stmt));
+			if (operand == null) {
+				return Optional.of(new SqlCommandCall(cmd));
+			} else {
+				return Optional.of(new SqlCommandCall(cmd, new String[] { operand }));
+			}
 		}
 	}
 
@@ -309,8 +332,8 @@ public final class SqlCommandParser {
 			this.operands = operands;
 		}
 
-		public SqlCommandCall(SqlCommand command, String operand) {
-			this(command, new String[] { operand });
+		public SqlCommandCall(SqlCommand command) {
+			this(command, new String[0]);
 		}
 
 		@Override
