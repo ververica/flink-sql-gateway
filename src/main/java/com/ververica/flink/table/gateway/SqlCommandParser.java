@@ -61,7 +61,7 @@ public final class SqlCommandParser {
 	/**
 	 * Parse the given statement and return corresponding SqlCommandCall.
 	 *
-	 * <p>only `show current_catalog`, `show current_database`, `show modules`, `set`, `reset`,
+	 * <p>only `show current catalog`, `show current database`, `show modules`, `set`, `reset`,
 	 * `describe`, `explain` are parsed through regex matching,
 	 * other commands are parsed through sql parser.
 	 *
