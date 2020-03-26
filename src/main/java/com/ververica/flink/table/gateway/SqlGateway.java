@@ -43,10 +43,9 @@ import java.util.concurrent.CountDownLatch;
 import static com.ververica.flink.table.gateway.utils.EnvironmentUtil.readEnvironment;
 
 /**
- * Sql gateway .
+ * Sql gateway.
  */
 public class SqlGateway {
-
 	private static final Logger LOG = LoggerFactory.getLogger(SqlGateway.class);
 
 	private final GatewayOptions options;
