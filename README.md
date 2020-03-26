@@ -59,6 +59,7 @@ server:
   bind-address: 127.0.0.1           # optional: The address that the gateway binds itself (127.0.0.1 by default)
   address: 127.0.0.1                # optional: The address that should be used by clients to connect to the gateway (127.0.0.1 by default)
   port: 8083                        # optional: The port that the client connects to  (8083 by default)
+  jvm_args: "-Xmx2018m -Xms1024m"   # optional: The JVM args for SQL gateway process
 
 
 # Define session properties.

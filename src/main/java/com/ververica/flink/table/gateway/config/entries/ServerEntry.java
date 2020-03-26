@@ -45,6 +45,8 @@ public class ServerEntry extends ConfigEntry {
 
 	private static final String GATEWAY_PORT = "port";
 
+	private static final String JVM_ARGS = "jvm_args";
+
 	private ServerEntry(DescriptorProperties properties) {
 		super(properties);
 	}
@@ -54,6 +56,7 @@ public class ServerEntry extends ConfigEntry {
 		properties.validateString(GATEWAY_BIND_ADDRESS, true);
 		properties.validateString(GATEWAY_ADDRESS, true);
 		properties.validateInt(GATEWAY_PORT, true, 1024, 65535);
+		properties.validateString(JVM_ARGS, true);
 	}
 
 	public static ServerEntry create(Map<String, Object> config) {
@@ -88,5 +91,9 @@ public class ServerEntry extends ConfigEntry {
 
 	public int getPort() {
 		return properties.getOptionalInt(GATEWAY_PORT).orElse(DEFAULT_PORT);
+	}
+
+	public String getJvmArgs() {
+		return properties.getOptionalString(JVM_ARGS).orElse("");
 	}
 }
