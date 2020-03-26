@@ -27,8 +27,8 @@ under the License.
     <version>0.1-SNAPSHOT</version>
 
     <description>
-        This module contains the SQL Client for exploring and
-        submitting SQL programs to Flink.
+        Flink SQL gateway is a service that allows other applications
+        to easily interact with a Flink cluster through a REST API.
     </description>
 
     <packaging>jar</packaging>
