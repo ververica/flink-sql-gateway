@@ -30,6 +30,8 @@ server:
   address: 127.0.0.1
   # The port that the client connects to.
   port: 8083
+  # The jvm args, like -Xmx2018m -Xms1024m -XX:+UseConcMarkSweepGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps ...
+  jvm_args: "-Xmx2018m -Xms1024m"
 
 
 #==============================================================================

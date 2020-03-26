@@ -34,12 +34,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+
+import static com.ververica.flink.table.gateway.utils.EnvironmentUtil.readEnvironment;
 
 /**
  * Sql gateway .
@@ -79,22 +80,6 @@ public class SqlGateway {
 		System.out.println("Rest endpoint started.");
 
 		new CountDownLatch(1).await();
-	}
-
-	private Environment readEnvironment(URL envUrl) {
-		// use an empty environment by default
-		if (envUrl == null) {
-			System.out.println("No session environment specified.");
-			return new Environment();
-		}
-
-		System.out.println("Reading configuration from: " + envUrl);
-		LOG.info("Using configuration file: {}", envUrl);
-		try {
-			return Environment.parse(envUrl);
-		} catch (IOException e) {
-			throw new SqlGatewayException("Could not read configuration file at: " + envUrl, e);
-		}
 	}
 
 	private static List<URL> discoverDependencies(List<URL> jars, List<URL> libraries) {

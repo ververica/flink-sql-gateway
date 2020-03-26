@@ -85,17 +85,29 @@ if [ "$FLINK_IDENT_STRING" = "" ]; then
 fi
 
 CC_CLASSPATH=`constructFlinkClassPath`
+FULL_CLASSPATH="`manglePathList "$CC_CLASSPATH:$INTERNAL_HADOOP_CLASSPATHS:$FLINK_SQL_GATEWAY_CLASSPATH"`"
 
 
 # build log config
 log=$FLINK_SQL_GATEWAY_LOG/flink-sql-gateway-$FLINK_IDENT_STRING-$HOSTNAME.log
 log_setting=(-Dlog.file="$log" -Dlog4j.configuration=file:"$FLINK_SQL_GATEWAY_CONF"/log4j.properties -Dlogback.configurationFile=file:"$FLINK_SQL_GATEWAY_CONF"/logback.xml)
 
+# read jvm args from config
+#
+jvm_args_output=`${JAVA_RUN} "${log_setting[@]}" -classpath ${FULL_CLASSPATH} com.ververica.flink.table.gateway.utils.BashJavaUtil "GET_SERVER_JVM_ARGS" "$@" --defaults "$FLINK_SQL_GATEWAY_DEFAULT_CONF" 2>&1 | tail -n 1000`
+if [[ $? -ne 0 ]]; then
+    echo "[ERROR] Cannot run BashJavaUtil to execute command GET_SERVER_JVM_ARGS." 1>&2
+    # Print the output in case the user redirect the log to console.
+    echo "$jvm_args_output" 1>&2
+    exit 1
+fi
+JVM_ARGS=`extractExecutionParams "$jvm_args_output"`
+
 
 if [ -n "$FLINK_SQL_GATEWAY_JAR" ]; then
 
     # start gateway with jar
-    exec $JAVA_RUN $JVM_ARGS "${log_setting[@]}" -classpath "`manglePathList "$CC_CLASSPATH:$INTERNAL_HADOOP_CLASSPATHS:$FLINK_SQL_GATEWAY_CLASSPATH"`" com.ververica.flink.table.gateway.SqlGateway "$@" --defaults "$FLINK_SQL_GATEWAY_DEFAULT_CONF" --jar "`manglePath $FLINK_SQL_GATEWAY_JAR`"
+    exec $JAVA_RUN $JVM_ARGS "${log_setting[@]}" -classpath ${FULL_CLASSPATH} com.ververica.flink.table.gateway.SqlGateway "$@" --defaults "$FLINK_SQL_GATEWAY_DEFAULT_CONF" --jar "`manglePath $FLINK_SQL_GATEWAY_JAR`"
 
 # write error message to stderr
 else
