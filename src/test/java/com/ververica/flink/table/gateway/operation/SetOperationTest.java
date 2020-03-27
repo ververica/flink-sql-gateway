@@ -24,6 +24,7 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
+import org.apache.flink.table.api.TableConfig;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link SetOperation}.
@@ -112,6 +114,17 @@ public class SetOperationTest extends OperationTestBase {
 				Row.of("table.optimizer.join-reorder-enabled", "false"))
 		);
 		assertEquals(expected, resultSet);
+	}
+
+	@Test
+	public void testSetPropertiesForTableConfig() {
+		TableConfig config1 = context.getExecutionContext().getTableEnvironment().getConfig();
+		assertNull(config1.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+
+		SetOperation setOperation = new SetOperation(context, "table.optimizer.agg-phase-strategy", "ONE_PHASE");
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
+		TableConfig config2 = context.getExecutionContext().getTableEnvironment().getConfig();
+		assertEquals("ONE_PHASE", config2.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 	}
 
 }
