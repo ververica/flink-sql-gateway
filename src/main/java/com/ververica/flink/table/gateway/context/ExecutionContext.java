@@ -135,6 +135,7 @@ public class ExecutionContext<ClusterID> {
 
 	// Members that should be reused in the same session.
 	private SessionState sessionState;
+	private SessionState originalSessionState;
 
 	private ExecutionContext(
 		Environment environment,
@@ -220,6 +221,10 @@ public class ExecutionContext<ClusterID> {
 
 	public SessionState getSessionState() {
 		return this.sessionState;
+	}
+
+	public SessionState getOriginalSessionState() {
+		return originalSessionState;
 	}
 
 	/**
@@ -459,6 +464,7 @@ public class ExecutionContext<ClusterID> {
 			final FunctionCatalog functionCatalog = new FunctionCatalog(config, catalogManager, moduleManager);
 			// Step 1.4 Set up session state.
 			this.sessionState = SessionState.of(config, catalogManager, moduleManager, functionCatalog);
+			this.originalSessionState = this.sessionState;
 
 			// Must initialize the table environment before actually the
 			createTableEnvironment(settings, config, catalogManager, moduleManager, functionCatalog);

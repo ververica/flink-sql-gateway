@@ -24,7 +24,6 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
-import org.apache.flink.table.api.TableConfig;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
@@ -118,13 +117,34 @@ public class SetOperationTest extends OperationTestBase {
 
 	@Test
 	public void testSetPropertiesForTableConfig() {
-		TableConfig config1 = context.getExecutionContext().getTableEnvironment().getConfig();
-		assertNull(config1.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+		// check init state
+		assertNull(context.getExecutionContext().getEnvironment().getConfiguration().asMap()
+			.getOrDefault("table.optimizer.agg-phase-strategy", null));
+		assertNull(context.getExecutionContext().getSessionState()
+			.config.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+		assertNull(context.getExecutionContext().getTableEnvironment()
+			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 
+		// set table config key-value
 		SetOperation setOperation = new SetOperation(context, "table.optimizer.agg-phase-strategy", "ONE_PHASE");
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
-		TableConfig config2 = context.getExecutionContext().getTableEnvironment().getConfig();
-		assertEquals("ONE_PHASE", config2.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+		assertEquals("ONE_PHASE", context.getExecutionContext().getEnvironment().getConfiguration().asMap()
+			.getOrDefault("table.optimizer.agg-phase-strategy", null));
+		assertEquals("ONE_PHASE", context.getExecutionContext().getSessionState()
+			.config.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+		assertEquals("ONE_PHASE", context.getExecutionContext().getTableEnvironment()
+			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+
+		// reset all properties
+		ResetOperation resetOperation = new ResetOperation(context);
+		resetOperation.execute();
+
+		assertNull(context.getExecutionContext().getEnvironment().getConfiguration().asMap()
+			.getOrDefault("table.optimizer.agg-phase-strategy", null));
+		assertNull(context.getExecutionContext().getSessionState()
+			.config.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+		assertNull(context.getExecutionContext().getTableEnvironment()
+			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 	}
 
 }
