@@ -120,8 +120,6 @@ public class SetOperationTest extends OperationTestBase {
 		// check init state
 		assertNull(context.getExecutionContext().getEnvironment().getConfiguration().asMap()
 			.getOrDefault("table.optimizer.agg-phase-strategy", null));
-		assertNull(context.getExecutionContext().getSessionState()
-			.config.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 		assertNull(context.getExecutionContext().getTableEnvironment()
 			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 
@@ -130,8 +128,6 @@ public class SetOperationTest extends OperationTestBase {
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
 		assertEquals("ONE_PHASE", context.getExecutionContext().getEnvironment().getConfiguration().asMap()
 			.getOrDefault("table.optimizer.agg-phase-strategy", null));
-		assertEquals("ONE_PHASE", context.getExecutionContext().getSessionState()
-			.config.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 		assertEquals("ONE_PHASE", context.getExecutionContext().getTableEnvironment()
 			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 
@@ -141,8 +137,6 @@ public class SetOperationTest extends OperationTestBase {
 
 		assertNull(context.getExecutionContext().getEnvironment().getConfiguration().asMap()
 			.getOrDefault("table.optimizer.agg-phase-strategy", null));
-		assertNull(context.getExecutionContext().getSessionState()
-			.config.getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 		assertNull(context.getExecutionContext().getTableEnvironment()
 			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 	}

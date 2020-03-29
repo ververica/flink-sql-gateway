@@ -40,7 +40,7 @@ public class ResetOperation implements NonJobOperation {
 		// re-register them into the new one.
 		ExecutionContext<?> newExecutionContext = context
 			.createExecutionContextBuilder(context.getOriginalSessionEnv())
-			.sessionState(executionContext.getOriginalSessionState())
+			.sessionState(executionContext.getSessionState())
 			.build();
 		context.setExecutionContext(newExecutionContext);
 
