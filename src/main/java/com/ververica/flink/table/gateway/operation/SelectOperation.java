@@ -33,12 +33,8 @@ import com.ververica.flink.table.gateway.result.ResultDescriptor;
 import com.ververica.flink.table.gateway.result.ResultUtil;
 import com.ververica.flink.table.gateway.result.TypedResult;
 
-import org.apache.flink.api.common.JobID;
-import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.client.deployment.ClusterDescriptor;
-import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.core.execution.JobClient;
@@ -60,9 +56,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Operation for SELECT command.
@@ -72,7 +65,7 @@ public class SelectOperation extends AbstractJobOperation {
 
 	private final String query;
 
-	private volatile ResultDescriptor resultDescriptor;
+	private ResultDescriptor resultDescriptor;
 
 	private List<ColumnInfo> columnInfos;
 
@@ -104,55 +97,26 @@ public class SelectOperation extends AbstractJobOperation {
 	}
 
 	@Override
-	public JobStatus getJobStatus() throws SqlGatewayException {
-		if (jobId == null) {
-			LOG.error("Session: {}. No job has been submitted. This is a bug.", sessionId);
-			throw new IllegalStateException("No job has been submitted. This is a bug.");
-		} else if (resultDescriptor == null) {
-			// canceled by cancelJob method
-			return JobStatus.CANCELED;
-		}
-
-		synchronized (lock) {
-			try {
-				return resultDescriptor.getJobClient().getJobStatus().get(30, TimeUnit.SECONDS);
-			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				LOG.error(String.format("Session: %s. Failed to fetch job status for job %s", sessionId, jobId), e);
-				throw new SqlGatewayException("Failed to fetch job status for job " + jobId, e);
-			}
-		}
-	}
-
-	@Override
-	public void cancelJob() {
-		if (resultDescriptor != null) {
-			synchronized (lock) {
-				if (resultDescriptor != null) {
-					try {
-						LOG.info("Session: {}. Start to cancel job {} and result retrieval.", sessionId, jobId);
-						resultDescriptor.getResult().close();
-						// ignore if there is no more result
-						// the job might has finished earlier. it's hard to say whether it need to be canceled,
-						// so the clients should be care for the exceptions ???
-						if (!noMoreResult) {
-							cancelQueryInternal(context.getExecutionContext(), jobId);
-						}
-					} finally {
-						resultDescriptor = null;
-						jobId = null;
-					}
+	protected void cancelJobInternal() {
+		LOG.info("Session: {}. Start to cancel job {} and result retrieval.", sessionId, jobId);
+		resultDescriptor.getResult().close();
+		// ignore if there is no more result
+		// the job might has finished earlier. it's hard to say whether it need to be canceled,
+		// so the clients should be care for the exceptions ???
+		if (!noMoreResult) {
+			bridgeClientRequest(context.getExecutionContext(), jobId, clusterClient -> {
+				try {
+					clusterClient.cancel(jobId).get();
+				} catch (Throwable t) {
+					// the job might has finished earlier
 				}
-			}
+				return null;
+			});
 		}
 	}
 
 	@Override
 	protected Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults() throws SqlGatewayException {
-		if (resultDescriptor == null) {
-			LOG.error("Session: {}. The job for this query has been canceled.", sessionId);
-			throw new SqlGatewayException("The job for this query has been canceled.");
-		}
-
 		Optional<Tuple2<List<Row>, List<Boolean>>> ret;
 		synchronized (lock) {
 			if (resultDescriptor == null) {
@@ -297,41 +261,6 @@ public class SelectOperation extends AbstractJobOperation {
 			isChangelogResult,
 			removeTimeAttributes(table.getSchema()),
 			jobClient);
-	}
-
-	private <C> void cancelQueryInternal(ExecutionContext<C> executionContext, JobID jobId) {
-		// stop Flink job
-		try (final ClusterDescriptor<C> clusterDescriptor = executionContext.createClusterDescriptor()) {
-			ClusterClient<C> clusterClient = null;
-			try {
-				// retrieve existing cluster
-				clusterClient = clusterDescriptor.retrieve(executionContext.getClusterId()).getClusterClient();
-				try {
-					clusterClient.cancel(jobId).get();
-				} catch (Throwable t) {
-					// the job might has finished earlier
-				}
-			} catch (Exception e) {
-				LOG.error(
-					String.format("Session: %s, job: %s. Could not retrieve or create a cluster.", sessionId, jobId),
-					e);
-				throw new SqlExecutionException("Could not retrieve or create a cluster.", e);
-			} finally {
-				try {
-					if (clusterClient != null) {
-						clusterClient.close();
-					}
-				} catch (Exception e) {
-					// ignore
-				}
-			}
-		} catch (SqlExecutionException e) {
-			throw e;
-		} catch (Exception e) {
-			LOG.error(
-				String.format("Session: %s, job: %s. Could not locate a cluster.", sessionId, jobId), e);
-			throw new SqlExecutionException("Could not locate a cluster.", e);
-		}
 	}
 
 	/**
