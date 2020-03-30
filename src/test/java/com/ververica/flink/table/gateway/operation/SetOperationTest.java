@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link SetOperation}.
@@ -112,6 +113,32 @@ public class SetOperationTest extends OperationTestBase {
 				Row.of("table.optimizer.join-reorder-enabled", "false"))
 		);
 		assertEquals(expected, resultSet);
+	}
+
+	@Test
+	public void testSetPropertiesForTableConfig() {
+		// check init state
+		assertNull(context.getExecutionContext().getEnvironment().getConfiguration().asMap()
+			.getOrDefault("table.optimizer.agg-phase-strategy", null));
+		assertNull(context.getExecutionContext().getTableEnvironment()
+			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+
+		// set table config key-value
+		SetOperation setOperation = new SetOperation(context, "table.optimizer.agg-phase-strategy", "ONE_PHASE");
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
+		assertEquals("ONE_PHASE", context.getExecutionContext().getEnvironment().getConfiguration().asMap()
+			.getOrDefault("table.optimizer.agg-phase-strategy", null));
+		assertEquals("ONE_PHASE", context.getExecutionContext().getTableEnvironment()
+			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
+
+		// reset all properties
+		ResetOperation resetOperation = new ResetOperation(context);
+		resetOperation.execute();
+
+		assertNull(context.getExecutionContext().getEnvironment().getConfiguration().asMap()
+			.getOrDefault("table.optimizer.agg-phase-strategy", null));
+		assertNull(context.getExecutionContext().getTableEnvironment()
+			.getConfig().getConfiguration().getString("table.optimizer.agg-phase-strategy", null));
 	}
 
 }

@@ -24,6 +24,7 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
@@ -31,6 +32,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -52,30 +54,40 @@ public class ResetOperationTest extends OperationTestBase {
 	}
 
 	@Test
-	public void testRest() {
+	public void testReset() {
 		SetOperation showSetOperation1 = new SetOperation(context);
 		ResultSet resultSet = showSetOperation1.execute();
+		List<Row> properties = Arrays.asList(
+			Row.of("execution.max-parallelism", "16"),
+			Row.of("execution.planner", "old"),
+			Row.of("execution.parallelism", "1"),
+			Row.of("execution.type", "batch"),
+			Row.of("deployment.response-timeout", "5000"),
+			Row.of("table.optimizer.join-reorder-enabled", "false"));
+
+		Configuration conf = new Configuration();
+		conf.setString("table.optimizer.join-reorder-enabled", "false");
+
 		ResultSet expected1 = new ResultSet(
 			Arrays.asList(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
 				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			Arrays.asList(
-				Row.of("execution.max-parallelism", "16"),
-				Row.of("execution.planner", "old"),
-				Row.of("execution.parallelism", "1"),
-				Row.of("execution.type", "batch"),
-				Row.of("deployment.response-timeout", "5000"),
-				Row.of("table.optimizer.join-reorder-enabled", "false"))
-		);
+			properties);
 		assertEquals(expected1, resultSet);
+		assertEquals(conf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
 		SetOperation setOperation1 = new SetOperation(context, "table.optimizer.join-reorder-enabled", "true");
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation1.execute());
 		SetOperation setOperation2 = new SetOperation(context, "table.optimizer.join.broadcast-threshold", "TWO_PHASE");
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation2.execute());
+		Configuration newConf = new Configuration(conf);
+		newConf.setString("table.optimizer.join-reorder-enabled", "true");
+		newConf.setString("table.optimizer.join.broadcast-threshold", "TWO_PHASE");
+		assertEquals(newConf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
 		ResetOperation resetOperation = new ResetOperation(context);
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, resetOperation.execute());
+		assertEquals(conf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
 		SetOperation showSetOperation2 = new SetOperation(context);
 		ResultSet resultSet2 = showSetOperation2.execute();
@@ -83,14 +95,7 @@ public class ResetOperationTest extends OperationTestBase {
 			Arrays.asList(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
 				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			Arrays.asList(
-				Row.of("execution.max-parallelism", "16"),
-				Row.of("execution.planner", "old"),
-				Row.of("execution.parallelism", "1"),
-				Row.of("execution.type", "batch"),
-				Row.of("deployment.response-timeout", "5000"),
-				Row.of("table.optimizer.join-reorder-enabled", "false"))
-		);
+			properties);
 		assertEquals(expected2, resultSet2);
 	}
 }

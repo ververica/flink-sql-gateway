@@ -128,7 +128,6 @@ public class DefaultContext {
 			customOptions);
 	}
 
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
