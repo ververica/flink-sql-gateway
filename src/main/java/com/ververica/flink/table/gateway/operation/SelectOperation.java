@@ -77,11 +77,13 @@ public class SelectOperation extends AbstractJobOperation {
 	private List<ColumnInfo> columnInfos;
 
 	private boolean resultFetched;
+	private volatile boolean noMoreResult;
 
 	public SelectOperation(SessionContext context, String query) {
 		super(context);
 		this.query = query;
 		this.resultFetched = false;
+		this.noMoreResult = false;
 	}
 
 	@Override
@@ -129,7 +131,12 @@ public class SelectOperation extends AbstractJobOperation {
 					try {
 						LOG.info("Session: {}. Start to cancel job {} and result retrieval.", sessionId, jobId);
 						resultDescriptor.getResult().close();
-						cancelQueryInternal(context.getExecutionContext(), jobId);
+						// ignore if there is no more result
+						// the job might has finished earlier. it's hard to say whether it need to be canceled,
+						// so the clients should be care for the exceptions ???
+						if (!noMoreResult) {
+							cancelQueryInternal(context.getExecutionContext(), jobId);
+						}
 					} finally {
 						resultDescriptor = null;
 						jobId = null;
@@ -172,6 +179,7 @@ public class SelectOperation extends AbstractJobOperation {
 		BatchResult<?> result = (BatchResult<?>) resultDescriptor.getResult();
 		TypedResult<List<Row>> typedResult = result.retrieveChanges();
 		if (typedResult.getType() == TypedResult.ResultType.EOS) {
+			noMoreResult = true;
 			if (resultFetched) {
 				return Optional.empty();
 			} else {
@@ -189,6 +197,7 @@ public class SelectOperation extends AbstractJobOperation {
 		ChangelogResult<?> result = (ChangelogResult<?>) resultDescriptor.getResult();
 		TypedResult<List<Tuple2<Boolean, Row>>> typedResult = result.retrieveChanges();
 		if (typedResult.getType() == TypedResult.ResultType.EOS) {
+			noMoreResult = true;
 			// According to the implementation of ChangelogCollectStreamResult,
 			// if a streaming job producing no result finished and no attempt has been made to fetch the result,
 			// EOS will be returned.
