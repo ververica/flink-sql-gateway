@@ -70,7 +70,7 @@ public class SessionHeartbeatHandler
 			sessionManager.getSession(sessionId);
 			return CompletableFuture.completedFuture(EmptyResponseBody.getInstance());
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 	}
 }

@@ -67,7 +67,7 @@ public class JobCancelHandler
 		try {
 			sessionManager.getSession(sessionId).cancelJob(jobId);
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 
 		return CompletableFuture.completedFuture(new JobCancelResponseBody("CANCELED"));

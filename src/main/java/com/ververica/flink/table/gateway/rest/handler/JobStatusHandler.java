@@ -72,7 +72,7 @@ public class JobStatusHandler
 		try {
 			jobStatus = sessionManager.getSession(sessionId).getJobStatus(jobId);
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 
 		return CompletableFuture.completedFuture(new JobStatusResponseBody(jobStatus.toString()));

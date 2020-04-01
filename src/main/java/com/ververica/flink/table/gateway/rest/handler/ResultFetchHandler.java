@@ -95,7 +95,7 @@ public class ResultFetchHandler
 
 			return CompletableFuture.completedFuture(new ResultFetchResponseBody(results, nextResultUri));
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 	}
 }
