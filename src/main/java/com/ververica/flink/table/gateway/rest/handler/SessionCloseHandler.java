@@ -64,7 +64,7 @@ public class SessionCloseHandler
 			sessionManager.closeSession(sessionId);
 			return CompletableFuture.completedFuture(new SessionCloseResponseBody("CLOSED"));
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 	}
 }

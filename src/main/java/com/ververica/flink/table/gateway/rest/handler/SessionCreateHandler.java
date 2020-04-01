@@ -99,7 +99,7 @@ public class SessionCreateHandler
 		try {
 			sessionId = sessionManager.createSession(sessionName, planner, executionType, properties);
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 
 		return CompletableFuture.completedFuture(new SessionCreateResponseBody(sessionId));

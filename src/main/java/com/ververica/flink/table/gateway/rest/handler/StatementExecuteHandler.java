@@ -88,7 +88,7 @@ public class StatementExecuteHandler
 					Collections.singletonList(statementType))
 			);
 		} catch (SqlGatewayException e) {
-			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new RestHandlerException(e.getMessage(), HttpResponseStatus.INTERNAL_SERVER_ERROR, e);
 		}
 	}
 }
