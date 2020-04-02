@@ -237,7 +237,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 
 	/**
 	 * The reason of using ClusterClient instead of JobClient to retrieve a cluster is
-	 * the JobClient can't know whether the job is finished on yarn-per-job mode,
+	 * the JobClient can't know whether the job is finished on yarn-per-job mode.
 	 *
 	 * <p>If a job is finished, JobClient always get java.util.concurrent.TimeoutException
 	 * when getting job status and canceling a job after job is finished.
