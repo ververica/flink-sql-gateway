@@ -102,6 +102,10 @@ public abstract class AbstractJobOperation implements JobOperation {
 
 	@Override
 	public void cancelJob() {
+		if (isJobCanceled) {
+			// just for fast failure
+			return;
+		}
 		synchronized (lock) {
 			if (jobId == null) {
 				LOG.error("Session: {}. No job has been submitted. This is a bug.", sessionId);
