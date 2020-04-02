@@ -253,7 +253,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 			try (ClusterClient<C> clusterClient =
 				     clusterDescriptor.retrieve(executionContext.getClusterId()).getClusterClient()) {
 				// retrieve existing cluster
-				function.apply(clusterClient);
+				return function.apply(clusterClient);
 			} catch (Exception e) {
 				LOG.error(
 					String.format("Session: %s, job: %s. Could not retrieve or create a cluster.", sessionId, jobId),
@@ -267,6 +267,5 @@ public abstract class AbstractJobOperation implements JobOperation {
 				String.format("Session: %s, job: %s. Could not locate a cluster.", sessionId, jobId), e);
 			throw new SqlExecutionException("Could not locate a cluster.", e);
 		}
-		return null;
 	}
 }

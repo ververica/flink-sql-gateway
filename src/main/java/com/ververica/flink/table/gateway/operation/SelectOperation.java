@@ -103,16 +103,17 @@ public class SelectOperation extends AbstractJobOperation {
 		// ignore if there is no more result
 		// the job might has finished earlier. it's hard to say whether it need to be canceled,
 		// so the clients should be care for the exceptions ???
-		if (!noMoreResult) {
-			bridgeClientRequest(context.getExecutionContext(), jobId, clusterClient -> {
-				try {
-					clusterClient.cancel(jobId).get();
-				} catch (Throwable t) {
-					// the job might has finished earlier
-				}
-				return null;
-			});
+		if (noMoreResult) {
+			return;
 		}
+		bridgeClientRequest(context.getExecutionContext(), jobId, clusterClient -> {
+			try {
+				clusterClient.cancel(jobId).get();
+			} catch (Throwable t) {
+				// the job might has finished earlier
+			}
+			return null;
+		});
 	}
 
 	@Override
