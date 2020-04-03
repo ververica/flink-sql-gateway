@@ -22,6 +22,7 @@ import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.options.GatewayOptions;
 import com.ververica.flink.table.gateway.options.GatewayOptionsParser;
+import org.apache.flink.configuration.DeploymentOptions;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,8 +44,8 @@ public class BashJavaUtil {
 			case GET_SERVER_JVM_ARGS:
 				getJvmArgs(Arrays.copyOfRange(args, 1, args.length));
 				break;
-			case GET_FLINK_CONF:
-				getFlinkConfig(Arrays.copyOfRange(args, 1, args.length));
+			case GET_EXECUTION_TARGET:
+				getExecutionTarget(Arrays.copyOfRange(args, 1, args.length));
 				break;
 			default:
 				// unexpected, Command#valueOf should fail if a unknown command is passed in
@@ -59,13 +60,12 @@ public class BashJavaUtil {
 		System.out.println(EXECUTION_PREFIX + jvmArgs);
 	}
 
-	private static void getFlinkConfig(String[] args) {
+	private static void getExecutionTarget(String[] args) {
 		GatewayOptions options = GatewayOptionsParser.parseGatewayOptions(args);
 		Environment defaultEnv = readEnvironment(options.getDefaultConfig().orElse(null));
 		DefaultContext context = new DefaultContext(defaultEnv, Collections.emptyList());
-		for (Map.Entry<String, String> entry : context.getFlinkConfig().toMap().entrySet()) {
-			System.out.println(EXECUTION_PREFIX + entry.getKey() + "," + entry.getValue());
-		}
+		String executionTarget = context.getFlinkConfig().getString(DeploymentOptions.TARGET);
+		System.out.println(EXECUTION_PREFIX + executionTarget);
 	}
 
 	/**
@@ -78,8 +78,8 @@ public class BashJavaUtil {
 		GET_SERVER_JVM_ARGS,
 
 		/**
-		 * Get specific flink config.
+		 * Get execution target in Flink config.
 		 */
-		GET_FLINK_CONF
+		GET_EXECUTION_TARGET
 	}
 }

@@ -86,4 +86,4 @@ assert_equals \
         "6 FRANCE")" \
     "$select_res"
 
-insert_into "res SELECT n_nationkey, n_name FROM nation ORDER BY n_nationkey LIMIT 7" "$check_status"
+insert_into "res SELECT n_nationkey, n_name FROM nation" "$check_status"

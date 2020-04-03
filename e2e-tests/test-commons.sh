@@ -140,6 +140,14 @@ EOF`
     echo "$session_id"
 }
 
+function delete_session() {
+    response=`send_request "DELETE" "" "http://$HOST:$PORT/$API_VERSION/sessions/$1"`
+    if [[ "$?" -ne 0 ]]
+    then
+        exit 1
+    fi
+}
+
 function send_heartbeat() {
     send_request "POST" "" "http://$HOST:$PORT/$API_VERSION/sessions/$1/heartbeat" > /dev/null
 }

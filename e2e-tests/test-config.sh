@@ -29,9 +29,7 @@ while read -d '' -r jarfile ; do
     fi
 done < <(find "$FLINK_SQL_GATEWAY_LIB" ! -type d -name '*.jar' -print0 | sort -z)
 
-# build flink class path
 cd "$FLINK_HOME"/bin
-pwd
 # get flink config
 . ./config.sh
 
@@ -42,10 +40,12 @@ fi
 CC_CLASSPATH=`constructFlinkClassPath`
 FULL_CLASSPATH="`manglePathList "$CC_CLASSPATH:$INTERNAL_HADOOP_CLASSPATHS:$FLINK_SQL_GATEWAY_CLASSPATH"`"
 
-# read jvm args from config
-#
-flink_conf_output=`${JAVA_RUN} -classpath ${FULL_CLASSPATH} com.ververica.flink.table.gateway.utils.BashJavaUtil "GET_FLINK_CONF" "$@" --defaults ""$TEST_DIR"/data/test-config.yaml" 2> /dev/null | tail -n 1000`
-if [[ $? -ne 0 ]]; then
-    echo "[ERROR] Cannot run BashJavaUtil to execute command GET_SERVER_JVM_ARGS." > /dev/stderr
-    exit 1
-fi
+function get_execution_target() {
+    # read execution target from config
+    execution_target_output=`${JAVA_RUN} -classpath ${FULL_CLASSPATH} com.ververica.flink.table.gateway.utils.BashJavaUtil "GET_EXECUTION_TARGET" "$@" --defaults ""$TEST_DIR"/data/test-config.yaml" 2> /dev/null | tail -n 1000`
+    if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Cannot run BashJavaUtil to execute command GET_EXECUTION_TARGET." > /dev/stderr
+        exit 1
+    fi
+    echo "$execution_target_output"
+}

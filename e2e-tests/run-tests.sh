@@ -42,7 +42,9 @@ function cleanup() {
 }
 trap cleanup EXIT
 
+echo "Reading Flink config..."
 source "$TEST_DIR"/test-config.sh
+execution_target=`get_execution_target`
 
 cd "$TEST_DIR/../bin"
 ./sql-gateway.sh -d "$TEST_DIR/data/test-config.yaml" > /tmp/flink-sql-gateway-test.out &
@@ -59,17 +61,27 @@ do
 done
 
 info_response=`get_info`
-echo "$info_response"
 echo "Product Name: `echo "$info_response" | jq -r ".product_name"`"
 echo "Version: `echo "$info_response" | jq -r ".version"`"
 
-session_id=`create_session "batch"`
-send_heartbeat "$session_id"
+function run_tests() {
+    echo ""
+    echo "################################################################################"
+    echo "#                    Running tests in $1 mode"
+    echo "################################################################################"
+    echo ""
 
-execution_target=`echo "$flink_conf_output" | grep "execution.target" | cut -d',' -f2`
+    session_id=`create_session "$1"`
+    send_heartbeat "$session_id"
 
-run_test "$TEST_DIR"/cases/test-catalog-and-database.sh "$session_id" "$execution_target"
-# VIEW is buggy
-# run_test "$TEST_DIR"/cases/test-table-and-view.sh "$session_id" "$execution_target"
-run_test "$TEST_DIR"/cases/test-select-and-insert.sh "$session_id" "$execution_target"
-run_test "$TEST_DIR"/cases/test-availability.sh "$session_id" "$execution_target"
+    run_test "$TEST_DIR"/cases/test-catalog-and-database.sh "$session_id" "$execution_target"
+    # VIEW is buggy
+    # run_test "$TEST_DIR"/cases/test-table-and-view.sh "$session_id" "$execution_target"
+    run_test "$TEST_DIR"/cases/test-select-and-insert.sh "$session_id" "$execution_target"
+    run_test "$TEST_DIR"/cases/test-availability.sh "$session_id" "$execution_target"
+
+    delete_session "$session_id"
+}
+
+run_tests batch
+run_tests streaming
