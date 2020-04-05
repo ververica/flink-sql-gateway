@@ -56,7 +56,7 @@ public class SetOperationTest extends OperationTestBase {
 	@Test
 	public void testSetProperties() {
 		SetOperation setOperation = new SetOperation(context, "table.optimizer.join-reorder-enabled", "true");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
+		assertEquals(OperationUtil.OK, setOperation.execute());
 
 		SetOperation showSetOperation = new SetOperation(context);
 		ResultSet resultSet = showSetOperation.execute();
@@ -79,7 +79,7 @@ public class SetOperationTest extends OperationTestBase {
 	@Test
 	public void testSetPropertiesWithWhitespace() {
 		SetOperation setOperation = new SetOperation(context, "execution.parallelism", " 10");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
+		assertEquals(OperationUtil.OK, setOperation.execute());
 
 		SetOperation showSetOperation = new SetOperation(context);
 		ResultSet resultSet = showSetOperation.execute();
@@ -129,7 +129,7 @@ public class SetOperationTest extends OperationTestBase {
 
 		// set table config key-value
 		SetOperation setOperation = new SetOperation(context, "table.optimizer.agg-phase-strategy", "ONE_PHASE");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation.execute());
+		assertEquals(OperationUtil.OK, setOperation.execute());
 		assertEquals("ONE_PHASE", context.getExecutionContext().getEnvironment().getConfiguration().asMap()
 			.getOrDefault("table.optimizer.agg-phase-strategy", null));
 		assertEquals("ONE_PHASE", context.getExecutionContext().getTableEnvironment()

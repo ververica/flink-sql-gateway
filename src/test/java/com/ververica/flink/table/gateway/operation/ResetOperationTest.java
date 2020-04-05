@@ -79,16 +79,16 @@ public class ResetOperationTest extends OperationTestBase {
 		assertEquals(conf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
 		SetOperation setOperation1 = new SetOperation(context, "table.optimizer.join-reorder-enabled", "true");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation1.execute());
+		assertEquals(OperationUtil.OK, setOperation1.execute());
 		SetOperation setOperation2 = new SetOperation(context, "table.optimizer.join.broadcast-threshold", "TWO_PHASE");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, setOperation2.execute());
+		assertEquals(OperationUtil.OK, setOperation2.execute());
 		Configuration newConf = new Configuration(conf);
 		newConf.setString("table.optimizer.join-reorder-enabled", "true");
 		newConf.setString("table.optimizer.join.broadcast-threshold", "TWO_PHASE");
 		assertEquals(newConf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
 		ResetOperation resetOperation = new ResetOperation(context);
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, resetOperation.execute());
+		assertEquals(OperationUtil.OK, resetOperation.execute());
 		assertEquals(conf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
 		SetOperation showSetOperation2 = new SetOperation(context);

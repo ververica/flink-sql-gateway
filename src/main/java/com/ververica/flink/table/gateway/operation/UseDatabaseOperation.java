@@ -52,6 +52,6 @@ public class UseDatabaseOperation implements NonJobOperation {
 			}
 		});
 
-		return OperationUtil.AFFECTED_ROW_COUNT0;
+		return OperationUtil.OK;
 	}
 }

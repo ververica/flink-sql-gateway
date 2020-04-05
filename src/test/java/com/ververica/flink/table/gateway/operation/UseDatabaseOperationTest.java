@@ -49,7 +49,7 @@ public class UseDatabaseOperationTest extends OperationTestBase {
 		context.getExecutionContext().getTableEnvironment().useCatalog("catalog1");
 
 		UseDatabaseOperation operation = new UseDatabaseOperation(context, "default");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation.execute());
+		assertEquals(OperationUtil.OK, operation.execute());
 
 		assertEquals("default", context.getExecutionContext().getTableEnvironment().getCurrentDatabase());
 	}

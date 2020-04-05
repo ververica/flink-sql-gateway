@@ -55,6 +55,6 @@ public class CreateViewOperation implements NonJobOperation {
 		tableEnv.createTemporaryView(viewName, tableEnv.sqlQuery(query));
 		// Also attach the view to ExecutionContext#environment.
 		env.getTables().put(viewName, ViewEntry.create(viewName, query));
-		return OperationUtil.AFFECTED_ROW_COUNT0;
+		return OperationUtil.OK;
 	}
 }

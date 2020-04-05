@@ -232,5 +232,5 @@ EOF`
 
 function run_ddl() {
     res=`run_non_job_statement "$1" "$2" "$3"`
-    assert_equals 0 "$res"
+    assert_equals "OK" "$res"
 }

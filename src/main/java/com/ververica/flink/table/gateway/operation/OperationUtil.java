@@ -23,7 +23,6 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
-import org.apache.flink.table.types.logical.BigIntType;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
@@ -36,10 +35,10 @@ import java.util.List;
  */
 public class OperationUtil {
 
-	public static final ResultSet AFFECTED_ROW_COUNT0 = new ResultSet(
+	public static final ResultSet OK = new ResultSet(
 		ResultKind.SUCCESS,
-		Collections.singletonList(ColumnInfo.create(ConstantNames.AFFECTED_ROW_COUNT, new BigIntType(false))),
-		Collections.singletonList(Row.of(0L)));
+		Collections.singletonList(ColumnInfo.create(ConstantNames.RESULT, new VarCharType(2))),
+		Collections.singletonList(Row.of(ConstantNames.OK)));
 
 	public static ResultSet singleStringToResultSet(String str, String columnName) {
 		return new ResultSet(
