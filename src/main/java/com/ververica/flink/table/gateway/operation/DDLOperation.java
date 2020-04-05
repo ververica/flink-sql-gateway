@@ -60,7 +60,7 @@ public class DDLOperation implements NonJobOperation {
 			throw new SqlExecutionException(getExceptionMsg(), t);
 		}
 
-		return OperationUtil.AFFECTED_ROW_COUNT0;
+		return OperationUtil.OK;
 	}
 
 	private String getExceptionMsg() {

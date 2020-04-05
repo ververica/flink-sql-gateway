@@ -47,7 +47,7 @@ public class UseCatalogOperationTest extends OperationTestBase {
 	@Test
 	public void testUseCatalog() {
 		UseCatalogOperation operation = new UseCatalogOperation(context, "simple-catalog");
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation.execute());
+		assertEquals(OperationUtil.OK, operation.execute());
 
 		assertEquals("simple-catalog", context.getExecutionContext().getTableEnvironment().getCurrentCatalog());
 	}

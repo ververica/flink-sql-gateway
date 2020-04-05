@@ -35,7 +35,7 @@ public class CreateViewOperationTest extends OperationTestBase {
 	public void testCreateView() {
 		CreateViewOperation operation = new CreateViewOperation(context, "MyView1", "select 1 + 1");
 		ResultSet resultSet = operation.execute();
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, resultSet);
+		assertEquals(OperationUtil.OK, resultSet);
 
 		String[] tables = context.getExecutionContext().getTableEnvironment().listTables();
 		assertArrayEquals(new String[] { "MyView1" }, tables);

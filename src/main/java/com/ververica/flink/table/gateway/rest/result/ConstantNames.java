@@ -25,6 +25,7 @@ public class ConstantNames {
 
 	public static final String JOB_ID = "job_id";
 	public static final String AFFECTED_ROW_COUNT = "affected_row_count";
+	public static final String RESULT = "result";
 	public static final String MODULES = "modules";
 	public static final String CATALOG = "catalog";
 	public static final String CATALOGS = "catalogs";

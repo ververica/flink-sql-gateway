@@ -90,7 +90,7 @@ public class SetOperation implements NonJobOperation {
 				.build();
 			context.setExecutionContext(newExecutionContext);
 
-			return OperationUtil.AFFECTED_ROW_COUNT0;
+			return OperationUtil.OK;
 		}
 	}
 

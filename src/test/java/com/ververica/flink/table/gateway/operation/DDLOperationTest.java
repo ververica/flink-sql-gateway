@@ -46,7 +46,7 @@ public class DDLOperationTest extends OperationTestBase {
 			")\n";
 		DDLOperation operation = new DDLOperation(context, String.format(ddlTemplate, "MyTable1"), CREATE_TABLE);
 		ResultSet resultSet = operation.execute();
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, resultSet);
+		assertEquals(OperationUtil.OK, resultSet);
 
 		String[] tables = context.getExecutionContext().getTableEnvironment().listTables();
 		assertArrayEquals(new String[] { "MyTable1" }, tables);
@@ -58,7 +58,7 @@ public class DDLOperationTest extends OperationTestBase {
 		assertEquals(0, tables1.length);
 
 		DDLOperation operation1 = new DDLOperation(context, "DROP TABLE IF EXISTS MyTable1", DROP_TABLE);
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation1.execute());
+		assertEquals(OperationUtil.OK, operation1.execute());
 
 		final String ddlTemplate = "create table %s(\n" +
 			"  a int,\n" +
@@ -70,13 +70,13 @@ public class DDLOperationTest extends OperationTestBase {
 			"  'connector.path'='xxx'\n" +
 			")\n";
 		DDLOperation operation = new DDLOperation(context, String.format(ddlTemplate, "MyTable1"), CREATE_TABLE);
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation.execute());
+		assertEquals(OperationUtil.OK, operation.execute());
 
 		String[] tables2 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertArrayEquals(new String[] { "MyTable1" }, tables2);
 
 		DDLOperation operation2 = new DDLOperation(context, "DROP TABLE MyTable1", DROP_TABLE);
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation2.execute());
+		assertEquals(OperationUtil.OK, operation2.execute());
 
 		String[] tables3 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertEquals(0, tables3.length);
@@ -85,7 +85,7 @@ public class DDLOperationTest extends OperationTestBase {
 	@Test
 	public void testCreateDatabase() {
 		DDLOperation operation = new DDLOperation(context, "create database MyDatabase1", CREATE_DATABASE);
-		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation.execute());
+		assertEquals(OperationUtil.OK, operation.execute());
 
 		String[] tables2 = context.getExecutionContext().getTableEnvironment().listDatabases();
 		assertArrayEquals(new String[] { "default_database", "MyDatabase1" }, tables2);

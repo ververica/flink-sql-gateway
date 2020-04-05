@@ -52,6 +52,6 @@ public class UseCatalogOperation implements NonJobOperation {
 			}
 		});
 
-		return OperationUtil.AFFECTED_ROW_COUNT0;
+		return OperationUtil.OK;
 	}
 }
