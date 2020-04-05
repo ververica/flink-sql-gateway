@@ -30,6 +30,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_CHANGE_FLAGS;
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_COLUMNS;
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_DATA;
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_RESULT_KIND;
+
 /**
  * Json serializer for {@link ResultSet}.
  */
@@ -46,9 +51,10 @@ public class ResultSetJsonSerializer extends StdSerializer<ResultSet> {
 		SerializerProvider serializerProvider) throws IOException {
 		jsonGenerator.writeStartObject();
 
-		serializerProvider.defaultSerializeField("columns", resultSet.getColumns(), jsonGenerator);
+		serializerProvider.defaultSerializeField(FIELD_NAME_RESULT_KIND, resultSet.getResultKind(), jsonGenerator);
+		serializerProvider.defaultSerializeField(FIELD_NAME_COLUMNS, resultSet.getColumns(), jsonGenerator);
 
-		jsonGenerator.writeFieldName("data");
+		jsonGenerator.writeFieldName(FIELD_NAME_DATA);
 		jsonGenerator.writeStartArray();
 		for (Row row : resultSet.getData()) {
 			serializeRow(row, jsonGenerator, serializerProvider);
@@ -56,7 +62,7 @@ public class ResultSetJsonSerializer extends StdSerializer<ResultSet> {
 		jsonGenerator.writeEndArray();
 
 		if (resultSet.getChangeFlags().isPresent()) {
-			serializerProvider.defaultSerializeField("change_flags", resultSet.getChangeFlags().get(), jsonGenerator);
+			serializerProvider.defaultSerializeField(FIELD_NAME_CHANGE_FLAGS, resultSet.getChangeFlags().get(), jsonGenerator);
 		}
 
 		jsonGenerator.writeEndObject();

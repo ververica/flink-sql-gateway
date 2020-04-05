@@ -20,6 +20,7 @@ package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.table.types.logical.BigIntType;
@@ -36,11 +37,13 @@ import java.util.List;
 public class OperationUtil {
 
 	public static final ResultSet AFFECTED_ROW_COUNT0 = new ResultSet(
+		ResultKind.SUCCESS,
 		Collections.singletonList(ColumnInfo.create(ConstantNames.AFFECTED_ROW_COUNT, new BigIntType(false))),
 		Collections.singletonList(Row.of(0L)));
 
 	public static ResultSet singleStringToResultSet(String str, String columnName) {
 		return new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Collections.singletonList((ColumnInfo.create(columnName, new VarCharType(false, str.length())))),
 			Collections.singletonList(Row.of(str)));
 	}
@@ -56,6 +59,6 @@ public class OperationUtil {
 
 		List<ColumnInfo> columnInfos = Collections.singletonList(
 			ColumnInfo.create(columnName, new VarCharType(false, maxLength)));
-		return new ResultSet(columnInfos, data);
+		return new ResultSet(ResultKind.SUCCESS_WITH_CONTENT, columnInfos, data);
 	}
 }

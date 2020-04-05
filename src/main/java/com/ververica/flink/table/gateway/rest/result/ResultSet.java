@@ -31,12 +31,18 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A set of statement execution result containing column infos, rows of data and change flags for streaming mode.
+ * A set of one statement execution result containing result kind, column infos,
+ * rows of data and change flags for streaming mode.
  */
 @JsonSerialize(using = ResultSetJsonSerializer.class)
 @JsonDeserialize(using = ResultSetJsonDeserializer.class)
 public class ResultSet {
+	static final String FIELD_NAME_RESULT_KIND = "result_kind";
+	static final String FIELD_NAME_COLUMNS = "columns";
+	static final String FIELD_NAME_DATA = "data";
+	static final String FIELD_NAME_CHANGE_FLAGS = "change_flags";
 
+	private final ResultKind resultKind;
 	private final List<ColumnInfo> columns;
 	private final List<Row> data;
 
@@ -46,11 +52,16 @@ public class ResultSet {
 	// true if the corresponding row is an append row, false if its a retract row
 	private final List<Boolean> changeFlags;
 
-	public ResultSet(List<ColumnInfo> columns, List<Row> data) {
-		this(columns, data, null);
+	public ResultSet(ResultKind resultKind, List<ColumnInfo> columns, List<Row> data) {
+		this(resultKind, columns, data, null);
 	}
 
-	public ResultSet(List<ColumnInfo> columns, List<Row> data, @Nullable List<Boolean> changeFlags) {
+	public ResultSet(
+		ResultKind resultKind,
+		List<ColumnInfo> columns,
+		List<Row> data,
+		@Nullable List<Boolean> changeFlags) {
+		this.resultKind = Preconditions.checkNotNull(resultKind, "resultKind must not be null");
 		this.columns = Preconditions.checkNotNull(columns, "columns must not be null");
 		this.data = Preconditions.checkNotNull(data, "data must not be null");
 		if (!data.isEmpty()) {
@@ -62,6 +73,10 @@ public class ResultSet {
 			Preconditions.checkArgument(data.size() == changeFlags.size(),
 				"the size of data and the size of changeFlags should be equal");
 		}
+	}
+
+	public ResultKind getResultKind() {
+		return resultKind;
 	}
 
 	public List<ColumnInfo> getColumns() {
@@ -85,20 +100,22 @@ public class ResultSet {
 			return false;
 		}
 		ResultSet resultSet = (ResultSet) o;
-		return columns.equals(resultSet.columns) &&
+		return resultKind.equals(resultSet.resultKind) &&
+			columns.equals(resultSet.columns) &&
 			data.equals(resultSet.data) &&
 			Objects.equals(changeFlags, resultSet.changeFlags);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(columns, data, changeFlags);
+		return Objects.hash(resultKind, columns, data, changeFlags);
 	}
 
 	@Override
 	public String toString() {
 		return "ResultSet{" +
-			"columns=" + columns +
+			"resultKind=" + resultKind +
+			", columns=" + columns +
 			", data=" + data +
 			", changeFlags=" + changeFlags +
 			'}';

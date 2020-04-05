@@ -27,7 +27,6 @@ import org.apache.flink.types.Row;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonParseException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonParser;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonToken;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.DeserializationContext;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
@@ -41,6 +40,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_CHANGE_FLAGS;
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_COLUMNS;
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_DATA;
+import static com.ververica.flink.table.gateway.rest.result.ResultSet.FIELD_NAME_RESULT_KIND;
+
 /**
  * Json deserializer for {@link ResultSet}.
  */
@@ -53,37 +57,47 @@ public class ResultSetJsonDeserializer extends StdDeserializer<ResultSet> {
 	@Override
 	public ResultSet deserialize(
 		JsonParser jsonParser,
-		DeserializationContext ctx) throws IOException, JsonProcessingException {
+		DeserializationContext ctx) throws IOException {
 		JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
+		ResultKind resultKind;
 		List<ColumnInfo> columns;
 		List<Boolean> changeFlags = null;
 		List<Row> data;
 
-		JsonNode columnNode = node.get("columns");
+		JsonNode resultKindNode = node.get(FIELD_NAME_RESULT_KIND);
+		if (resultKindNode != null) {
+			JsonParser resultKindParser = node.get(FIELD_NAME_RESULT_KIND).traverse();
+			resultKindParser.nextToken();
+			resultKind = ctx.readValue(resultKindParser, ResultKind.class);
+		} else {
+			throw new JsonParseException(jsonParser, "Field column must be provided");
+		}
+
+		JsonNode columnNode = node.get(FIELD_NAME_COLUMNS);
 		if (columnNode != null) {
-			JsonParser columnParser = node.get("columns").traverse();
+			JsonParser columnParser = node.get(FIELD_NAME_COLUMNS).traverse();
 			columnParser.nextToken();
 			columns = Arrays.asList(ctx.readValue(columnParser, ColumnInfo[].class));
 		} else {
 			throw new JsonParseException(jsonParser, "Field column must be provided");
 		}
 
-		JsonNode changeFlagNode = node.get("change_flags");
+		JsonNode changeFlagNode = node.get(FIELD_NAME_CHANGE_FLAGS);
 		if (changeFlagNode != null) {
 			JsonParser changeFlagParser = changeFlagNode.traverse();
 			changeFlagParser.nextToken();
 			changeFlags = Arrays.asList(ctx.readValue(changeFlagParser, Boolean[].class));
 		}
 
-		JsonNode dataNode = node.get("data");
+		JsonNode dataNode = node.get(FIELD_NAME_DATA);
 		if (dataNode != null) {
 			data = deserializeRows(columns, dataNode, ctx);
 		} else {
 			throw new JsonParseException(jsonParser, "Field data must be provided");
 		}
 
-		return new ResultSet(columns, data, changeFlags);
+		return new ResultSet(resultKind, columns, data, changeFlags);
 	}
 
 	private List<Row> deserializeRows(

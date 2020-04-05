@@ -22,6 +22,7 @@ import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapter;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.api.common.JobID;
@@ -200,6 +201,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 		}
 
 		return Optional.of(new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			getColumnInfos(),
 			getLinkedListElementsFromBegin(bufferedResults, previousResultSetSize),
 			getLinkedListElementsFromBegin(bufferedChangeFlags, previousResultSetSize)));

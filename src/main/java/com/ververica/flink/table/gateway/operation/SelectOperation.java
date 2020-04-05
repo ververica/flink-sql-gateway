@@ -26,6 +26,7 @@ import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.result.BatchResult;
 import com.ververica.flink.table.gateway.result.ChangelogResult;
@@ -93,6 +94,7 @@ public class SelectOperation extends AbstractJobOperation {
 		}
 
 		return new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Collections.singletonList(
 				ColumnInfo.create(ConstantNames.JOB_ID, new VarCharType(false, jobId.toString().length()))),
 			Collections.singletonList(Row.of(jobId.toString())));

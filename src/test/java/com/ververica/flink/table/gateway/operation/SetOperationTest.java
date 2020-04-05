@@ -21,6 +21,7 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
@@ -60,6 +61,7 @@ public class SetOperationTest extends OperationTestBase {
 		SetOperation showSetOperation = new SetOperation(context);
 		ResultSet resultSet = showSetOperation.execute();
 		ResultSet expected = new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Arrays.asList(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
 				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
@@ -82,6 +84,7 @@ public class SetOperationTest extends OperationTestBase {
 		SetOperation showSetOperation = new SetOperation(context);
 		ResultSet resultSet = showSetOperation.execute();
 		ResultSet expected = new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Arrays.asList(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
 				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
@@ -101,6 +104,7 @@ public class SetOperationTest extends OperationTestBase {
 		SetOperation operation = new SetOperation(context);
 		ResultSet resultSet = operation.execute();
 		ResultSet expected = new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Arrays.asList(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
 				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),

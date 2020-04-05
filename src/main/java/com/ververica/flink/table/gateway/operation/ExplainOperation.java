@@ -23,6 +23,7 @@ import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.table.api.Table;
@@ -52,6 +53,7 @@ public class ExplainOperation implements NonJobOperation {
 			final Table table = createTable(context, tableEnv, statement);
 			String explanation = context.wrapClassLoader(() -> tableEnv.explain(table));
 			return new ResultSet(
+				ResultKind.SUCCESS_WITH_CONTENT,
 				Collections.singletonList(
 					ColumnInfo.create(ConstantNames.EXPLANATION, new VarCharType(false, explanation.length()))),
 				Collections.singletonList(Row.of(explanation)));

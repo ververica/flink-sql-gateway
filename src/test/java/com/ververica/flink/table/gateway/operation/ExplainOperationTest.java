@@ -21,6 +21,7 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
@@ -75,6 +76,7 @@ public class ExplainOperationTest extends OperationTestBase {
 			"\t\tPartitioning : RANDOM_PARTITIONED\n" +
 			"\n";
 		ResultSet expected = new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Collections.singletonList(
 				ColumnInfo.create(ConstantNames.EXPLANATION, new VarCharType(false, expectedExplain.length()))),
 			Collections.singletonList(Row.of(expectedExplain))

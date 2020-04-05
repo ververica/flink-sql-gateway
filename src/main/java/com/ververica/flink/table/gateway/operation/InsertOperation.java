@@ -25,6 +25,7 @@ import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.api.common.JobID;
@@ -78,6 +79,7 @@ public class InsertOperation extends AbstractJobOperation {
 		jobId = executeUpdateInternal(context.getExecutionContext());
 		String strJobId = jobId.toString();
 		return new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Collections.singletonList(
 				ColumnInfo.create(ConstantNames.JOB_ID, new VarCharType(false, strJobId.length()))),
 			Collections.singletonList(Row.of(strJobId)));

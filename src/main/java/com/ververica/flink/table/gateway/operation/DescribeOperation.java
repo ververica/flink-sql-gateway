@@ -23,6 +23,7 @@ import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
 
@@ -58,6 +59,7 @@ public class DescribeOperation implements NonJobOperation {
 			data.add(Row.of(schemaJson));
 
 			return new ResultSet(
+				ResultKind.SUCCESS_WITH_CONTENT,
 				Collections.singletonList(ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, length))),
 				data);
 		} catch (Throwable t) {

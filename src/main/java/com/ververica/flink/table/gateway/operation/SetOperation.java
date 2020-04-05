@@ -23,6 +23,7 @@ import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -68,6 +69,7 @@ public class SetOperation implements NonJobOperation {
 			buildResult(env.getConfiguration().asMap(), data, maxKeyLenAndMaxValueLen);
 
 			return new ResultSet(
+				ResultKind.SUCCESS_WITH_CONTENT,
 				Arrays.asList(
 					ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, maxKeyLenAndMaxValueLen.f0)),
 					ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, maxKeyLenAndMaxValueLen.f1))),

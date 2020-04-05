@@ -21,6 +21,7 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
@@ -60,6 +61,7 @@ public class ShowCurrentDatabaseOperationTest extends OperationTestBase {
 		ResultSet resultSet = operation.execute();
 
 		ResultSet expected = new ResultSet(
+			ResultKind.SUCCESS_WITH_CONTENT,
 			Collections.singletonList(ColumnInfo.create(ConstantNames.DATABASE, new VarCharType(false, 7))),
 			Collections.singletonList(Row.of("default"))
 		);
