@@ -93,11 +93,11 @@ public class SelectOperation extends AbstractJobOperation {
 			columnInfos.add(ColumnInfo.create(column.getName(), column.getType().getLogicalType()));
 		}
 
-		return new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Collections.singletonList(
-				ColumnInfo.create(ConstantNames.JOB_ID, new VarCharType(false, jobId.toString().length()))),
-			Collections.singletonList(Row.of(jobId.toString())));
+		return ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(ConstantNames.JOB_ID, new VarCharType(false, jobId.toString().length())))
+			.data(Row.of(jobId.toString()))
+			.build();
 	}
 
 	@Override

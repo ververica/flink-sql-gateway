@@ -200,11 +200,14 @@ public abstract class AbstractJobOperation implements JobOperation {
 			throw new SqlGatewayException(msg);
 		}
 
-		return Optional.of(new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			getColumnInfos(),
-			getLinkedListElementsFromBegin(bufferedResults, previousResultSetSize),
-			getLinkedListElementsFromBegin(bufferedChangeFlags, previousResultSetSize)));
+		return Optional.of(
+			ResultSet.builder()
+				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+				.columns(getColumnInfos())
+				.data(getLinkedListElementsFromBegin(bufferedResults, previousResultSetSize))
+				.changeFlags(getLinkedListElementsFromBegin(bufferedChangeFlags, previousResultSetSize))
+				.build()
+		);
 	}
 
 	protected abstract Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults();

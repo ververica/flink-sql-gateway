@@ -33,7 +33,6 @@ import org.apache.flink.types.Row;
 import org.apache.flink.shaded.guava18.com.google.common.collect.ImmutableMap;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -68,12 +67,13 @@ public class SetOperation implements NonJobOperation {
 			buildResult(env.getDeployment().asTopLevelMap(), data, maxKeyLenAndMaxValueLen);
 			buildResult(env.getConfiguration().asMap(), data, maxKeyLenAndMaxValueLen);
 
-			return new ResultSet(
-				ResultKind.SUCCESS_WITH_CONTENT,
-				Arrays.asList(
+			return ResultSet.builder()
+				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+				.columns(
 					ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, maxKeyLenAndMaxValueLen.f0)),
-					ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, maxKeyLenAndMaxValueLen.f1))),
-				data);
+					ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, maxKeyLenAndMaxValueLen.f1)))
+				.data(data)
+				.build();
 		} else {
 			// TODO avoid to build a new Environment for some cases
 			// set a property

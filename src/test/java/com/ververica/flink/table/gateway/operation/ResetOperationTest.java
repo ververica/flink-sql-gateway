@@ -69,12 +69,14 @@ public class ResetOperationTest extends OperationTestBase {
 		Configuration conf = new Configuration();
 		conf.setString("table.optimizer.join-reorder-enabled", "false");
 
-		ResultSet expected1 = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		ResultSet expected1 = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			properties);
+				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+			.data(properties)
+			.build();
+
 		assertEquals(expected1, resultSet);
 		assertEquals(conf, context.getExecutionContext().getTableEnvironment().getConfig().getConfiguration());
 
@@ -93,12 +95,14 @@ public class ResetOperationTest extends OperationTestBase {
 
 		SetOperation showSetOperation2 = new SetOperation(context);
 		ResultSet resultSet2 = showSetOperation2.execute();
-		ResultSet expected2 = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		ResultSet expected2 = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			properties);
+				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+			.data(properties)
+			.build();
+
 		assertEquals(expected2, resultSet2);
 	}
 }

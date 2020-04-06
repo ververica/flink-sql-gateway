@@ -69,12 +69,13 @@ public class ShowTableOperation implements NonJobOperation {
 			}
 		}
 
-		return new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		return ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.TABLES, new VarCharType(false, maxNameLength)),
 				ColumnInfo.create(ConstantNames.TYPE, new VarCharType(
-					false, Math.max(ConstantNames.VIEW_TYPE.length(), ConstantNames.TABLE_TYPE.length())))),
-			rows);
+					false, Math.max(ConstantNames.VIEW_TYPE.length(), ConstantNames.TABLE_TYPE.length()))))
+			.data(rows)
+			.build();
 	}
 }

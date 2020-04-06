@@ -30,7 +30,6 @@ import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,19 +56,19 @@ public class ShowTableOperationTest extends OperationTestBase {
 		ShowTableOperation operation = new ShowTableOperation(context);
 		ResultSet resultSet = operation.execute();
 
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.TABLES, new VarCharType(false, 15)),
-				ColumnInfo.create(ConstantNames.TYPE, new VarCharType(false, 5))),
-			Arrays.asList(
+				ColumnInfo.create(ConstantNames.TYPE, new VarCharType(false, 5)))
+			.data(
 				Row.of("TestView1", "VIEW"),
 				Row.of("TestView2", "VIEW"),
 				Row.of("TableNumber1", "TABLE"),
 				Row.of("TableNumber2", "TABLE"),
-				Row.of("TableSourceSink", "TABLE")
-			)
-		);
+				Row.of("TableSourceSink", "TABLE"))
+			.build();
+
 		assertEquals(expected, resultSet);
 	}
 }

@@ -33,7 +33,6 @@ import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,10 +57,11 @@ public class DescribeOperation implements NonJobOperation {
 			List<Row> data = new ArrayList<>();
 			data.add(Row.of(schemaJson));
 
-			return new ResultSet(
-				ResultKind.SUCCESS_WITH_CONTENT,
-				Collections.singletonList(ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, length))),
-				data);
+			return ResultSet.builder()
+				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+				.columns(ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, length)))
+				.data(data)
+				.build();
 		} catch (Throwable t) {
 			// catch everything such that the query does not crash the executor
 			throw new SqlExecutionException("No table with this name could be found.", t);

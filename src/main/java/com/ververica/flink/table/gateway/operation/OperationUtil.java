@@ -27,7 +27,6 @@ import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,16 +34,18 @@ import java.util.List;
  */
 public class OperationUtil {
 
-	public static final ResultSet OK = new ResultSet(
-		ResultKind.SUCCESS,
-		Collections.singletonList(ColumnInfo.create(ConstantNames.RESULT, new VarCharType(2))),
-		Collections.singletonList(Row.of(ConstantNames.OK)));
+	public static final ResultSet OK = ResultSet.builder()
+		.resultKind(ResultKind.SUCCESS)
+		.columns(ColumnInfo.create(ConstantNames.RESULT, new VarCharType(2)))
+		.data(Row.of(ConstantNames.OK))
+		.build();
 
 	public static ResultSet singleStringToResultSet(String str, String columnName) {
-		return new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Collections.singletonList((ColumnInfo.create(columnName, new VarCharType(false, str.length())))),
-			Collections.singletonList(Row.of(str)));
+		return ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(columnName, new VarCharType(false, str.length())))
+			.data(Row.of(str))
+			.build();
 	}
 
 	public static ResultSet stringListToResultSet(List<String> strings, String columnName) {
@@ -56,8 +57,10 @@ public class OperationUtil {
 			data.add(Row.of(str));
 		}
 
-		List<ColumnInfo> columnInfos = Collections.singletonList(
-			ColumnInfo.create(columnName, new VarCharType(false, maxLength)));
-		return new ResultSet(ResultKind.SUCCESS_WITH_CONTENT, columnInfos, data);
+		return ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(columnName, new VarCharType(false, maxLength)))
+			.data(data)
+			.build();
 	}
 }
