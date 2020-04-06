@@ -33,7 +33,6 @@ import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,12 +65,11 @@ public class DescribeOperationTest extends OperationTestBase {
 			.build();
 		String schemaJson = TableSchemaUtil.writeTableSchemaToJson(tableSchema);
 
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Collections.singletonList(
-				ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, schemaJson.length()))),
-			Collections.singletonList(Row.of(schemaJson))
-		);
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, schemaJson.length())))
+			.data(Row.of(schemaJson))
+			.build();
 
 		assertEquals(expected, resultSet);
 	}

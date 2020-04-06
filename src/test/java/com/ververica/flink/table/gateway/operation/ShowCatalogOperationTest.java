@@ -30,8 +30,6 @@ import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,11 +56,11 @@ public class ShowCatalogOperationTest extends OperationTestBase {
 		ShowCatalogOperation operation = new ShowCatalogOperation(context);
 		ResultSet resultSet = operation.execute();
 
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Collections.singletonList(ColumnInfo.create(ConstantNames.CATALOGS, new VarCharType(false, 15))),
-			Arrays.asList(Row.of("catalog1"), Row.of("default_catalog"), Row.of("simple-catalog"))
-		);
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(ConstantNames.CATALOGS, new VarCharType(false, 15)))
+			.data(Row.of("catalog1"), Row.of("default_catalog"), Row.of("simple-catalog"))
+			.build();
 		assertEquals(expected, resultSet);
 	}
 }

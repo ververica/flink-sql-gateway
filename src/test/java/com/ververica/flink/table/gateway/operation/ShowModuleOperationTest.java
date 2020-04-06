@@ -30,8 +30,6 @@ import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,11 +55,11 @@ public class ShowModuleOperationTest extends OperationTestBase {
 		ShowModuleOperation operation = new ShowModuleOperation(context);
 		ResultSet resultSet = operation.execute();
 
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Collections.singletonList(ColumnInfo.create(ConstantNames.MODULES, new VarCharType(false, 8))),
-			Arrays.asList(Row.of("core"), Row.of("mymodule"), Row.of("myhive"), Row.of("myhive2"))
-		);
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(ConstantNames.MODULES, new VarCharType(false, 8)))
+			.data(Row.of("core"), Row.of("mymodule"), Row.of("myhive"), Row.of("myhive2"))
+			.build();
 		assertEquals(expected, resultSet);
 	}
 }

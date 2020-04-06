@@ -78,11 +78,11 @@ public class InsertOperation extends AbstractJobOperation {
 	public ResultSet execute() {
 		jobId = executeUpdateInternal(context.getExecutionContext());
 		String strJobId = jobId.toString();
-		return new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Collections.singletonList(
-				ColumnInfo.create(ConstantNames.JOB_ID, new VarCharType(false, strJobId.length()))),
-			Collections.singletonList(Row.of(strJobId)));
+		return ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(ColumnInfo.create(ConstantNames.JOB_ID, new VarCharType(false, strJobId.length())))
+			.data(Row.of(strJobId))
+			.build();
 	}
 
 	@Override

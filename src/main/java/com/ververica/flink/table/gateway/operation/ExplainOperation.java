@@ -31,8 +31,6 @@ import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
-import java.util.Collections;
-
 /**
  * Operation for EXPLAIN command.
  */
@@ -52,11 +50,11 @@ public class ExplainOperation implements NonJobOperation {
 		try {
 			final Table table = createTable(context, tableEnv, statement);
 			String explanation = context.wrapClassLoader(() -> tableEnv.explain(table));
-			return new ResultSet(
-				ResultKind.SUCCESS_WITH_CONTENT,
-				Collections.singletonList(
-					ColumnInfo.create(ConstantNames.EXPLANATION, new VarCharType(false, explanation.length()))),
-				Collections.singletonList(Row.of(explanation)));
+			return ResultSet.builder()
+				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+				.columns(ColumnInfo.create(ConstantNames.EXPLANATION, new VarCharType(false, explanation.length())))
+				.data(Row.of(explanation))
+				.build();
 		} catch (Throwable t) {
 			// catch everything such that the query does not crash the executor
 			throw new SqlExecutionException("Invalid SQL statement.", t);

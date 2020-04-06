@@ -26,6 +26,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.annotatio
 
 import javax.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,11 +53,7 @@ public class ResultSet {
 	// true if the corresponding row is an append row, false if its a retract row
 	private final List<Boolean> changeFlags;
 
-	public ResultSet(ResultKind resultKind, List<ColumnInfo> columns, List<Row> data) {
-		this(resultKind, columns, data, null);
-	}
-
-	public ResultSet(
+	private ResultSet(
 		ResultKind resultKind,
 		List<ColumnInfo> columns,
 		List<Row> data,
@@ -119,5 +116,78 @@ public class ResultSet {
 			", data=" + data +
 			", changeFlags=" + changeFlags +
 			'}';
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	/**
+	 * Builder for {@link ResultSet}.
+	 */
+	public static class Builder {
+		private ResultKind resultKind = null;
+		private List<ColumnInfo> columns = null;
+		private List<Row> data = null;
+		private List<Boolean> changeFlags = null;
+
+		private Builder() {
+
+		}
+
+		/**
+		 * Set {@link ResultKind}.
+		 */
+		public Builder resultKind(ResultKind resultKind) {
+			this.resultKind = resultKind;
+			return this;
+		}
+
+		/**
+		 * Set {@link ColumnInfo}s.
+		 */
+		public Builder columns(ColumnInfo... columns) {
+			this.columns = Arrays.asList(columns);
+			return this;
+		}
+
+		/**
+		 * Set {@link ColumnInfo}s.
+		 */
+		public Builder columns(List<ColumnInfo> columns) {
+			this.columns = columns;
+			return this;
+		}
+
+		/**
+		 * Set data.
+		 */
+		public Builder data(List<Row> data) {
+			this.data = data;
+			return this;
+		}
+
+		/**
+		 * Set data.
+		 */
+		public Builder data(Row... data) {
+			this.data = Arrays.asList(data);
+			return this;
+		}
+
+		/**
+		 * Set change flags.
+		 */
+		public Builder changeFlags(List<Boolean> changeFlags) {
+			this.changeFlags = changeFlags;
+			return this;
+		}
+
+		/**
+		 * Returns a {@link ResultSet} instance.
+		 */
+		public ResultSet build() {
+			return new ResultSet(resultKind, columns, data, changeFlags);
+		}
 	}
 }

@@ -30,7 +30,6 @@ import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,19 +59,19 @@ public class SetOperationTest extends OperationTestBase {
 
 		SetOperation showSetOperation = new SetOperation(context);
 		ResultSet resultSet = showSetOperation.execute();
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			Arrays.asList(
+				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+			.data(
 				Row.of("execution.max-parallelism", "16"),
 				Row.of("execution.planner", "old"),
 				Row.of("execution.parallelism", "1"),
 				Row.of("execution.type", "batch"),
 				Row.of("deployment.response-timeout", "5000"),
 				Row.of("table.optimizer.join-reorder-enabled", "true"))
-		);
+			.build();
 		assertEquals(expected, resultSet);
 	}
 
@@ -83,19 +82,19 @@ public class SetOperationTest extends OperationTestBase {
 
 		SetOperation showSetOperation = new SetOperation(context);
 		ResultSet resultSet = showSetOperation.execute();
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			Arrays.asList(
+				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+			.data(
 				Row.of("execution.max-parallelism", "16"),
 				Row.of("execution.planner", "old"),
 				Row.of("execution.parallelism", "10"),
 				Row.of("execution.type", "batch"),
 				Row.of("deployment.response-timeout", "5000"),
 				Row.of("table.optimizer.join-reorder-enabled", "false"))
-		);
+			.build();
 		assertEquals(expected, resultSet);
 	}
 
@@ -103,19 +102,19 @@ public class SetOperationTest extends OperationTestBase {
 	public void testShowProperties() {
 		SetOperation operation = new SetOperation(context);
 		ResultSet resultSet = operation.execute();
-		ResultSet expected = new ResultSet(
-			ResultKind.SUCCESS_WITH_CONTENT,
-			Arrays.asList(
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
 				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5))),
-			Arrays.asList(
+				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+			.data(
 				Row.of("execution.max-parallelism", "16"),
 				Row.of("execution.planner", "old"),
 				Row.of("execution.parallelism", "1"),
 				Row.of("execution.type", "batch"),
 				Row.of("deployment.response-timeout", "5000"),
 				Row.of("table.optimizer.join-reorder-enabled", "false"))
-		);
+			.build();
 		assertEquals(expected, resultSet);
 	}
 
