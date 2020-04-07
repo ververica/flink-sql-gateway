@@ -151,9 +151,9 @@ public class SqlGateway {
 
 	private static void checkFlinkVersion() {
 		String flinkVersion = EnvironmentInformation.getVersion();
-		if (!flinkVersion.startsWith("1.10")) {
-			LOG.error("Only Flink-1.10 is supported now!");
-			throw new SqlGatewayException("Only Flink-1.10 is supported now!");
+		if (!flinkVersion.startsWith("1.11")) {
+			LOG.error("Only Flink-1.11 is supported now!");
+			throw new SqlGatewayException("Only Flink-1.11 is supported now!");
 		}
 	}
 

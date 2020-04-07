@@ -52,13 +52,13 @@ public class ExplainOperationTest extends OperationTestBase {
 	}
 
 	@Test
-	public void testDescribe() {
+	public void testExplain() {
 		ExplainOperation operation = new ExplainOperation(context, "select * from TableNumber1");
 		ResultSet resultSet = operation.execute();
 
 		String expectedExplain = "== Abstract Syntax Tree ==\n" +
 			"LogicalProject(IntegerField1=[$0], StringField1=[$1])\n" +
-			"  EnumerableTableScan(table=[[default_catalog, default_database, TableNumber1]])\n" +
+			"  LogicalTableScan(table=[[default_catalog, default_database, TableNumber1]])\n" +
 			"\n" +
 			"== Optimized Logical Plan ==\n" +
 			"BatchTableSourceScan(table=[[default_catalog, default_database, TableNumber1]], fields=[IntegerField1, StringField1], source=[CsvTableSource(read fields: IntegerField1, StringField1)])\n" +

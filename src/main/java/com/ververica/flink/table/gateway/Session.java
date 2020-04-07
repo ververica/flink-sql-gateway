@@ -29,7 +29,10 @@ import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.table.planner.plan.metadata.FlinkDefaultRelMetadataProvider;
 
+import org.apache.calcite.rel.metadata.JaninoRelMetadataProvider;
+import org.apache.calcite.rel.metadata.RelMetadataQueryBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +93,11 @@ public class Session {
 			LOG.error("Session: {}, Failed to parse statement: {}", sessionId, statement);
 			throw new SqlGatewayException(e.getMessage(), e.getCause());
 		}
+
+		// TODO: This is a temporary fix to avoid NPE thrown from RelMetadataQueryBase.THREAD_PROVIDERS.get().xx
+		// In SQL gateway, TableEnvironment is created and used by different threads, thus causing this problem.
+		RelMetadataQueryBase.THREAD_PROVIDERS
+			.set(JaninoRelMetadataProvider.of(FlinkDefaultRelMetadataProvider.INSTANCE()));
 
 		Operation operation = OperationFactory.createOperation(call, context);
 		ResultSet resultSet = operation.execute();
