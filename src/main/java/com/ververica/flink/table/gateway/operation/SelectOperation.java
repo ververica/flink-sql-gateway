@@ -217,7 +217,7 @@ public class SelectOperation extends AbstractJobOperation {
 				table.insertInto(executionContext.getQueryConfig(), tableName);
 				return null;
 			});
-			pipeline = executionContext.createPipeline(jobName, executionContext.getFlinkConfig());
+			pipeline = executionContext.createPipeline(jobName);
 		} catch (Throwable t) {
 			// the result needs to be closed as long as
 			// it not stored in the result store

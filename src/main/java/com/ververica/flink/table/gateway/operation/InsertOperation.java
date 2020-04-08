@@ -166,7 +166,7 @@ public class InsertOperation extends AbstractJobOperation {
 		// create job graph with dependencies
 		final Pipeline pipeline;
 		try {
-			pipeline = executionContext.createPipeline(jobName, executionContext.getFlinkConfig());
+			pipeline = executionContext.createPipeline(jobName);
 		} catch (Throwable t) {
 			LOG.error(String.format("Session: %s. Invalid SQL query.", sessionId), t);
 			// catch everything such that the statement does not crash the executor

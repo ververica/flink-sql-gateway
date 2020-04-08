@@ -152,7 +152,7 @@ public class ExecutionContext<ClusterID> {
 
 		// create class loader
 		classLoader = FlinkUserCodeClassLoaders.parentFirst(
-			dependencies.toArray(new URL[dependencies.size()]),
+			dependencies.toArray(new URL[0]),
 			this.getClass().getClassLoader());
 
 		// Initialize the TableEnvironment.
@@ -226,7 +226,7 @@ public class ExecutionContext<ClusterID> {
 	 * Executes the given supplier using the execution context's classloader as thread classloader.
 	 */
 	public <R> R wrapClassLoader(Supplier<R> supplier) {
-		try (TemporaryClassLoaderContext tmpCl = new TemporaryClassLoaderContext(classLoader)) {
+		try (TemporaryClassLoaderContext ignored = new TemporaryClassLoaderContext(classLoader)) {
 			return supplier.get();
 		}
 	}
@@ -235,7 +235,7 @@ public class ExecutionContext<ClusterID> {
 	 * Executes the given Runnable using the execution context's classloader as thread classloader.
 	 */
 	void wrapClassLoader(Runnable runnable) {
-		try (TemporaryClassLoaderContext tmpCl = new TemporaryClassLoaderContext(classLoader)) {
+		try (TemporaryClassLoaderContext ignored = new TemporaryClassLoaderContext(classLoader)) {
 			runnable.run();
 		}
 	}
@@ -264,7 +264,7 @@ public class ExecutionContext<ClusterID> {
 		}
 	}
 
-	public Pipeline createPipeline(String name, Configuration flinkConfig) {
+	public Pipeline createPipeline(String name) {
 		if (streamExecEnv != null) {
 			// special case for Blink planner to apply batch optimizations
 			// note: it also modifies the ExecutionConfig!
@@ -273,7 +273,6 @@ public class ExecutionContext<ClusterID> {
 			}
 			return streamExecEnv.getStreamGraph(name);
 		} else {
-			final int parallelism = execEnv.getParallelism();
 			return execEnv.createProgramPlan(name);
 		}
 	}
@@ -683,19 +682,6 @@ public class ExecutionContext<ClusterID> {
 			throw new SqlExecutionException(
 				"Invalid temporal table '" + temporalTableEntry.getName() + "' over table '" +
 					temporalTableEntry.getHistoryTable() + ".\nCause: " + e.getMessage());
-		}
-	}
-
-	private Pipeline createPipeline(String name) {
-		if (streamExecEnv != null) {
-			// special case for Blink planner to apply batch optimizations
-			// note: it also modifies the ExecutionConfig!
-			if (executor instanceof ExecutorBase) {
-				return ((ExecutorBase) executor).getStreamGraph(name);
-			}
-			return streamExecEnv.getStreamGraph(name);
-		} else {
-			return execEnv.createProgramPlan(name);
 		}
 	}
 
