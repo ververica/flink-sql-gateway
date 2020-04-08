@@ -172,9 +172,9 @@ The following statements are supported now.
 |  statement   | comment  |
 |  ----  | ----  |
 | SHOW CATALOGS | List all registered catalogs |
-| SHOW CURRENT_CATALOG | Show current catalog |
+| SHOW CURRENT CATALOG | Show current catalog (experimental) |
 | SHOW DATABASES | List all databases in the current catalog |
-| SHOW CURRENT DATABASE | Show current database in current catalog |
+| SHOW CURRENT DATABASE | Show current database in current catalog (experimental) |
 | SHOW TABLES | List all tables in the current database of the current catalog |
 | SHOW FUNCTIONS | List all functions |
 | SHOW MODULES | List all modules |
@@ -200,9 +200,13 @@ The following statements are supported now.
 # Run Gateway with Different Executors
 You might want to run the gateway on a standalone Flink cluster or with Yarn / Kubernetes deployment. Flink SQL gateway currently supports the following executors:
 * **[Standalone Flink Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/cluster_setup.html)**: This is the default executor in Flink. No further configuration is needed.
-* **[Flink on Yarn Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
+* **[Flink on Yarn Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html#flink-yarn-session)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
     ```
     execution.target: yarn-session
+    ```
+* **[Flink on Yarn per Job](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html#run-a-single-flink-job-on-yarn)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
+    ```
+    execution.target: yarn-per-job
     ```
 * **[Standalone Flink Session on Kubernetes](https://ci.apache.org/projects/flink/flink-docs-stable/ops/deployment/kubernetes.html)**: This is the same with the normal standalone Flink session. No further configuration is needed.
 * **[Native Flink Session on Kubernetes](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/native_kubernetes.html)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
