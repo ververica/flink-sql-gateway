@@ -31,23 +31,44 @@ import static org.junit.Assert.assertEquals;
 public class DropViewOperationTest extends OperationTestBase {
 
 	@Test
-	public void testDropViewTest() {
+	public void testDropView() {
 		CreateViewOperation operation1 = new CreateViewOperation(context, "MyView1", "select 1 + 1");
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation1.execute());
 
 		String[] tables1 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertArrayEquals(new String[] { "MyView1" }, tables1);
 
-		DropViewOperation operation2 = new DropViewOperation(context, "MyView1");
+		DropViewOperation operation2 = new DropViewOperation(context, "MyView1", false);
 		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation2.execute());
 
 		String[] tables2 = context.getExecutionContext().getTableEnvironment().listTables();
 		assertEquals(0, tables2.length);
 	}
 
+	@Test
+	public void testDropViewIfExists() {
+		CreateViewOperation operation1 = new CreateViewOperation(context, "MyView1", "select 1 + 1");
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation1.execute());
+
+		String[] tables1 = context.getExecutionContext().getTableEnvironment().listTables();
+		assertArrayEquals(new String[] { "MyView1" }, tables1);
+
+		DropViewOperation operation2 = new DropViewOperation(context, "RandomString", true);
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation2.execute());
+
+		String[] tables2 = context.getExecutionContext().getTableEnvironment().listTables();
+		assertArrayEquals(new String[] { "MyView1" }, tables2);
+
+		DropViewOperation operation3 = new DropViewOperation(context, "MyView1", true);
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, operation3.execute());
+
+		String[] tables3 = context.getExecutionContext().getTableEnvironment().listTables();
+		assertEquals(0, tables3.length);
+	}
+
 	@Test(expected = SqlExecutionException.class)
-	public void testDropViewTest_ViewNotExist() {
-		DropViewOperation operation = new DropViewOperation(context, "MyView1");
+	public void testDropViewNotExist() {
+		DropViewOperation operation = new DropViewOperation(context, "MyView1", false);
 		operation.execute();
 	}
 

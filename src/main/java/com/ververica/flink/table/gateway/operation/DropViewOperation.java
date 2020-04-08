@@ -32,18 +32,22 @@ import com.ververica.flink.table.gateway.rest.result.ResultSet;
 public class DropViewOperation implements NonJobOperation {
 	private final SessionContext context;
 	private final String viewName;
+	private final boolean ifExists;
 
-	public DropViewOperation(SessionContext context, String viewName) {
+	public DropViewOperation(SessionContext context, String viewName, boolean ifExists) {
 		this.context = context;
 		this.viewName = viewName;
+		this.ifExists = ifExists;
 	}
 
 	@Override
 	public ResultSet execute() {
 		Environment env = context.getExecutionContext().getEnvironment();
 		TableEntry tableEntry = env.getTables().get(viewName);
-		if (tableEntry == null || !(tableEntry instanceof ViewEntry)) {
-			throw new SqlExecutionException("'" + viewName + "' does not exist in the current session.");
+		if (!(tableEntry instanceof ViewEntry)) {
+			if (!ifExists) {
+				throw new SqlExecutionException("'" + viewName + "' does not exist in the current session.");
+			}
 		}
 
 		// Here we rebuild the ExecutionContext because we want to ensure that all the remaining views can work fine.
@@ -54,10 +58,12 @@ public class DropViewOperation implements NonJobOperation {
 		// all the remaining views are OK, so do the ExecutionContext rebuilding to avoid breaking the view dependency.
 		Environment newEnv = env.clone();
 		if (newEnv.getTables().remove(viewName) != null) {
+			context.getExecutionContext().getTableEnvironment().dropTemporaryView(viewName);
 			// Renew the ExecutionContext.
 			ExecutionContext<?> newExecutionContext = context
 				.createExecutionContextBuilder(context.getOriginalSessionEnv())
 				.env(newEnv)
+				.sessionState(context.getExecutionContext().getSessionState())
 				.build();
 			context.setExecutionContext(newExecutionContext);
 		}

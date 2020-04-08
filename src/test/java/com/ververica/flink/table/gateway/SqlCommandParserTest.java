@@ -136,22 +136,35 @@ public class SqlCommandParserTest {
 
 	@Test
 	public void testCreateView() {
-		String query1 = "create view MyView as select * from MyTable where a > 10;";
-		checkCommand(query1, SqlCommand.CREATE_VIEW, query1);
+		String view = "MyView";
+		String query = "select * from MyTable where a > 10";
+		String parsedQuery = "SELECT *\n" +
+			"FROM `MyTable`\n" +
+			"WHERE `a` > 10";
 
-		String query2 = " \n -- single-line comment \n create \n -- single-line comment \n view MyView as" +
-			" select * from MyTable where a > 10" +
-			"\n  /* multi-line comments */";
-		checkCommand(query2, SqlCommand.CREATE_VIEW, query2);
+		String stmt1 = "create view " + view + " as " + query + ";";
+		checkCommand(stmt1, SqlCommand.CREATE_VIEW, view, parsedQuery);
+
+		String stmt2 = " \n -- single-line comment \n create \n -- single-line comment \n view " + view + " as " +
+			query + "\n  /* multi-line comments */";
+		checkCommand(stmt2, SqlCommand.CREATE_VIEW, view, parsedQuery);
 	}
 
 	@Test
 	public void testDropView() {
-		String query1 = "drop view MyView;";
-		checkCommand(query1, SqlCommand.DROP_VIEW, query1);
+		String view = "MyView";
 
-		String query2 = " \n -- single-line comment \n drop \n view \n MyView;";
-		checkCommand(query2, SqlCommand.DROP_VIEW, query2);
+		String stmt1 = "drop view " + view + ";";
+		checkCommand(stmt1, SqlCommand.DROP_VIEW, view, "false");
+
+		String stmt2 = " \n -- single-line comment \n drop \n view \n " + view + ";";
+		checkCommand(stmt2, SqlCommand.DROP_VIEW, view, "false");
+
+		String stmt3 = "drop view if exists " + view + ";";
+		checkCommand(stmt3, SqlCommand.DROP_VIEW, view, "true");
+
+		String stmt4 = " \n -- single-line comment \n drop \n view \n if exists " + view + ";";
+		checkCommand(stmt4, SqlCommand.DROP_VIEW, view, "true");
 	}
 
 	@Test

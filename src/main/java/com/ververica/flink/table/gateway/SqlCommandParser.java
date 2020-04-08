@@ -37,11 +37,13 @@ import org.apache.flink.sql.parser.impl.FlinkSqlParserImpl;
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance;
 
 import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.SqlDrop;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.parser.SqlParser;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -115,57 +117,82 @@ public final class SqlCommandParser {
 			throw new SqlParseException("Only single statement is supported now");
 		}
 
-		final String operand;
+		final String[] operands;
 		final SqlCommand cmd;
 		SqlNode node = sqlNodes.get(0);
 		if (node.getKind().belongsTo(SqlKind.QUERY)) {
 			cmd = SqlCommand.SELECT;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof RichSqlInsert) {
 			cmd = ((RichSqlInsert) node).isOverwrite() ? SqlCommand.INSERT_OVERWRITE : SqlCommand.INSERT_INTO;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlShowTables) {
 			cmd = SqlCommand.SHOW_TABLES;
-			operand = null;
+			operands = null;
 		} else if (node instanceof SqlCreateTable) {
 			cmd = SqlCommand.CREATE_TABLE;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlDropTable) {
 			cmd = SqlCommand.DROP_TABLE;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlAlterTable) {
 			cmd = SqlCommand.ALTER_TABLE;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlCreateView) {
+			// TableEnvironment currently does not support creating view
+			// so we have to perform the modification here
+			SqlCreateView createViewNode = (SqlCreateView) node;
 			cmd = SqlCommand.CREATE_VIEW;
-			operand = stmt;
+			operands = new String[] {
+				createViewNode.getViewName().toString(),
+				createViewNode.getQuery().toString()
+			};
 		} else if (node instanceof SqlDropView) {
+			// TableEnvironment currently does not support dropping view
+			// so we have to perform the modification here
+			SqlDropView dropViewNode = (SqlDropView) node;
+
+			// TODO: we can't get this field from SqlDropView normally until FLIP-71 is implemented
+			Field ifExistsField;
+			try {
+				ifExistsField = SqlDrop.class.getDeclaredField("ifExists");
+			} catch (NoSuchFieldException e) {
+				throw new SqlParseException("Failed to parse drop view statement.", e);
+			}
+			ifExistsField.setAccessible(true);
+			boolean ifExists;
+			try {
+				ifExists = ifExistsField.getBoolean(dropViewNode);
+			} catch (IllegalAccessException e) {
+				throw new SqlParseException("Failed to parse drop view statement.", e);
+			}
+
 			cmd = SqlCommand.DROP_VIEW;
-			operand = stmt;
+			operands = new String[] { dropViewNode.getViewName().toString(), String.valueOf(ifExists) };
 		} else if (node instanceof SqlShowDatabases) {
 			cmd = SqlCommand.SHOW_DATABASES;
-			operand = null;
+			operands = null;
 		} else if (node instanceof SqlCreateDatabase) {
 			cmd = SqlCommand.CREATE_DATABASE;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlDropDatabase) {
 			cmd = SqlCommand.DROP_DATABASE;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlAlterDatabase) {
 			cmd = SqlCommand.ALTER_DATABASE;
-			operand = stmt;
+			operands = new String[] { stmt };
 		} else if (node instanceof SqlShowCatalogs) {
 			cmd = SqlCommand.SHOW_CATALOGS;
-			operand = null;
+			operands = null;
 		} else if (node instanceof SqlShowFunctions) {
 			cmd = SqlCommand.SHOW_FUNCTIONS;
-			operand = null;
+			operands = null;
 		} else if (node instanceof SqlUseCatalog) {
 			cmd = SqlCommand.USE_CATALOG;
-			operand = ((SqlUseCatalog) node).getCatalogName();
+			operands = new String[] { ((SqlUseCatalog) node).getCatalogName() };
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
-			operand = ((SqlUseDatabase) node).getDatabaseName().toString();
+			operands = new String[] { ((SqlUseDatabase) node).getDatabaseName().toString() };
 			// TODO remove `DESCRIBE` and supports `DESCRIBE TABLE`
 			// } else if (node instanceof SqlDescribeTable) {
 			//	cmd = SqlCommand.DESCRIBE;
@@ -174,7 +201,7 @@ public final class SqlCommandParser {
 			// 	md = SqlCommand.EXPLAIN;
 		} else {
 			cmd = null;
-			operand = null;
+			operands = null;
 		}
 
 		if (cmd == null) {
@@ -182,10 +209,10 @@ public final class SqlCommandParser {
 		} else {
 			// use the origin given statement to make sure
 			// users can find the correct line number when parsing failed
-			if (operand == null) {
+			if (operands == null) {
 				return Optional.of(new SqlCommandCall(cmd));
 			} else {
-				return Optional.of(new SqlCommandCall(cmd, new String[] { operand }));
+				return Optional.of(new SqlCommandCall(cmd, operands));
 			}
 		}
 	}
