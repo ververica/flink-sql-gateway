@@ -21,6 +21,8 @@ set -e
 
 TEST_DIR=$(cd $(dirname $BASH_SOURCE)/..; pwd)
 source "$TEST_DIR"/test-statements.sh "$1"
+execution_target="$2"
+data_dir="$3"
 
 function cleanup() {
     use_database "tmp_db"
@@ -42,7 +44,7 @@ nation (
   n_comment varchar  not null
 ) WITH (
   'connector.type'='filesystem',
-  'connector.path'='hdfs://$HDFS_ADDRESS/tmp/flink-sql-gateway-test/nation.tbl',
+  'connector.path'='${data_dir}/nation.tbl',
   'format.type' = 'csv',
   'format.derive-schema' = 'true',
   'format.field-delimiter' = '|'
@@ -55,7 +57,7 @@ res (
   b varchar  not null
 ) WITH (
   'connector.type'='filesystem',
-  'connector.path'='hdfs://$HDFS_ADDRESS/tmp/flink-sql-gateway-test/gateway-test-$RANDOM-$RANDOM-$RANDOM-$RANDOM.tbl',
+  'connector.path'='${data_dir}/gateway-test-$RANDOM-$RANDOM-$RANDOM-$RANDOM.tbl',
   'format.type' = 'csv',
   'format.derive-schema' = 'true',
   'format.field-delimiter' = '|'
@@ -67,7 +69,7 @@ create_table "$nation_table"
 create_table "$output_table"
 
 # as cluster has been released in per-job mode after job has finished, we cannot get job status
-if [[ "$2" = "yarn-per-job" ]]
+if [[ "$execution_target" = "yarn-per-job" ]]
 then
     check_status=0
 else

@@ -21,6 +21,7 @@ set -e
 
 TEST_DIR=$(cd $(dirname $BASH_SOURCE)/..; pwd)
 source "$TEST_DIR"/test-statements.sh "$1"
+data_dir="$3"
 
 function cleanup() {
     use_database "tmp_db"
@@ -41,7 +42,7 @@ nation (
   n_comment varchar  not null
 ) WITH (
   'connector.type'='filesystem',
-  'connector.path'='hdfs://$HDFS_ADDRESS/tmp/flink-sql-gateway-test/nation.tbl',
+  'connector.path'='${data_dir}/nation.tbl',
   'format.type' = 'csv',
   'format.derive-schema' = 'true',
   'format.field-delimiter' = '|'

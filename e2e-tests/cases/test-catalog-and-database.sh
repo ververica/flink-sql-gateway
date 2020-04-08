@@ -21,6 +21,7 @@ set -e
 
 TEST_DIR=$(cd $(dirname $BASH_SOURCE)/..; pwd)
 source "$TEST_DIR"/test-statements.sh "$1"
+data_dir="$3"
 
 function cleanup() {
     use_catalog "test_catalog"

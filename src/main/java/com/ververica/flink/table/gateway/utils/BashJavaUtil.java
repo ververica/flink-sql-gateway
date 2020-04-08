@@ -22,6 +22,7 @@ import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.options.GatewayOptions;
 import com.ververica.flink.table.gateway.options.GatewayOptionsParser;
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.DeploymentOptions;
 
 import java.util.Arrays;
@@ -60,6 +61,7 @@ public class BashJavaUtil {
 		System.out.println(EXECUTION_PREFIX + jvmArgs);
 	}
 
+	@VisibleForTesting
 	private static void getExecutionTarget(String[] args) {
 		GatewayOptions options = GatewayOptionsParser.parseGatewayOptions(args);
 		Environment defaultEnv = readEnvironment(options.getDefaultConfig().orElse(null));

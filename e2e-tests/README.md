@@ -6,6 +6,20 @@ This directory contains tests that verify end-to-end behaviour of Flink SQL gate
 
 Before running the tests, you should have a Flink cluster configured. If you want to run the tests on a Flink session cluster, the session cluster must be started before running the tests.
 
+### Running Tests on a Local Flink Session Cluster
+
+To quickly run the tests on a local Flink session cluster (the job manager and all task managers are on the same local machine), you should first start the local cluster and then run the following command:
+
+```
+FLINK_HOME=<flink home> e2e-tests/run-tests.sh
+```
+
+where `<flink home>` is a Flink distribution directory.
+
+### Running Tests on a Flink Cluster with Multiple Machines
+
+Running tests on a Flink cluster with multiple machines requires an available HDFS service to store test data such that it can be accessed across multiple machines.
+
 To run the tests against different executors (for example, on a standlone Flink session, a Flink on Yarn session or a Flink on Yarn per-job executor), please change the `execution.target` and other related options in `$FLINK_HOME/conf/flink-conf.yaml` before running the tests. See "Run Gateway with Different Executors" of the documentation in the project root for the detailed settings. 
 
 You can now run all the tests by executing

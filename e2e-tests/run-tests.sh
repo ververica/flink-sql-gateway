@@ -26,16 +26,21 @@ then
     exit 1
 fi
 
+echo "Preparing test data..."
 if [[ -z "$HDFS_ADDRESS" ]]
 then
-    echo "Please define \$HDFS_LOCATION first" >> /dev/stderr
-    exit 1
+    echo "No HDFS address provided. Putting test data into /tmp directory..."
+    rm -rf /tmp/flink-sql-gateway-test/
+    mkdir -p /tmp/flink-sql-gateway-test/
+    cp "$TEST_DIR/data/nation.tbl" /tmp/flink-sql-gateway-test/
+    data_dir=/tmp/flink-sql-gateway-test/
+else
+    echo "HDFS address provided, put test data into HDFS..."
+    hdfs dfs -rm -r hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
+    hdfs dfs -mkdir -p hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
+    hdfs dfs -copyFromLocal "$TEST_DIR/data/nation.tbl" hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
+    data_dir=hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
 fi
-
-echo "Preparing test data..."
-hdfs dfs -rm -r hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
-hdfs dfs -mkdir -p hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
-hdfs dfs -copyFromLocal "$TEST_DIR/data/nation.tbl" hdfs://"$HDFS_ADDRESS"/tmp/flink-sql-gateway-test/
 
 function cleanup() {
     kill %1
@@ -74,11 +79,10 @@ function run_tests() {
     session_id=`create_session "$1"`
     send_heartbeat "$session_id"
 
-    run_test "$TEST_DIR"/cases/test-catalog-and-database.sh "$session_id" "$execution_target"
-    # VIEW is buggy
-    # run_test "$TEST_DIR"/cases/test-table-and-view.sh "$session_id" "$execution_target"
-    run_test "$TEST_DIR"/cases/test-select-and-insert.sh "$session_id" "$execution_target"
-    run_test "$TEST_DIR"/cases/test-availability.sh "$session_id" "$execution_target"
+    run_test "$TEST_DIR"/cases/test-catalog-and-database.sh "$session_id" "$execution_target" "$data_dir"
+    run_test "$TEST_DIR"/cases/test-table-and-view.sh "$session_id" "$execution_target" "$data_dir"
+    run_test "$TEST_DIR"/cases/test-select-and-insert.sh "$session_id" "$execution_target" "$data_dir"
+    run_test "$TEST_DIR"/cases/test-availability.sh "$session_id" "$execution_target" "$data_dir"
 
     delete_session "$session_id"
 }

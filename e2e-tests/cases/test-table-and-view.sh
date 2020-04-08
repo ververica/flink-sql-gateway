@@ -21,20 +21,16 @@ set -e
 
 TEST_DIR=$(cd $(dirname $BASH_SOURCE)/..; pwd)
 source "$TEST_DIR"/test-statements.sh "$1"
+data_dir="$3"
 
 function cleanup() {
-    use_database "tmp_db_1"
+    use_database "tmp_db"
+    drop_view_if_exists "region_view"
+    drop_view_if_exists "nation_view"
     drop_table_if_exists "region"
     drop_table_if_exists "region_new"
     drop_table_if_exists "nation"
-    drop_view_if_exists "region_view"
-    drop_view_if_exists "nation_view"
-    drop_database_if_exists "tmp_db_1"
-
-    use_database "tmp_db_2"
-    drop_table_if_exists "region"
-    drop_view_if_exists "region_view"
-    drop_database_if_exists "tmp_db_2"
+    drop_database_if_exists "tmp_db"
 }
 trap cleanup EXIT
 
@@ -47,7 +43,7 @@ region (
   r_comment varchar not null
 ) WITH (
   'connector.type'='filesystem',
-  'connector.path'='hdfs://$HDFS_ADDRESS/tmp/flink-sql-gateway-test/nation.tbl',
+  'connector.path'='${data_dir}/nation.tbl',
   'format.type' = 'csv',
   'format.derive-schema' = 'true',
   'format.field-delimiter' = '|'
@@ -62,7 +58,7 @@ nation (
   n_comment varchar  not null
 ) WITH (
   'connector.type'='filesystem',
-  'connector.path'='hdfs://$HDFS_ADDRESS/tmp/flink-sql-gateway-test/nation.tbl',
+  'connector.path'='${data_dir}/nation.tbl',
   'format.type' = 'csv',
   'format.derive-schema' = 'true',
   'format.field-delimiter' = '|'
@@ -70,11 +66,25 @@ nation (
 EOF`
 )
 
-create_database "tmp_db_1"
-use_database "tmp_db_1"
+create_database "tmp_db"
+use_database "tmp_db"
 
 create_table "$region_table"
 create_table "$nation_table"
+table_rows=`show_tables`
+assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
+assert_equals_after_sorting \
+    "`make_array "region TABLE" "nation TABLE"`" \
+    "$table_rows"
+
+alter_table "region RENAME TO region_new"
+table_rows=`show_tables`
+assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
+assert_equals_after_sorting \
+    "`make_array "region_new TABLE" "nation TABLE"`" \
+    "$table_rows"
+alter_table "region_new RENAME TO region"
+
 create_view "region_view AS SELECT * FROM region"
 create_view "nation_view AS SELECT * FROM nation"
 table_rows=`show_tables`
@@ -83,26 +93,8 @@ assert_equals_after_sorting \
     "`make_array "region TABLE" "nation TABLE" "region_view VIEW" "nation_view VIEW"`" \
     "$table_rows"
 
-alter_table "region RENAME TO region_new"
-table_rows=`show_tables`
-assert_equals 4 "`echo "$table_rows" | grep -c "^"`"
-assert_equals_after_sorting \
-    "`make_array "region_new TABLE" "nation TABLE" "region_view VIEW" "nation_view VIEW"`" \
-    "$table_rows"
-
+drop_view "nation_view"
 drop_table "nation"
-drop_view "region_view"
-table_rows=`show_tables`
-assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
-assert_equals_after_sorting \
-    "`make_array "region_new TABLE" "nation_view VIEW"`" \
-    "$table_rows"
-
-create_database "tmp_db_2"
-use_database "tmp_db_2"
-
-create_table "$region_table"
-create_view "region_view AS SELECT * FROM region"
 table_rows=`show_tables`
 assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
 assert_equals_after_sorting \
