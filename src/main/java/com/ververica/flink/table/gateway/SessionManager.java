@@ -92,7 +92,7 @@ public class SessionManager {
 		String sessionName,
 		String planner,
 		String executionType,
-		Map<String, String> properties) throws SqlGatewayException {
+		Map<String, String> properties) {
 		checkSessionCount();
 
 		Map<String, String> newProperties = new HashMap<>(properties);
@@ -126,7 +126,7 @@ public class SessionManager {
 		return sessionId;
 	}
 
-	public void closeSession(String sessionId) throws SqlGatewayException {
+	public void closeSession(String sessionId) {
 		Session session = getSession(sessionId);
 		closeSession(session);
 	}
@@ -137,7 +137,7 @@ public class SessionManager {
 		LOG.info("Session: {} is closed.", sessionId);
 	}
 
-	public Session getSession(String sessionId) throws SqlGatewayException {
+	public Session getSession(String sessionId) {
 		// TODO lock sessions to prevent fetching an expired session?
 		Session session = sessions.get(sessionId);
 		if (session == null) {
@@ -149,7 +149,7 @@ public class SessionManager {
 		return session;
 	}
 
-	private void checkSessionCount() throws SqlGatewayException {
+	private void checkSessionCount() {
 		if (maxCount <= 0) {
 			return;
 		}

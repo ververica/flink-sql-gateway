@@ -80,7 +80,7 @@ public class SelectOperation extends AbstractJobOperation {
 	}
 
 	@Override
-	public ResultSet execute() throws SqlGatewayException {
+	public ResultSet execute() {
 		resultDescriptor = executeQueryInternal(context.getExecutionContext(), query);
 		jobId = resultDescriptor.getJobClient().getJobID();
 
@@ -117,7 +117,7 @@ public class SelectOperation extends AbstractJobOperation {
 	}
 
 	@Override
-	protected Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults() throws SqlGatewayException {
+	protected Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults() {
 		Optional<Tuple2<List<Row>, List<Boolean>>> ret;
 		synchronized (lock) {
 			if (resultDescriptor == null) {

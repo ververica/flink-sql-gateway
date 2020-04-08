@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.api.common.JobID;
@@ -47,12 +46,12 @@ public interface JobOperation extends Operation {
 	 * <p>The size of result data must be less than maxFetchSize if it's is positive value, else ignore it.
 	 * Note: the maxFetchSize must be same for same token in each call, else a SqlGatewayException will be thrown.
 	 */
-	Optional<ResultSet> getJobResult(long token, int maxFetchSize) throws SqlGatewayException;
+	Optional<ResultSet> getJobResult(long token, int maxFetchSize);
 
 	/**
 	 * Returns the status of the flink job.
 	 */
-	JobStatus getJobStatus() throws SqlGatewayException;
+	JobStatus getJobStatus();
 
 	/**
 	 * Cancel the flink job.

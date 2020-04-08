@@ -72,7 +72,7 @@ public class Session {
 		return context;
 	}
 
-	public Tuple2<ResultSet, SqlCommandParser.SqlCommand> runStatement(String statement) throws SqlGatewayException {
+	public Tuple2<ResultSet, SqlCommandParser.SqlCommand> runStatement(String statement) {
 		LOG.info("Session: {}, run statement: {}", sessionId, statement);
 		boolean isBlinkPlanner = context.getExecutionContext().getEnvironment().getExecution().getPlanner()
 			.equalsIgnoreCase(ExecutionEntry.EXECUTION_PLANNER_VALUE_BLINK);
@@ -102,24 +102,24 @@ public class Session {
 		return Tuple2.of(resultSet, call.command);
 	}
 
-	public JobStatus getJobStatus(JobID jobId) throws SqlGatewayException {
+	public JobStatus getJobStatus(JobID jobId) {
 		LOG.info("Session: {}, get status for job: {}", sessionId, jobId);
 		return getJobOperation(jobId).getJobStatus();
 	}
 
-	public void cancelJob(JobID jobId) throws SqlGatewayException {
+	public void cancelJob(JobID jobId) {
 		LOG.info("Session: {}, cancel job: {}", sessionId, jobId);
 		getJobOperation(jobId).cancelJob();
 		jobOperations.remove(jobId);
 	}
 
-	public Optional<ResultSet> getJobResult(JobID jobId, long token, int maxFetchSize) throws SqlGatewayException {
+	public Optional<ResultSet> getJobResult(JobID jobId, long token, int maxFetchSize) {
 		LOG.info("Session: {}, get result for job: {}, token: {}, maxFetchSize: {}",
 			sessionId, jobId, token, maxFetchSize);
 		return getJobOperation(jobId).getJobResult(token, maxFetchSize);
 	}
 
-	private JobOperation getJobOperation(JobID jobId) throws SqlGatewayException {
+	private JobOperation getJobOperation(JobID jobId) {
 		JobOperation jobOperation = jobOperations.get(jobId);
 		if (jobOperation == null) {
 			String msg = String.format("Job: %s does not exist in current session: %s.", jobId, sessionId);

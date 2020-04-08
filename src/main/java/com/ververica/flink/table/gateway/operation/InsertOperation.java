@@ -20,7 +20,6 @@ package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.ProgramDeployer;
 import com.ververica.flink.table.gateway.SqlExecutionException;
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -86,7 +85,7 @@ public class InsertOperation extends AbstractJobOperation {
 	}
 
 	@Override
-	protected Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults() throws SqlGatewayException {
+	protected Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults() {
 		if (fetched) {
 			return Optional.empty();
 		} else {
