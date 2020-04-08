@@ -19,7 +19,6 @@
 package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.SqlExecutionException;
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -49,7 +48,7 @@ public class DescribeOperation implements NonJobOperation {
 	}
 
 	@Override
-	public ResultSet execute() throws SqlGatewayException {
+	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
 		try {
 			TableSchema schema = context.wrapClassLoader(() -> tableEnv.scan(tableName).getSchema());

@@ -82,7 +82,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 	}
 
 	@Override
-	public JobStatus getJobStatus() throws SqlGatewayException {
+	public JobStatus getJobStatus() {
 		synchronized (lock) {
 			if (jobId == null) {
 				LOG.error("Session: {}. No job has been submitted. This is a bug.", sessionId);
@@ -140,7 +140,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 	}
 
 	@Override
-	public synchronized Optional<ResultSet> getJobResult(long token, int maxFetchSize) throws SqlGatewayException {
+	public synchronized Optional<ResultSet> getJobResult(long token, int maxFetchSize) {
 		if (token == currentToken) {
 			if (noMoreResults) {
 				if (LOG.isDebugEnabled()) {
@@ -223,7 +223,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 			getLinkedListElementsFromBegin(bufferedChangeFlags, previousResultSetSize)));
 	}
 
-	protected abstract Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults() throws SqlGatewayException;
+	protected abstract Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults();
 
 	protected abstract List<ColumnInfo> getColumnInfos();
 

@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 /**
@@ -29,8 +28,6 @@ public interface Operation {
 
 	/**
 	 * Execute the command and return the result.
-	 *
-	 * @throws SqlGatewayException
 	 */
-	ResultSet execute() throws SqlGatewayException;
+	ResultSet execute();
 }
