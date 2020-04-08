@@ -155,21 +155,16 @@ public class SqlCommandParserTest {
 		String view = "MyView";
 
 		String stmt1 = "drop view " + view + ";";
-		checkCommand(stmt1, SqlCommand.DROP_VIEW, view);
+		checkCommand(stmt1, SqlCommand.DROP_VIEW, view, "false");
 
 		String stmt2 = " \n -- single-line comment \n drop \n view \n " + view + ";";
-		checkCommand(stmt2, SqlCommand.DROP_VIEW, view);
-	}
+		checkCommand(stmt2, SqlCommand.DROP_VIEW, view, "false");
 
-	@Test
-	public void testDropViewIfExists() {
-		String view = "MyView";
+		String stmt3 = "drop view if exists " + view + ";";
+		checkCommand(stmt3, SqlCommand.DROP_VIEW, view, "true");
 
-		String stmt1 = "drop view if exists " + view + ";";
-		checkCommand(stmt1, SqlCommand.DROP_VIEW_IF_EXISTS, view);
-
-		String stmt2 = " \n -- single-line comment \n drop \n view \n if exists " + view + ";";
-		checkCommand(stmt2, SqlCommand.DROP_VIEW_IF_EXISTS, view);
+		String stmt4 = " \n -- single-line comment \n drop \n view \n if exists " + view + ";";
+		checkCommand(stmt4, SqlCommand.DROP_VIEW, view, "true");
 	}
 
 	@Test

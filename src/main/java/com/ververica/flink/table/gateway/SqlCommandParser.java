@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway;
 
-import org.apache.calcite.sql.SqlDrop;
 import org.apache.flink.sql.parser.ddl.SqlAlterDatabase;
 import org.apache.flink.sql.parser.ddl.SqlAlterTable;
 import org.apache.flink.sql.parser.ddl.SqlCreateDatabase;
@@ -38,6 +37,7 @@ import org.apache.flink.sql.parser.impl.FlinkSqlParserImpl;
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance;
 
 import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.SqlDrop;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
@@ -167,12 +167,8 @@ public final class SqlCommandParser {
 				throw new SqlParseException("Failed to parse drop view statement.", e);
 			}
 
-			if (ifExists) {
-				cmd = SqlCommand.DROP_VIEW_IF_EXISTS;
-			} else {
-				cmd = SqlCommand.DROP_VIEW;
-			}
-			operands = new String[] { dropViewNode.getViewName().toString() };
+			cmd = SqlCommand.DROP_VIEW;
+			operands = new String[] { dropViewNode.getViewName().toString(), String.valueOf(ifExists) };
 		} else if (node instanceof SqlShowDatabases) {
 			cmd = SqlCommand.SHOW_DATABASES;
 			operands = null;
@@ -272,8 +268,6 @@ public final class SqlCommandParser {
 		CREATE_VIEW,
 
 		DROP_VIEW,
-
-		DROP_VIEW_IF_EXISTS,
 
 		CREATE_DATABASE,
 

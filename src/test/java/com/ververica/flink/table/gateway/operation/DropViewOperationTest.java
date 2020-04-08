@@ -67,7 +67,7 @@ public class DropViewOperationTest extends OperationTestBase {
 	}
 
 	@Test(expected = SqlExecutionException.class)
-	public void testDropViewTest_ViewNotExist() {
+	public void testDropViewNotExist() {
 		DropViewOperation operation = new DropViewOperation(context, "MyView1", false);
 		operation.execute();
 	}

@@ -37,10 +37,7 @@ public class OperationFactory {
 				operation = new CreateViewOperation(context, call.operands[0], call.operands[1]);
 				break;
 			case DROP_VIEW:
-				operation = new DropViewOperation(context, call.operands[0], false);
-				break;
-			case DROP_VIEW_IF_EXISTS:
-				operation = new DropViewOperation(context, call.operands[0], true);
+				operation = new DropViewOperation(context, call.operands[0], Boolean.parseBoolean(call.operands[1]));
 				break;
 			case CREATE_TABLE:
 			case DROP_TABLE:
