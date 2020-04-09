@@ -40,6 +40,7 @@ import org.apache.flink.table.types.logical.BigIntType;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
+import org.apache.flink.yarn.configuration.YarnConfigOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,6 @@ public class InsertOperation extends AbstractJobOperation {
 	private final List<ColumnInfo> columnInfos;
 
 	private boolean fetched = false;
-	private boolean isYarnPerJobMode = false;
 
 	public InsertOperation(SessionContext context, String statement) {
 		super(context);
@@ -186,6 +186,9 @@ public class InsertOperation extends AbstractJobOperation {
 		// blocking deployment
 		try {
 			JobClient jobClient = deployer.deploy().get();
+			if (isYarnPerJobMode){
+				appId = configuration.getString(YarnConfigOptions.APPLICATION_ID);
+			}
 			return jobClient.getJobID();
 		} catch (Exception e) {
 			throw new RuntimeException("Error running SQL job.", e);

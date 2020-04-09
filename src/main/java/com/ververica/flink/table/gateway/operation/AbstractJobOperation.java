@@ -57,6 +57,8 @@ public abstract class AbstractJobOperation implements JobOperation {
 	protected final SessionContext context;
 	protected final String sessionId;
 	protected volatile JobID jobId;
+	protected String appId;
+	protected boolean isYarnPerJobMode = false;
 
 	private long currentToken;
 	private int previousMaxFetchSize;
@@ -254,9 +256,15 @@ public abstract class AbstractJobOperation implements JobOperation {
 		Function<ClusterClient<?>, R> function) {
 		// stop Flink job
 		try (final ClusterDescriptor<C> clusterDescriptor = executionContext.createClusterDescriptor()) {
-			try (ClusterClient<C> clusterClient =
-				     clusterDescriptor.retrieve(executionContext.getClusterId()).getClusterClient()) {
-				// retrieve existing cluster
+			try {
+				ClusterClient<C> clusterClient;
+				if (isYarnPerJobMode){
+					clusterClient =
+							clusterDescriptor.retrieve(executionContext.getClusterId(appId)).getClusterClient();
+				}else {
+					clusterClient =
+							clusterDescriptor.retrieve(executionContext.getClusterId()).getClusterClient();
+				}
 				return function.apply(clusterClient);
 			} catch (Exception e) {
 				LOG.error(

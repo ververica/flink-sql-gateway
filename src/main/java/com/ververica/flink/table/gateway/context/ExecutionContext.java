@@ -89,6 +89,7 @@ import org.apache.flink.util.FlinkException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.flink.yarn.configuration.YarnConfigOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,6 +209,12 @@ public class ExecutionContext<ClusterID> {
 
 	public ClusterDescriptor<ClusterID> createClusterDescriptor() {
 		return clusterClientFactory.createClusterDescriptor(flinkConfig);
+	}
+
+	public ClusterID getClusterId(String appId) {
+		Configuration configuration = new Configuration(flinkConfig);
+		configuration.setString(YarnConfigOptions.APPLICATION_ID, appId);
+		return clusterClientFactory.getClusterId(configuration);
 	}
 
 	public Map<String, Catalog> getCatalogs() {
