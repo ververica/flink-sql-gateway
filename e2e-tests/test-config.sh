@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-FLINK_SQL_GATEWAY_LIB="$TEST_DIR"/../lib
+FLINK_SQL_GATEWAY_LIB="$TEST_DIR"/../build-target/lib
 
 # build flink-sql-gateway classpath
 FLINK_SQL_GATEWAY_CLASSPATH=""

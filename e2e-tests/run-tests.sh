@@ -51,7 +51,7 @@ echo "Reading Flink config..."
 source "$TEST_DIR"/test-config.sh
 execution_target=`get_execution_target`
 
-cd "$TEST_DIR/../bin"
+cd "$TEST_DIR/../build-target/bin"
 ./sql-gateway.sh -d "$TEST_DIR/data/test-config.yaml" > /tmp/flink-sql-gateway-test.out &
 echo "Starting rest endpoint..."
 while true
