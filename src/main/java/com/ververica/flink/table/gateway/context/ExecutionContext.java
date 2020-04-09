@@ -125,7 +125,6 @@ public class ExecutionContext<ClusterID> {
 
 	private final Configuration flinkConfig;
 	private final ClusterClientFactory<ClusterID> clusterClientFactory;
-	private final ClusterID clusterId;
 	private final ClusterSpecification clusterSpec;
 
 	private TableEnvironment tableEnv;
@@ -173,7 +172,6 @@ public class ExecutionContext<ClusterID> {
 		clusterClientFactory = serviceLoader.getClusterClientFactory(flinkConfig);
 		checkState(clusterClientFactory != null);
 
-		clusterId = clusterClientFactory.getClusterId(flinkConfig);
 		clusterSpec = clusterClientFactory.getClusterSpecification(flinkConfig);
 	}
 
@@ -200,10 +198,6 @@ public class ExecutionContext<ClusterID> {
 
 	public ClusterSpecification getClusterSpec() {
 		return clusterSpec;
-	}
-
-	public ClusterID getClusterId() {
-		return clusterId;
 	}
 
 	public ClusterDescriptor<ClusterID> createClusterDescriptor() {
@@ -262,6 +256,10 @@ public class ExecutionContext<ClusterID> {
 		} else {
 			return execEnv.getConfig();
 		}
+	}
+
+	public ClusterClientFactory<ClusterID> getClusterClientFactory() {
+		return clusterClientFactory;
 	}
 
 	public Pipeline createPipeline(String name) {
