@@ -1,0 +1,46 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.ververica.flink.table.gateway.deployment;
+
+import com.ververica.flink.table.gateway.config.YarnConfigOptions;
+import com.ververica.flink.table.gateway.context.ExecutionContext;
+import org.apache.flink.client.deployment.ClusterClientFactory;
+import org.apache.flink.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Get ClusterID based on yarn-per-job mode.
+ */
+public class YarnClusterDescriptorAdapter extends ClusterDescriptorAdapter{
+    private static final Logger LOG = LoggerFactory.getLogger(YarnClusterDescriptorAdapter.class);
+
+    @Override
+    public <ClusterID> ClusterID getClusterId(ExecutionContext<ClusterID> executionContext) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The yarn application id is {}", clusterIdValue);
+        }
+
+        Configuration flinkConfig = executionContext.getFlinkConfig();
+        ClusterClientFactory<ClusterID> clusterClientFactory = executionContext.getClusterClientFactory();
+        Configuration configuration = new Configuration(flinkConfig);
+        configuration.setString(YarnConfigOptions.APPLICATION_ID, clusterIdValue);
+        return clusterClientFactory.getClusterId(configuration);
+    }
+}

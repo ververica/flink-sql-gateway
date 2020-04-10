@@ -22,6 +22,8 @@ import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
+import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapter;
+import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
@@ -55,10 +57,9 @@ public abstract class AbstractJobOperation implements JobOperation {
 	private static final int DEFAULT_TIMEOUT_SECONDS = 30;
 
 	protected final SessionContext context;
+	protected ClusterDescriptorAdapter clusterDescriptorAdapter;
 	protected final String sessionId;
 	protected volatile JobID jobId;
-	protected String appId;
-	protected boolean isYarnPerJobMode = false;
 
 	private long currentToken;
 	private int previousMaxFetchSize;
@@ -81,6 +82,8 @@ public abstract class AbstractJobOperation implements JobOperation {
 		this.bufferedChangeFlags = null;
 		this.noMoreResults = false;
 		this.isJobCanceled = false;
+		this.clusterDescriptorAdapter =
+				ClusterDescriptorAdapterFactory.createClusterDescriptorAdapter(context.getExecutionContext().getFlinkConfig());
 	}
 
 	@Override
@@ -256,15 +259,9 @@ public abstract class AbstractJobOperation implements JobOperation {
 		Function<ClusterClient<?>, R> function) {
 		// stop Flink job
 		try (final ClusterDescriptor<C> clusterDescriptor = executionContext.createClusterDescriptor()) {
-			try {
-				ClusterClient<C> clusterClient;
-				if (isYarnPerJobMode){
-					clusterClient =
-							clusterDescriptor.retrieve(executionContext.getClusterId(appId)).getClusterClient();
-				}else {
-					clusterClient =
-							clusterDescriptor.retrieve(executionContext.getClusterId()).getClusterClient();
-				}
+			try (ClusterClient<C> clusterClient =
+						 clusterDescriptor.retrieve(clusterDescriptorAdapter.getClusterId(executionContext)).getClusterClient()) {
+				// retrieve existing cluster
 				return function.apply(clusterClient);
 			} catch (Exception e) {
 				LOG.error(

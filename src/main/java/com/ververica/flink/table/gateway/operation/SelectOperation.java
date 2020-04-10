@@ -21,6 +21,7 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.ProgramDeployer;
 import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.SqlGatewayException;
+import com.ververica.flink.table.gateway.config.YarnConfigOptions;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -48,7 +49,6 @@ import org.apache.flink.table.types.logical.utils.LogicalTypeUtils;
 import org.apache.flink.table.types.utils.DataTypeUtils;
 import org.apache.flink.types.Row;
 
-import org.apache.flink.yarn.configuration.YarnConfigOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,7 +240,6 @@ public class SelectOperation extends AbstractJobOperation {
 		configuration.set(DeploymentOptions.ATTACHED, true);
 		// shut down the cluster if the shell is closed
 		configuration.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, true);
-		isYarnPerJobMode = configuration.getString(DeploymentOptions.TARGET, "").equals("yarn-per-job");
 
 		// create execution
 		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline);
@@ -254,9 +253,7 @@ public class SelectOperation extends AbstractJobOperation {
 			throw new RuntimeException("Error running SQL job.", e);
 		}
 		String jobId = jobClient.getJobID().toString();
-		if (isYarnPerJobMode){
-			appId = configuration.getString(YarnConfigOptions.APPLICATION_ID);
-		}
+		clusterDescriptorAdapter.setClusterIdValue(configuration.getString(YarnConfigOptions.APPLICATION_ID, ""));
 		LOG.info("Session: {}. Submit flink job: {} successfully, query: ", sessionId, jobId, query);
 
 		// start result retrieval
