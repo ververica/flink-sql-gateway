@@ -36,15 +36,8 @@ public class SessionClusterDescriptorAdapter<ClusterID> extends ClusterDescripto
 
     @Override
     public boolean isGloballyTerminalState() {
-        boolean isGloballyTerminalState;
-        try {
-            JobStatus jobStatus = getJobStatus();
-            isGloballyTerminalState = jobStatus.isGloballyTerminalState();
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return isGloballyTerminalState;
+        JobStatus jobStatus = getJobStatus();
+        return jobStatus.isGloballyTerminalState();
     }
 
     @Override

@@ -20,6 +20,7 @@ package com.ververica.flink.table.gateway.deployment;
 
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import org.apache.flink.configuration.DeploymentOptions;
+import org.apache.flink.yarn.executors.YarnJobClusterExecutor;
 
 /**
  * The factory to create {@link ClusterDescriptorAdapter} based on execution.target.
@@ -37,7 +38,7 @@ public class ClusterDescriptorAdapterFactory {
 
         ClusterDescriptorAdapter<ClusterID> clusterDescriptorAdapter;
 
-        if ("yarn-per-job".equals(executionTarget)) {
+        if (YarnJobClusterExecutor.NAME.equals(executionTarget)) {
             clusterDescriptorAdapter = new YarnPerJobClusterDescriptorAdapter<>(
                     executionContext,
                     sessionId);

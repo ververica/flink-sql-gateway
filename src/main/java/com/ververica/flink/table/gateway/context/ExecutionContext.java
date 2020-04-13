@@ -125,6 +125,7 @@ public class ExecutionContext<ClusterID> {
 
 	private final Configuration flinkConfig;
 	private final ClusterClientFactory<ClusterID> clusterClientFactory;
+	// For session mode, clusterId is global, while for yarn-per-job mode, clusterId is useless
 	private final ClusterID clusterId;
 	private final ClusterSpecification clusterSpec;
 

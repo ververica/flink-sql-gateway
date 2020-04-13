@@ -42,7 +42,9 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
     private static final int DEFAULT_TIMEOUT_SECONDS = 30;
 
     protected final ExecutionContext<ClusterID> executionContext;
+    // Only used for logging
     private final String sessionId;
+    // jobId is not null only after job is submitted
     protected JobID jobId;
     protected ClusterID clusterID;
 
@@ -73,6 +75,10 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
      * Cancel the flink job.
      */
     public void cancelJob() {
+        if (jobId == null) {
+            LOG.error("Session: {}. No job has been submitted. This is a bug.", sessionId);
+            throw new IllegalStateException("No job has been submitted. This is a bug.");
+        }
         LOG.info("Session: {}. Start to cancel job {}.", sessionId, jobId);
         bridgeClientRequest(this.executionContext, jobId, sessionId, clusterClient -> {
             try {
@@ -98,6 +104,10 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
             JobID jobId,
             String sessionId,
             Function<ClusterClient<?>, R> function) {
+        if (this.clusterID == null) {
+            LOG.error("Session: {}. Cluster information don't exist.", sessionId);
+            throw new IllegalStateException("Cluster information don't exist.");
+        }
         // stop Flink job
         try (final ClusterDescriptor<ClusterID> clusterDescriptor = executionContext.createClusterDescriptor()) {
             try (ClusterClient<ClusterID> clusterClient =
@@ -127,7 +137,14 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
     }
 
     /**
-     * Check whether the current flink job status is GloballyTerminalState.
+     * Checks whether this job state is <i>globally terminal</i>.
+     * A globally terminal job is complete and cannot fail any more
+     * and will not be restarted or recovered by another standby master node.
+     *
+     * When a globally terminal state has been reached,
+     * all recovery data for the job is dropped from the high-availability services.
+     *
+     * @return True, if this job status is globally terminal, false otherwise.
      */
     public abstract boolean isGloballyTerminalState();
 
