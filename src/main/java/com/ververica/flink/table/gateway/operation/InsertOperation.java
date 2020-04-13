@@ -20,7 +20,6 @@ package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.ProgramDeployer;
 import com.ververica.flink.table.gateway.SqlExecutionException;
-import com.ververica.flink.table.gateway.config.YarnConfigOptions;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -28,7 +27,6 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -65,7 +63,6 @@ public class InsertOperation extends AbstractJobOperation {
 	private final List<ColumnInfo> columnInfos;
 
 	private boolean fetched = false;
-	private boolean isYarnPerJobMode = false;
 
 	public InsertOperation(SessionContext context, String statement) {
 		super(context);
@@ -97,17 +94,8 @@ public class InsertOperation extends AbstractJobOperation {
 			// currently only yarn-per-job is supported,
 			// and if the exception (thrown when getting job status) contains ApplicationNotFoundException,
 			// we can say the job is finished.
-			boolean isGloballyTerminalState;
-			try {
-				JobStatus jobStatus = getJobStatus();
-				isGloballyTerminalState = jobStatus.isGloballyTerminalState();
-			} catch (Exception e) {
-				if (isYarnPerJobMode && containsYarnApplicationNotFoundException(e)) {
-					isGloballyTerminalState = true;
-				} else {
-					throw e;
-				}
-			}
+			boolean isGloballyTerminalState = clusterDescriptorAdapter.isGloballyTerminalState();
+
 			if (isGloballyTerminalState) {
 				// TODO get affected_row_count for batch job
 				fetched = true;
@@ -127,15 +115,7 @@ public class InsertOperation extends AbstractJobOperation {
 
 	@Override
 	protected void cancelJobInternal() {
-		LOG.info("Session: {}. Start to cancel job {}.", sessionId, jobId);
-		bridgeClientRequest(context.getExecutionContext(), jobId, clusterClient -> {
-			try {
-				clusterClient.cancel(jobId).get();
-			} catch (Throwable t) {
-				// the job might has finished earlier
-			}
-			return null;
-		});
+		clusterDescriptorAdapter.cancelJob();
 	}
 
 	private <C> JobID executeUpdateInternal(ExecutionContext<C> executionContext) {
@@ -179,32 +159,19 @@ public class InsertOperation extends AbstractJobOperation {
 		// for update queries we don't wait for the job result, so run in detached mode
 		configuration.set(DeploymentOptions.ATTACHED, false);
 
-		isYarnPerJobMode = configuration.getString(DeploymentOptions.TARGET, "").equals("yarn-per-job");
-
 		// create execution
 		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline);
 
 		// blocking deployment
 		try {
 			JobClient jobClient = deployer.deploy().get();
-			clusterDescriptorAdapter.setClusterIdValue(configuration.getString(YarnConfigOptions.APPLICATION_ID, ""));
-			return jobClient.getJobID();
+			JobID jobID = jobClient.getJobID();
+			clusterDescriptorAdapter.setJobId(jobID);
+			clusterDescriptorAdapter.setClusterID(configuration);
+
+			return jobID;
 		} catch (Exception e) {
 			throw new RuntimeException("Error running SQL job.", e);
 		}
-	}
-
-	/**
-	 * We do't want to add hadoop dependency
-	 */
-	private boolean containsYarnApplicationNotFoundException(Throwable e) {
-		do {
-			String exceptionClass = e.getClass().getCanonicalName();
-			if (exceptionClass.equals("org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException")) {
-				return true;
-			}
-			e = e.getCause();
-		} while (e != null);
-		return false;
 	}
 }

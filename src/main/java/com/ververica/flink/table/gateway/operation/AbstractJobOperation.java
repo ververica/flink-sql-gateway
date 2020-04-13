@@ -18,9 +18,7 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.SqlGatewayException;
-import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapter;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
@@ -30,34 +28,24 @@ import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.client.deployment.ClusterDescriptor;
-import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.types.Row;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 /**
  * A default implementation of JobOperation.
  */
 public abstract class AbstractJobOperation implements JobOperation {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractJobOperation.class);
-	private static final int DEFAULT_TIMEOUT_SECONDS = 30;
 
 	protected final SessionContext context;
-	protected ClusterDescriptorAdapter clusterDescriptorAdapter;
+	protected ClusterDescriptorAdapter<?> clusterDescriptorAdapter;
 	protected final String sessionId;
 	protected volatile JobID jobId;
 
@@ -83,25 +71,13 @@ public abstract class AbstractJobOperation implements JobOperation {
 		this.noMoreResults = false;
 		this.isJobCanceled = false;
 		this.clusterDescriptorAdapter =
-				ClusterDescriptorAdapterFactory.createClusterDescriptorAdapter(context.getExecutionContext().getFlinkConfig());
+				ClusterDescriptorAdapterFactory.create(context.getExecutionContext(), sessionId);
 	}
 
 	@Override
 	public JobStatus getJobStatus() {
 		synchronized (lock) {
-			if (jobId == null) {
-				LOG.error("Session: {}. No job has been submitted. This is a bug.", sessionId);
-				throw new IllegalStateException("No job has been submitted. This is a bug.");
-			}
-
-			return bridgeClientRequest(context.getExecutionContext(), jobId, clusterClient -> {
-				try {
-					return clusterClient.getJobStatus(jobId).get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					LOG.error(String.format("Session: %s. Failed to fetch job status for job %s", sessionId, jobId), e);
-					throw new SqlGatewayException("Failed to fetch job status for job " + jobId, e);
-				}
-			});
+			return clusterDescriptorAdapter.getJobStatus();
 		}
 	}
 
@@ -242,39 +218,5 @@ public abstract class AbstractJobOperation implements JobOperation {
 			ret.add(iter.next());
 		}
 		return ret;
-	}
-
-	/**
-	 * The reason of using ClusterClient instead of JobClient to retrieve a cluster is
-	 * the JobClient can't know whether the job is finished on yarn-per-job mode.
-	 *
-	 * <p>If a job is finished, JobClient always get java.util.concurrent.TimeoutException
-	 * when getting job status and canceling a job after job is finished.
-	 * This method will throw org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
-	 * when creating a ClusterClient if the job is finished. This is more user-friendly.
-	 */
-	protected <C, R> R bridgeClientRequest(
-		ExecutionContext<C> executionContext,
-		JobID jobId,
-		Function<ClusterClient<?>, R> function) {
-		// stop Flink job
-		try (final ClusterDescriptor<C> clusterDescriptor = executionContext.createClusterDescriptor()) {
-			try (ClusterClient<C> clusterClient =
-						 clusterDescriptor.retrieve(clusterDescriptorAdapter.getClusterId(executionContext)).getClusterClient()) {
-				// retrieve existing cluster
-				return function.apply(clusterClient);
-			} catch (Exception e) {
-				LOG.error(
-					String.format("Session: %s, job: %s. Could not retrieve or create a cluster.", sessionId, jobId),
-					e);
-				throw new SqlExecutionException("Could not retrieve or create a cluster.", e);
-			}
-		} catch (SqlExecutionException e) {
-			throw e;
-		} catch (Exception e) {
-			LOG.error(
-				String.format("Session: %s, job: %s. Could not locate a cluster.", sessionId, jobId), e);
-			throw new SqlExecutionException("Could not locate a cluster.", e);
-		}
 	}
 }

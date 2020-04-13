@@ -18,29 +18,40 @@
 
 package com.ververica.flink.table.gateway.deployment;
 
-import com.ververica.flink.table.gateway.config.YarnConfigOptions;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
-import org.apache.flink.client.deployment.ClusterClientFactory;
+import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Get ClusterID based on yarn-per-job mode.
+ * Handle job actions based on session mode.
  */
-public class YarnClusterDescriptorAdapter extends ClusterDescriptorAdapter{
-    private static final Logger LOG = LoggerFactory.getLogger(YarnClusterDescriptorAdapter.class);
+public class SessionClusterDescriptorAdapter<ClusterID> extends ClusterDescriptorAdapter<ClusterID> {
+    private static final Logger LOG = LoggerFactory.getLogger(SessionClusterDescriptorAdapter.class);
+
+    public SessionClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext, String sessionId) {
+        super(executionContext, sessionId);
+    }
 
     @Override
-    public <ClusterID> ClusterID getClusterId(ExecutionContext<ClusterID> executionContext) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The yarn application id is {}", clusterIdValue);
+    public boolean isGloballyTerminalState() {
+        boolean isGloballyTerminalState;
+        try {
+            JobStatus jobStatus = getJobStatus();
+            isGloballyTerminalState = jobStatus.isGloballyTerminalState();
+        } catch (Exception e) {
+            throw e;
         }
 
-        Configuration flinkConfig = executionContext.getFlinkConfig();
-        ClusterClientFactory<ClusterID> clusterClientFactory = executionContext.getClusterClientFactory();
-        Configuration configuration = new Configuration(flinkConfig);
-        configuration.setString(YarnConfigOptions.APPLICATION_ID, clusterIdValue);
-        return clusterClientFactory.getClusterId(configuration);
+        return isGloballyTerminalState;
+    }
+
+    @Override
+    public void setClusterID(Configuration configuration) {
+        clusterID = executionContext.getClusterId();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The clusterID is {} for job {}", clusterID, jobId);
+        }
     }
 }

@@ -18,26 +18,33 @@
 
 package com.ververica.flink.table.gateway.deployment;
 
-import org.apache.flink.configuration.Configuration;
+import com.ververica.flink.table.gateway.context.ExecutionContext;
 import org.apache.flink.configuration.DeploymentOptions;
 
 /**
  * The factory to create {@link ClusterDescriptorAdapter} based on execution.target.
  */
 public class ClusterDescriptorAdapterFactory {
-    public static ClusterDescriptorAdapter createClusterDescriptorAdapter(Configuration configuration){
 
-        String executionTarget = configuration.getString(DeploymentOptions.TARGET);
+    public static <ClusterID> ClusterDescriptorAdapter<ClusterID> create(
+            ExecutionContext<ClusterID> executionContext,
+            String sessionId) {
+
+        String executionTarget = executionContext.getFlinkConfig().getString(DeploymentOptions.TARGET);
         if (executionTarget == null) {
             throw new RuntimeException("No execution.target specified in your configuration file.");
         }
 
-        ClusterDescriptorAdapter clusterDescriptorAdapter;
+        ClusterDescriptorAdapter<ClusterID> clusterDescriptorAdapter;
 
         if ("yarn-per-job".equals(executionTarget)) {
-            clusterDescriptorAdapter = new YarnClusterDescriptorAdapter();
+            clusterDescriptorAdapter = new YarnPerJobClusterDescriptorAdapter<>(
+                    executionContext,
+                    sessionId);
         } else {
-            clusterDescriptorAdapter = new DefaultClusterDescriptorAdapter();
+            clusterDescriptorAdapter = new SessionClusterDescriptorAdapter<>(
+                    executionContext,
+                    sessionId);
         }
 
         return clusterDescriptorAdapter;

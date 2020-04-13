@@ -21,7 +21,6 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.ProgramDeployer;
 import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.SqlGatewayException;
-import com.ververica.flink.table.gateway.config.YarnConfigOptions;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -34,6 +33,7 @@ import com.ververica.flink.table.gateway.result.ResultDescriptor;
 import com.ververica.flink.table.gateway.result.ResultUtil;
 import com.ververica.flink.table.gateway.result.TypedResult;
 
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -107,14 +107,8 @@ public class SelectOperation extends AbstractJobOperation {
 		if (noMoreResult) {
 			return;
 		}
-		bridgeClientRequest(context.getExecutionContext(), jobId, clusterClient -> {
-			try {
-				clusterClient.cancel(jobId).get();
-			} catch (Throwable t) {
-				// the job might has finished earlier
-			}
-			return null;
-		});
+
+		clusterDescriptorAdapter.cancelJob();
 	}
 
 	@Override
@@ -252,9 +246,12 @@ public class SelectOperation extends AbstractJobOperation {
 			LOG.error(String.format("Session: %s. Error running SQL job.", sessionId), e);
 			throw new RuntimeException("Error running SQL job.", e);
 		}
-		String jobId = jobClient.getJobID().toString();
-		clusterDescriptorAdapter.setClusterIdValue(configuration.getString(YarnConfigOptions.APPLICATION_ID, ""));
-		LOG.info("Session: {}. Submit flink job: {} successfully, query: ", sessionId, jobId, query);
+
+		JobID jobID = jobClient.getJobID();
+		clusterDescriptorAdapter.setJobId(jobID);
+		clusterDescriptorAdapter.setClusterID(configuration);
+
+		LOG.info("Session: {}. Submit flink job: {} successfully, query: ", sessionId, jobID.toString(), query);
 
 		// start result retrieval
 		result.startRetrieval(jobClient);

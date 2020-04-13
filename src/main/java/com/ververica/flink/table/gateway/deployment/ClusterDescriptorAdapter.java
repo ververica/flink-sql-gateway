@@ -18,15 +18,121 @@
 
 package com.ververica.flink.table.gateway.deployment;
 
+import com.ververica.flink.table.gateway.SqlExecutionException;
+import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
-/**
- * Adapter to generate ClusterID based on execution.target
- */
-public abstract class ClusterDescriptorAdapter {
-    protected String clusterIdValue;
-    public abstract  <ClusterID> ClusterID getClusterId(ExecutionContext<ClusterID> executionContext);
+import org.apache.flink.api.common.JobID;
+import org.apache.flink.api.common.JobStatus;
+import org.apache.flink.client.deployment.ClusterDescriptor;
+import org.apache.flink.client.program.ClusterClient;
+import org.apache.flink.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public void setClusterIdValue(String clusterIdValue) {
-        this.clusterIdValue = clusterIdValue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.concurrent.TimeoutException;
+
+/**
+ * Adapter to handle kinds of job actions (eg. get job status or cancel job) based on execution.target
+ */
+public abstract class ClusterDescriptorAdapter<ClusterID> {
+    private static final Logger LOG = LoggerFactory.getLogger(ClusterDescriptorAdapter.class);
+    private static final int DEFAULT_TIMEOUT_SECONDS = 30;
+
+    protected final ExecutionContext<ClusterID> executionContext;
+    private final String sessionId;
+    protected JobID jobId;
+    protected ClusterID clusterID;
+
+    public ClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext, String sessionId) {
+        this.executionContext = executionContext;
+        this.sessionId = sessionId;
     }
+
+    /**
+     * Returns the status of the flink job.
+     */
+    public JobStatus getJobStatus(){
+        if (jobId == null) {
+            LOG.error("Session: {}. No job has been submitted. This is a bug.", sessionId);
+            throw new IllegalStateException("No job has been submitted. This is a bug.");
+        }
+        return bridgeClientRequest(this.executionContext, jobId, sessionId, clusterClient -> {
+				try {
+					return clusterClient.getJobStatus(jobId).get(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					LOG.error(String.format("Session: %s. Failed to fetch job status for job %s", sessionId, jobId), e);
+					throw new SqlGatewayException("Failed to fetch job status for job " + jobId, e);
+				}
+			});
+    }
+
+    /**
+     * Cancel the flink job.
+     */
+    public void cancelJob() {
+        LOG.info("Session: {}. Start to cancel job {}.", sessionId, jobId);
+        bridgeClientRequest(this.executionContext, jobId, sessionId, clusterClient -> {
+            try {
+                clusterClient.cancel(jobId).get();
+            } catch (Throwable t) {
+                // the job might has finished earlier
+            }
+            return null;
+        });
+    }
+
+    /**
+     * The reason of using ClusterClient instead of JobClient to retrieve a cluster is
+     * the JobClient can't know whether the job is finished on yarn-per-job mode.
+     *
+     * <p>If a job is finished, JobClient always get java.util.concurrent.TimeoutException
+     * when getting job status and canceling a job after job is finished.
+     * This method will throw org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
+     * when creating a ClusterClient if the job is finished. This is more user-friendly.
+     */
+    protected <R> R bridgeClientRequest(
+            ExecutionContext<ClusterID> executionContext,
+            JobID jobId,
+            String sessionId,
+            Function<ClusterClient<?>, R> function) {
+        // stop Flink job
+        try (final ClusterDescriptor<ClusterID> clusterDescriptor = executionContext.createClusterDescriptor()) {
+            try (ClusterClient<ClusterID> clusterClient =
+                         clusterDescriptor.retrieve(this.clusterID).getClusterClient()) {
+                // retrieve existing cluster
+                return function.apply(clusterClient);
+            } catch (Exception e) {
+                LOG.error(
+                        String.format("Session: %s, job: %s. Could not retrieve or create a cluster.", sessionId, jobId),
+                        e);
+                throw new SqlExecutionException("Could not retrieve or create a cluster.", e);
+            }
+        } catch (SqlExecutionException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(
+                    String.format("Session: %s, job: %s. Could not locate a cluster.", sessionId, jobId), e);
+            throw new SqlExecutionException("Could not locate a cluster.", e);
+        }
+    }
+
+    /**
+     * Set the flink job id.
+     */
+    public void setJobId(JobID jobId) {
+        this.jobId = jobId;
+    }
+
+    /**
+     * Check whether the current flink job status is GloballyTerminalState.
+     */
+    public abstract boolean isGloballyTerminalState();
+
+    /**
+     * Set ClusterID.
+     */
+    public abstract void setClusterID(Configuration configuration);
 }
