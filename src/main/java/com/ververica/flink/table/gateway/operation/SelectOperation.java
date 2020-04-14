@@ -23,6 +23,7 @@ import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
+import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
@@ -248,8 +249,11 @@ public class SelectOperation extends AbstractJobOperation {
 		}
 
 		JobID jobID = jobClient.getJobID();
-		clusterDescriptorAdapter.setJobId(jobID);
-		clusterDescriptorAdapter.setClusterID(configuration);
+		this.clusterDescriptorAdapter =
+				ClusterDescriptorAdapterFactory.create(context.getExecutionContext(), configuration, sessionId, jobID);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Cluster Descriptor Adapter: {}", clusterDescriptorAdapter);
+		}
 
 		LOG.info("Session: {}. Submit flink job: {} successfully, query: ", sessionId, jobID.toString(), query);
 

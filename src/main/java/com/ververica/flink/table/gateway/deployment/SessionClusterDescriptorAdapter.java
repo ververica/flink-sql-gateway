@@ -19,6 +19,7 @@
 package com.ververica.flink.table.gateway.deployment;
 
 import com.ververica.flink.table.gateway.context.ExecutionContext;
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.configuration.Configuration;
 import org.slf4j.Logger;
@@ -30,21 +31,16 @@ import org.slf4j.LoggerFactory;
 public class SessionClusterDescriptorAdapter<ClusterID> extends ClusterDescriptorAdapter<ClusterID> {
     private static final Logger LOG = LoggerFactory.getLogger(SessionClusterDescriptorAdapter.class);
 
-    public SessionClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext, String sessionId) {
-        super(executionContext, sessionId);
+    public SessionClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext,
+                                           Configuration configuration,
+                                           String sessionId,
+                                           JobID jobId) {
+        super(executionContext, configuration, sessionId, jobId);
     }
 
     @Override
     public boolean isGloballyTerminalState() {
         JobStatus jobStatus = getJobStatus();
         return jobStatus.isGloballyTerminalState();
-    }
-
-    @Override
-    public void setClusterID(Configuration configuration) {
-        clusterID = executionContext.getClusterId();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The clusterID is {} for job {}", clusterID, jobId);
-        }
     }
 }

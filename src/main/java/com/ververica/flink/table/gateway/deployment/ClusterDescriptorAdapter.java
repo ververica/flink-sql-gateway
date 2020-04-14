@@ -45,12 +45,20 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
     // Only used for logging
     private final String sessionId;
     // jobId is not null only after job is submitted
-    protected JobID jobId;
-    protected ClusterID clusterID;
+    protected final JobID jobId;
+    protected final Configuration configuration;
+    protected final ClusterID clusterID;
 
-    public ClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext, String sessionId) {
+    public ClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext,
+                                    Configuration configuration,
+                                    String sessionId,
+                                    JobID jobId
+                                    ) {
         this.executionContext = executionContext;
         this.sessionId = sessionId;
+        this.jobId = jobId;
+        this.configuration = configuration;
+        this.clusterID = executionContext.getClusterClientFactory().getClusterId(configuration);
     }
 
     /**
@@ -129,11 +137,14 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
         }
     }
 
-    /**
-     * Set the flink job id.
-     */
-    public void setJobId(JobID jobId) {
-        this.jobId = jobId;
+    @Override
+    public String toString() {
+        return "ClusterDescriptorAdapter{" +
+                "sessionId='" + sessionId + '\'' +
+                ", jobId=" + jobId +
+                ", configuration=" + configuration +
+                ", clusterID=" + clusterID +
+                '}';
     }
 
     /**
@@ -147,9 +158,4 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
      * @return True, if this job status is globally terminal, false otherwise.
      */
     public abstract boolean isGloballyTerminalState();
-
-    /**
-     * Set ClusterID.
-     */
-    public abstract void setClusterID(Configuration configuration);
 }

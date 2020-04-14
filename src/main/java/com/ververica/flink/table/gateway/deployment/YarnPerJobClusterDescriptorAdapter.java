@@ -19,8 +19,8 @@
 package com.ververica.flink.table.gateway.deployment;
 
 import com.ververica.flink.table.gateway.context.ExecutionContext;
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
-import org.apache.flink.client.deployment.ClusterClientFactory;
 import org.apache.flink.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +31,11 @@ import org.slf4j.LoggerFactory;
 public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescriptorAdapter<ClusterID>{
     private static final Logger LOG = LoggerFactory.getLogger(YarnPerJobClusterDescriptorAdapter.class);
 
-    public YarnPerJobClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext, String sessionId) {
-        super(executionContext, sessionId);
+    public YarnPerJobClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext,
+                                              Configuration configuration,
+                                              String sessionId,
+                                              JobID jobId) {
+        super(executionContext, configuration, sessionId, jobId);
     }
 
     @Override
@@ -42,7 +45,7 @@ public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescri
             JobStatus jobStatus = getJobStatus();
             isGloballyTerminalState = jobStatus.isGloballyTerminalState();
         } catch (Exception e) {
-            if (containsYarnApplicationNotFoundException(e)) {
+            if (isYarnApplicationStopped(e)) {
                 isGloballyTerminalState = true;
             } else {
                 throw e;
@@ -52,22 +55,17 @@ public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescri
         return isGloballyTerminalState;
     }
 
-    @Override
-    public void setClusterID(Configuration configuration) {
-        ClusterClientFactory<ClusterID> clusterClientFactory = executionContext.getClusterClientFactory();
-        clusterID = clusterClientFactory.getClusterId(configuration);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The clusterID is {} for job {}", clusterID, jobId);
-        }
-    }
-
     /**
-     * We do't want to add hadoop dependency
+     * The yarn application is not running when its final status is not UNDEFINED.
+     *
+     * In this case, it will throw RuntimeException("The Yarn application " + applicationId + " doesn't run anymore.")
+     * from retrieve method in YarnClusterDescriptor.java
      */
-    private boolean containsYarnApplicationNotFoundException(Throwable e) {
+    private boolean isYarnApplicationStopped(Throwable e) {
         do {
-            String exceptionClass = e.getClass().getCanonicalName();
-            if (exceptionClass.equals("org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException")) {
+            String exceptionMessage = e.getMessage();
+            if (exceptionMessage.equals("The Yarn application " + clusterID + " doesn't run anymore.")) {
+                LOG.info("{} is stopped.", clusterID);
                 return true;
             }
             e = e.getCause();

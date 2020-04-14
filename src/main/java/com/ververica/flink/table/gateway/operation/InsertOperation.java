@@ -22,6 +22,7 @@ import com.ververica.flink.table.gateway.ProgramDeployer;
 import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
+import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
@@ -166,9 +167,11 @@ public class InsertOperation extends AbstractJobOperation {
 		try {
 			JobClient jobClient = deployer.deploy().get();
 			JobID jobID = jobClient.getJobID();
-			clusterDescriptorAdapter.setJobId(jobID);
-			clusterDescriptorAdapter.setClusterID(configuration);
-
+			this.clusterDescriptorAdapter =
+					ClusterDescriptorAdapterFactory.create(context.getExecutionContext(), configuration, sessionId, jobID);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Cluster Descriptor Adapter: {}", clusterDescriptorAdapter);
+			}
 			return jobID;
 		} catch (Exception e) {
 			throw new RuntimeException("Error running SQL job.", e);

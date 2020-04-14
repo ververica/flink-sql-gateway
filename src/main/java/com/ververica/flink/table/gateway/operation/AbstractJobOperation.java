@@ -21,7 +21,6 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapter;
-import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
@@ -45,6 +44,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractJobOperation.class);
 
 	protected final SessionContext context;
+	// clusterDescriptorAdapter is not null only after job is submitted
 	protected ClusterDescriptorAdapter<?> clusterDescriptorAdapter;
 	protected final String sessionId;
 	protected volatile JobID jobId;
@@ -70,8 +70,6 @@ public abstract class AbstractJobOperation implements JobOperation {
 		this.bufferedChangeFlags = null;
 		this.noMoreResults = false;
 		this.isJobCanceled = false;
-		this.clusterDescriptorAdapter =
-				ClusterDescriptorAdapterFactory.create(context.getExecutionContext(), sessionId);
 	}
 
 	@Override
