@@ -19,10 +19,13 @@
 package com.ververica.flink.table.gateway.deployment;
 
 import com.ververica.flink.table.gateway.context.ExecutionContext;
+
 import org.apache.commons.lang3.StringUtils;
+
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.configuration.Configuration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +35,11 @@ import org.slf4j.LoggerFactory;
 public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescriptorAdapter<ClusterID>{
     private static final Logger LOG = LoggerFactory.getLogger(YarnPerJobClusterDescriptorAdapter.class);
 
-    public YarnPerJobClusterDescriptorAdapter(ExecutionContext<ClusterID> executionContext,
-                                              Configuration configuration,
-                                              String sessionId,
-                                              JobID jobId) {
+    public YarnPerJobClusterDescriptorAdapter(
+    		ExecutionContext<ClusterID> executionContext,
+            Configuration configuration,
+            String sessionId,
+            JobID jobId) {
         super(executionContext, configuration, sessionId, jobId);
     }
 
