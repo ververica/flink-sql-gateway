@@ -62,7 +62,8 @@ public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescri
 	/**
 	 * The yarn application is not running when its final status is not UNDEFINED.
 	 *
-	 * In this case, it will throw RuntimeException("The Yarn application " + applicationId + " doesn't run anymore.")
+	 * <p>In this case, it will throw
+	 * <code>RuntimeException("The Yarn application " + applicationId + " doesn't run anymore.")</code>
 	 * from retrieve method in YarnClusterDescriptor.java
 	 */
 	private boolean isYarnApplicationStopped(Throwable e) {

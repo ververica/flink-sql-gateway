@@ -59,7 +59,8 @@ import org.apache.flink.table.types.logical.TimestampKind;
 import org.apache.flink.table.types.logical.TimestampType;
 import org.apache.flink.table.types.utils.LogicalTypeDataTypeConverter;
 
-import com.google.common.collect.Maps;
+import org.apache.flink.shaded.guava18.com.google.common.collect.Maps;
+
 import org.junit.Test;
 
 import java.net.URL;
