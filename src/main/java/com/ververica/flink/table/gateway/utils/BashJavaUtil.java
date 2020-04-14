@@ -22,12 +22,12 @@ import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.options.GatewayOptions;
 import com.ververica.flink.table.gateway.options.GatewayOptionsParser;
+
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.DeploymentOptions;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
 import static com.ververica.flink.table.gateway.utils.EnvironmentUtil.readEnvironment;
 import static org.apache.flink.util.Preconditions.checkArgument;
