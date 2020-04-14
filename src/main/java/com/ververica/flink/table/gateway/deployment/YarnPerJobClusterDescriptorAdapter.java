@@ -19,6 +19,7 @@
 package com.ververica.flink.table.gateway.deployment;
 
 import com.ververica.flink.table.gateway.context.ExecutionContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.configuration.Configuration;
@@ -64,7 +65,7 @@ public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescri
     private boolean isYarnApplicationStopped(Throwable e) {
         do {
             String exceptionMessage = e.getMessage();
-            if (exceptionMessage.equals("The Yarn application " + clusterID + " doesn't run anymore.")) {
+            if (StringUtils.equals(exceptionMessage, "The Yarn application " + clusterID + " doesn't run anymore.")) {
                 LOG.info("{} is stopped.", clusterID);
                 return true;
             }
