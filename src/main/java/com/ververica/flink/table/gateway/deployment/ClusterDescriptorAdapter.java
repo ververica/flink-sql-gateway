@@ -121,7 +121,7 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
 		// stop Flink job
 		try (final ClusterDescriptor<ClusterID> clusterDescriptor = executionContext.createClusterDescriptor()) {
 			try (ClusterClient<ClusterID> clusterClient =
-						 clusterDescriptor.retrieve(this.clusterID).getClusterClient()) {
+						clusterDescriptor.retrieve(this.clusterID).getClusterClient()) {
 				// retrieve existing cluster
 				return function.apply(clusterClient);
 			} catch (Exception e) {
@@ -154,7 +154,7 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
 	 * A globally terminal job is complete and cannot fail any more
 	 * and will not be restarted or recovered by another standby master node.
 	 *
-	 * When a globally terminal state has been reached,
+	 * <p>When a globally terminal state has been reached,
 	 * all recovery data for the job is dropped from the high-availability services.
 	 *
 	 * @return True, if this job status is globally terminal, false otherwise.
