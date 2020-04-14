@@ -26,6 +26,17 @@ then
     exit 1
 fi
 
+if [[ -z "$SQL_GATEWAY_HOME" ]]
+then
+    SQL_GATEWAY_HOME="$TEST_DIR""/../build-target/"
+fi
+
+if [[ ! -d "$SQL_GATEWAY_HOME" ]]
+then
+    echo "The directory ""$SQL_GATEWAY_HOME"" (\$SQL_GATEWAY_HOME) does not exist"
+    exit 1
+fi
+
 echo "Preparing test data..."
 if [[ -z "$HDFS_ADDRESS" ]]
 then
@@ -51,7 +62,7 @@ echo "Reading Flink config..."
 source "$TEST_DIR"/test-config.sh
 execution_target=`get_execution_target`
 
-cd "$TEST_DIR/../build-target/bin"
+cd "$SQL_GATEWAY_HOME/bin"
 ./sql-gateway.sh -d "$TEST_DIR/data/test-config.yaml" > /tmp/flink-sql-gateway-test.out &
 echo "Starting rest endpoint..."
 while true

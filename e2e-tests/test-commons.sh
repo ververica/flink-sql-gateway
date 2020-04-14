@@ -21,6 +21,8 @@ HOST=localhost
 PORT=8083
 API_VERSION=v1
 
+MAX_TOKEN=300
+
 function run_test() {
     echo "==================== Running Test: `basename "$1"` ===================="
     bash "$1" "${@:2}"
@@ -211,6 +213,12 @@ EOF`
             res="$res""$partial_res""\n"
         fi
         token=$(($token + 1))
+
+        if [[ "$token" -gt "$MAX_TOKEN" ]]
+        then
+            echo "No result is provided after $token fetches, is the job stuck?" >> /dev/stderr
+            exit 1
+        fi
     done
 
     if [[ "$2" = "1" ]]
