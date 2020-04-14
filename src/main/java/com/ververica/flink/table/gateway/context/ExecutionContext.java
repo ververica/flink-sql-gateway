@@ -39,7 +39,6 @@ import org.apache.flink.client.cli.ProgramOptions;
 import org.apache.flink.client.deployment.ClusterClientFactory;
 import org.apache.flink.client.deployment.ClusterClientServiceLoader;
 import org.apache.flink.client.deployment.ClusterDescriptor;
-import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.plugin.TemporaryClassLoaderContext;
 import org.apache.flink.runtime.execution.librarycache.FlinkUserCodeClassLoaders;
@@ -120,12 +119,10 @@ public class ExecutionContext<ClusterID> {
 	private static final Logger LOG = LoggerFactory.getLogger(ExecutionContext.class);
 
 	private final Environment environment;
-	private final Environment originalEnvironment;
 	private final ClassLoader classLoader;
 
 	private final Configuration flinkConfig;
 	private final ClusterClientFactory<ClusterID> clusterClientFactory;
-	private final ClusterSpecification clusterSpec;
 
 	private TableEnvironment tableEnv;
 	private ExecutionEnvironment execEnv;
@@ -137,7 +134,6 @@ public class ExecutionContext<ClusterID> {
 
 	private ExecutionContext(
 		Environment environment,
-		Environment originalEnvironment,
 		@Nullable SessionState sessionState,
 		List<URL> dependencies,
 		Configuration flinkConfig,
@@ -145,7 +141,6 @@ public class ExecutionContext<ClusterID> {
 		Options commandLineOptions,
 		List<CustomCommandLine> availableCommandLines) throws FlinkException {
 		this.environment = environment;
-		this.originalEnvironment = originalEnvironment;
 
 		this.flinkConfig = flinkConfig;
 
@@ -171,21 +166,10 @@ public class ExecutionContext<ClusterID> {
 		final ClusterClientServiceLoader serviceLoader = checkNotNull(clusterClientServiceLoader);
 		clusterClientFactory = serviceLoader.getClusterClientFactory(flinkConfig);
 		checkState(clusterClientFactory != null);
-
-		clusterSpec = clusterClientFactory.getClusterSpecification(flinkConfig);
 	}
 
 	public Configuration getFlinkConfig() {
 		return flinkConfig;
-	}
-
-	/**
-	 * Get the original {@link Environment}. It's usually used when resetting the session properties.
-	 *
-	 * @return the original environment.
-	 */
-	public Environment getOriginalEnvironment() {
-		return this.originalEnvironment;
 	}
 
 	public ClassLoader getClassLoader() {
@@ -196,12 +180,8 @@ public class ExecutionContext<ClusterID> {
 		return environment;
 	}
 
-	public ClusterSpecification getClusterSpec() {
-		return clusterSpec;
-	}
-
-	public ClusterDescriptor<ClusterID> createClusterDescriptor() {
-		return clusterClientFactory.createClusterDescriptor(flinkConfig);
+	public ClusterDescriptor<ClusterID> createClusterDescriptor(Configuration configuration) {
+		return clusterClientFactory.createClusterDescriptor(configuration);
 	}
 
 	public Map<String, Catalog> getCatalogs() {
@@ -733,7 +713,6 @@ public class ExecutionContext<ClusterID> {
 			try {
 				return new ExecutionContext<>(
 					this.currentEnv == null ? Environment.merge(defaultEnv, sessionEnv) : this.currentEnv,
-					this.sessionEnv,
 					this.sessionState,
 					this.dependencies,
 					this.configuration,

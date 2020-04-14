@@ -119,7 +119,8 @@ public abstract class ClusterDescriptorAdapter<ClusterID> {
 			throw new IllegalStateException("Cluster information don't exist.");
 		}
 		// stop Flink job
-		try (final ClusterDescriptor<ClusterID> clusterDescriptor = executionContext.createClusterDescriptor()) {
+		try (final ClusterDescriptor<ClusterID> clusterDescriptor =
+				executionContext.createClusterDescriptor(configuration)) {
 			try (ClusterClient<ClusterID> clusterClient =
 						clusterDescriptor.retrieve(this.clusterID).getClusterClient()) {
 				// retrieve existing cluster
