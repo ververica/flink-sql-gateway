@@ -27,12 +27,12 @@ import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.types.Row;
 
 /**
- * A bunch of UDFs for testing the SQL Client.
+ * A bunch of UDFs for testing the SQL Gateway.
  */
 public class UserDefinedFunctions {
 
 	/**
-	 * The scalar function for SQL Client test.
+	 * The scalar function for SQL Gateway test.
 	 */
 	public static class ScalarUDF extends ScalarFunction {
 
@@ -48,7 +48,7 @@ public class UserDefinedFunctions {
 	}
 
 	/**
-	 * The aggregate function for SQL Client test.
+	 * The aggregate function for SQL Gateway test.
 	 */
 	public static class AggregateUDF extends AggregateFunction<Long, Long> {
 
@@ -77,7 +77,7 @@ public class UserDefinedFunctions {
 	}
 
 	/**
-	 * The table function for SQL Client test.
+	 * The table function for SQL Gateway test.
 	 */
 	public static class TableUDF extends TableFunction<Row> {
 		private long extra;

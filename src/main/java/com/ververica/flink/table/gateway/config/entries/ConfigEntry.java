@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * Describes an environment configuration entry (such as catalogs, table, functions, views). Config entries
- * are similar to {@link org.apache.flink.table.descriptors.Descriptor} but apply to SQL Client's
+ * are similar to {@link org.apache.flink.table.descriptors.Descriptor} but apply to SQL Gateway's
  * environment files only.
  */
 abstract class ConfigEntry {

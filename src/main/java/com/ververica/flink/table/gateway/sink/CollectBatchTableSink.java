@@ -71,7 +71,7 @@ public class CollectBatchTableSink extends OutputFormatTableSink<Row> implements
 	public void emitDataSet(DataSet<Row> dataSet) {
 		dataSet
 			.output(new Utils.CollectHelper<>(accumulatorName, serializer))
-			.name("SQL Client Batch Collect Sink");
+			.name("SQL Gateway Batch Collect Sink");
 	}
 
 	@Override
