@@ -132,7 +132,6 @@ public class ResultSet {
 		private List<Boolean> changeFlags = null;
 
 		private Builder() {
-
 		}
 
 		/**

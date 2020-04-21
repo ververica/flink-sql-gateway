@@ -71,7 +71,7 @@ public class ResultSetJsonDeserializer extends StdDeserializer<ResultSet> {
 			resultKindParser.nextToken();
 			resultKind = ctx.readValue(resultKindParser, ResultKind.class);
 		} else {
-			throw new JsonParseException(jsonParser, "Field column must be provided");
+			throw new JsonParseException(jsonParser, "Field resultKind must be provided");
 		}
 
 		JsonNode columnNode = node.get(FIELD_NAME_COLUMNS);
