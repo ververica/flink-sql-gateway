@@ -37,7 +37,7 @@ public class OperationUtil {
 	public static final ResultSet OK = ResultSet.builder()
 		.resultKind(ResultKind.SUCCESS)
 		.columns(ColumnInfo.create(ConstantNames.RESULT, new VarCharType(2)))
-		.data(Row.of("OK"))
+		.data(Row.of(ConstantNames.OK))
 		.build();
 
 	public static ResultSet singleStringToResultSet(String str, String columnName) {

@@ -41,4 +41,6 @@ public class ConstantNames {
 	public static final String TYPE = "type";
 	public static final String TABLE_TYPE = "TABLE";
 	public static final String VIEW_TYPE = "VIEW";
+
+	public static final String OK = "OK";
 }
