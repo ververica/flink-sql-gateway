@@ -34,7 +34,6 @@ import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.Types;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.CatalogTable;
@@ -54,10 +53,10 @@ import org.apache.flink.table.descriptors.DescriptorProperties;
 import org.apache.flink.table.factories.CatalogFactory;
 import org.apache.flink.table.factories.ModuleFactory;
 import org.apache.flink.table.module.Module;
+import org.apache.flink.table.types.AtomicDataType;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.TimestampKind;
 import org.apache.flink.table.types.logical.TimestampType;
-import org.apache.flink.table.types.utils.LogicalTypeDataTypeConverter;
 
 import org.apache.flink.shaded.guava18.com.google.common.collect.Maps;
 
@@ -118,10 +117,9 @@ public class DependencyTest {
 		TableSchema schema = TableSchemaUtil.readTableSchemaFromJson(schemaJson);
 
 		final TableSchema expected = TableSchema.builder()
-			.field("IntegerField1", Types.INT())
-			.field("StringField1", Types.STRING())
-			.field("rowtimeField",
-				LogicalTypeDataTypeConverter.toDataType(new TimestampType(true, TimestampKind.ROWTIME, 3)))
+			.field("IntegerField1", DataTypes.INT())
+			.field("StringField1", DataTypes.STRING())
+			.field("rowtimeField", new AtomicDataType(new TimestampType(true, TimestampKind.ROWTIME, 3)))
 			.build();
 
 		assertEquals(expected, schema);
@@ -133,7 +131,6 @@ public class DependencyTest {
 	 * Table source that can be discovered if classloading is correct.
 	 */
 	public static class TestTableSourceFactory extends TestTableSourceFactoryBase {
-
 		public TestTableSourceFactory() {
 			super(CONNECTOR_TYPE_VALUE, TEST_PROPERTY);
 		}
@@ -143,7 +140,6 @@ public class DependencyTest {
 	 * Table sink that can be discovered if classloading is correct.
 	 */
 	public static class TestTableSinkFactory extends TestTableSinkFactoryBase {
-
 		public TestTableSinkFactory() {
 			super(CONNECTOR_TYPE_VALUE, TEST_PROPERTY);
 		}

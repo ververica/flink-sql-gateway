@@ -21,11 +21,8 @@ package com.ververica.flink.table.gateway.sink;
 import org.apache.flink.api.common.io.OutputFormat;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
-import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.Utils;
-import org.apache.flink.api.java.operators.DataSink;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.sinks.BatchTableSink;
 import org.apache.flink.table.sinks.OutputFormatTableSink;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.utils.TableSchemaUtils;
@@ -34,7 +31,7 @@ import org.apache.flink.types.Row;
 /**
  * Table sink for collecting the results locally all at once using accumulators.
  */
-public class CollectBatchTableSink extends OutputFormatTableSink<Row> implements BatchTableSink<Row> {
+public class CollectBatchTableSink extends OutputFormatTableSink<Row>  {
 
 	private final String accumulatorName;
 	private final TypeSerializer<Row> serializer;
@@ -66,13 +63,6 @@ public class CollectBatchTableSink extends OutputFormatTableSink<Row> implements
 	@Override
 	public CollectBatchTableSink configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
 		return new CollectBatchTableSink(accumulatorName, serializer, tableSchema);
-	}
-
-	@Override
-	public DataSink<?> consumeDataSet(DataSet<Row> dataSet) {
-		return dataSet
-			.output(new Utils.CollectHelper<>(accumulatorName, serializer))
-			.name("SQL Gateway Batch Collect Sink");
 	}
 
 	@Override

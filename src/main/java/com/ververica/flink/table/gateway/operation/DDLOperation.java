@@ -60,6 +60,9 @@ public class DDLOperation implements NonJobOperation {
 	private String getExceptionMsg() {
 		final String actionMsg;
 		switch (command) {
+			case CREATE_CATALOG:
+				actionMsg = "create a catalog";
+				break;
 			case CREATE_TABLE:
 				actionMsg = "create a table";
 				break;

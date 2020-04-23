@@ -29,7 +29,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.runtime.net.ConnectionUtils;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.runtime.types.TypeInfoDataTypeConverter;
+import org.apache.flink.table.types.utils.TypeConversions;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -45,8 +45,8 @@ public class ResultUtil {
 		TableSchema schema,
 		ExecutionConfig config,
 		ClassLoader classLoader) {
-		final TypeInformation[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
-			.map(TypeInfoDataTypeConverter::fromDataTypeToTypeInfo)
+		final TypeInformation<?>[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
+			.map(TypeConversions::fromDataTypeToLegacyInfo)
 			.toArray(TypeInformation[]::new);
 		final RowTypeInfo outputType = new RowTypeInfo(schemaTypeInfos, schema.getFieldNames());
 
@@ -59,8 +59,8 @@ public class ResultUtil {
 		TableSchema schema,
 		ExecutionConfig config,
 		ClassLoader classLoader) {
-		final TypeInformation[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
-			.map(TypeInfoDataTypeConverter::fromDataTypeToTypeInfo)
+		final TypeInformation<?>[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
+				.map(TypeConversions::fromDataTypeToLegacyInfo)
 			.toArray(TypeInformation[]::new);
 		final RowTypeInfo outputType = new RowTypeInfo(schemaTypeInfos, schema.getFieldNames());
 

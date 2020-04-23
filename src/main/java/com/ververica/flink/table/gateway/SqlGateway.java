@@ -78,6 +78,7 @@ public class SqlGateway {
 		endpoint.start();
 		System.out.println("Rest endpoint started.");
 
+		//wait forever
 		new CountDownLatch(1).await();
 	}
 

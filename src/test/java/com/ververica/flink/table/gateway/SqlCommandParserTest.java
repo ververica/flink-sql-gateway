@@ -196,6 +196,24 @@ public class SqlCommandParserTest {
 	}
 
 	@Test
+	public void testCreateCatalog() {
+		String createTestCatalog1 = "create catalog MyCat WITH ('type' = 'DependencyTest');";
+		checkCommand(createTestCatalog1, SqlCommand.CREATE_CATALOG, createTestCatalog1);
+
+		String createTestCatalog2 = " \n -- single-line comment \n create \n catalog \n MyCat;";
+		checkCommand(createTestCatalog2, SqlCommand.CREATE_CATALOG, createTestCatalog2);
+
+		String createPgCatalog1 = "CREATE CATALOG mypg WITH (" +
+				"'type' = 'jdbc'," +
+				"'default-database' = 'postgres'," +
+				"'username' = 'postgres'," +
+				"'password'= 'xxx'," +
+				"'base-url' = 'jdbc:postgresql://localhost:5432/'" +
+				")";
+		checkCommand(createPgCatalog1, SqlCommand.CREATE_CATALOG, createPgCatalog1);
+	}
+
+	@Test
 	public void testUseCatalog() {
 		String query1 = "use catalog MyCat";
 		checkCommand(query1, SqlCommand.USE_CATALOG, "MyCat");

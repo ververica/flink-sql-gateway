@@ -203,6 +203,20 @@ under the License.
             <optional>true</optional>
         </dependency>
 
+        <!-- test dependencies for JDBCCatalog -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-jdbc_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.12</version>
+            <scope>test</scope>
+        </dependency>
+        
         <!-- test dependencies for HiveCatalog. The exclusions should be in sync with those flink-connector-hive -->
 
         <dependency>

@@ -22,6 +22,7 @@ import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.junit.Test;
 
+import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_CATALOG;
 import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_DATABASE;
 import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_TABLE;
 import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.DROP_TABLE;
@@ -89,5 +90,21 @@ public class DDLOperationTest extends OperationTestBase {
 
 		String[] tables2 = context.getExecutionContext().getTableEnvironment().listDatabases();
 		assertArrayEquals(new String[] { "default_database", "MyDatabase1" }, tables2);
+	}
+
+	@Test
+	public void testCreateCatalog() {
+		final String ddlTemplate = "create catalog %s with ('type'='generic_in_memory')";
+		DDLOperation operation = new DDLOperation(context, String.format(ddlTemplate, "MyCatalog1"), CREATE_CATALOG);
+		ResultSet resultSet = operation.execute();
+		assertEquals(OperationUtil.AFFECTED_ROW_COUNT0, resultSet);
+
+		String[] catalogs = context.getExecutionContext().getTableEnvironment().listCatalogs();
+		assertArrayEquals(new String[] { "MyCatalog1", "default_catalog" }, catalogs);
+	}
+
+	@Test
+	public void testDropCatalog() {
+		// TODO: SqlDropCatalog does not exists in org.apache.flink.sql.parser.ddl
 	}
 }
