@@ -16,20 +16,18 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway.utils;
+package com.ververica.flink.table.gateway.sink;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.descriptors.DescriptorProperties;
 import org.apache.flink.table.descriptors.SchemaValidator;
-import org.apache.flink.table.factories.StreamTableSourceFactory;
-import org.apache.flink.table.sources.DefinedProctimeAttribute;
-import org.apache.flink.table.sources.DefinedRowtimeAttributes;
-import org.apache.flink.table.sources.RowtimeAttributeDescriptor;
-import org.apache.flink.table.sources.StreamTableSource;
+import org.apache.flink.table.factories.StreamTableSinkFactory;
+import org.apache.flink.table.sinks.AppendStreamTableSink;
+import org.apache.flink.table.sinks.StreamTableSink;
+import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.table.utils.TableSchemaUtils;
 import org.apache.flink.types.Row;
 
@@ -37,7 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.apache.flink.table.descriptors.ConnectorDescriptorValidator.CONNECTOR_TYPE;
 import static org.apache.flink.table.descriptors.DescriptorProperties.TABLE_SCHEMA_EXPR;
@@ -56,14 +53,14 @@ import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.
 import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.UPDATE_MODE_VALUE_APPEND;
 
 /**
- * Table source factory for testing.
+ * Table sink factory for testing.
  */
-public abstract class TestTableSourceFactoryBase implements StreamTableSourceFactory<Row> {
+public abstract class TestTableSinkFactoryBase implements StreamTableSinkFactory<Row> {
 
 	private String type;
 	private String testProperty;
 
-	public TestTableSourceFactoryBase(String type, String testProperty) {
+	public TestTableSinkFactoryBase(String type, String testProperty) {
 		this.type = type;
 		this.testProperty = testProperty;
 	}
@@ -96,36 +93,27 @@ public abstract class TestTableSourceFactoryBase implements StreamTableSourceFac
 	}
 
 	@Override
-	public StreamTableSource<Row> createStreamTableSource(Map<String, String> properties) {
+	public StreamTableSink<Row> createStreamTableSink(Map<String, String> properties) {
 		final DescriptorProperties params = new DescriptorProperties(true);
 		params.putProperties(properties);
-		final Optional<String> proctime = SchemaValidator.deriveProctimeAttribute(params);
-		final List<RowtimeAttributeDescriptor> rowtime = SchemaValidator.deriveRowtimeAttributes(params);
-		return new TestTableSource(
-			TableSchemaUtils.getPhysicalSchema(params.getTableSchema(SCHEMA)),
-			properties.get(testProperty),
-			proctime.orElse(null),
-			rowtime);
+		return new TestTableSink(
+				SchemaValidator.deriveTableSinkSchema(params),
+				properties.get(testProperty));
 	}
 
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * Test table source.
+	 * Test table sink.
 	 */
-	public static class TestTableSource implements StreamTableSource<Row>, DefinedRowtimeAttributes,
-		DefinedProctimeAttribute {
+	public static class TestTableSink implements TableSink<Row>, AppendStreamTableSink<Row> {
 
 		private final TableSchema schema;
 		private final String property;
-		private final String proctime;
-		private final List<RowtimeAttributeDescriptor> rowtime;
 
-		public TestTableSource(TableSchema schema, String property, String proctime, List<RowtimeAttributeDescriptor> rowtime) {
+		public TestTableSink(TableSchema schema, String property) {
 			this.schema = TableSchemaUtils.checkNoGeneratedColumns(schema);
 			this.property = property;
-			this.proctime = proctime;
-			this.rowtime = rowtime;
 		}
 
 		public String getProperty() {
@@ -133,33 +121,28 @@ public abstract class TestTableSourceFactoryBase implements StreamTableSourceFac
 		}
 
 		@Override
-		public DataStream<Row> getDataStream(StreamExecutionEnvironment execEnv) {
-			return null;
-		}
-
-		@Override
-		public TypeInformation<Row> getReturnType() {
+		public TypeInformation<Row> getOutputType() {
 			return Types.ROW(schema.getFieldNames(), schema.getFieldTypes());
 		}
 
 		@Override
-		public TableSchema getTableSchema() {
-			return schema;
+		public String[] getFieldNames() {
+			return schema.getFieldNames();
 		}
 
 		@Override
-		public String explainSource() {
-			return "TestTableSource";
+		public TypeInformation<?>[] getFieldTypes() {
+			return schema.getFieldTypes();
 		}
 
 		@Override
-		public List<RowtimeAttributeDescriptor> getRowtimeAttributeDescriptors() {
-			return rowtime;
+		public TableSink<Row> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
+			return new TestTableSink(new TableSchema(fieldNames, fieldTypes), property);
 		}
 
 		@Override
-		public String getProctimeAttribute() {
-			return proctime;
+		public void emitDataStream(DataStream<Row> dataStream) {
+			// do nothing
 		}
 	}
 }

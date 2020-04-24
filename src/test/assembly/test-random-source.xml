@@ -24,13 +24,24 @@ under the License.
         <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+
     <files>
         <!-- Create META-INF/services -->
         <file>
-            <source>src/test/resources/service-file/test-factory-services-file</source>
+            <source>src/test/resources/service-file/test-random-source-file</source>
             <outputDirectory>META-INF/services</outputDirectory>
             <destName>org.apache.flink.table.factories.TableFactory</destName>
-            <fileMode>0755</fileMode>
+            <fileMode>0644</fileMode>
         </file>
     </files>
+
+    <fileSets>
+        <!-- Create class files -->
+        <fileSet>
+            <directory>${project.build.directory}/test-classes/com/ververica/flink/table/gateway/source/random</directory>
+            <outputDirectory>com/ververica/flink/table/gateway/source/random</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+    </fileSets>
+
 </assembly>

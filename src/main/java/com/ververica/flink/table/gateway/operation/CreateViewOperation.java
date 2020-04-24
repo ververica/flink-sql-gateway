@@ -46,13 +46,21 @@ public class CreateViewOperation implements NonJobOperation {
 	public ResultSet execute() {
 		Environment env = context.getEnvironment();
 		TableEntry tableEntry = env.getTables().get(viewName);
-		if (tableEntry != null && tableEntry instanceof ViewEntry) {
+		if (tableEntry instanceof ViewEntry) {
 			throw new SqlExecutionException("'" + viewName + "' has already been defined in the current session.");
 		}
 
 		// TODO check the logic
 		TableEnvironment tableEnv = context.getTableEnvironment();
-		tableEnv.createTemporaryView(viewName, tableEnv.sqlQuery(query));
+		try {
+			context.wrapClassLoader(() -> {
+				tableEnv.createTemporaryView(viewName, tableEnv.sqlQuery(query));
+				return null;
+			});
+		} catch (Throwable t) {
+			// catch everything such that the query does not crash the executor
+			throw new SqlExecutionException("Invalid SQL statement.", t);
+		}
 		// Also attach the view to ExecutionContext#environment.
 		env.getTables().put(viewName, ViewEntry.create(viewName, query));
 		return OperationUtil.OK;

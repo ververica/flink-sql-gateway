@@ -20,7 +20,7 @@ package com.ververica.flink.table.gateway.config;
 
 import com.ververica.flink.table.gateway.config.entries.CatalogEntry;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
-import com.ververica.flink.table.gateway.utils.DummyTableSourceFactory;
+import com.ververica.flink.table.gateway.source.dummy.DummyTableSourceFactory;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
 import org.apache.flink.api.common.ExecutionConfig;

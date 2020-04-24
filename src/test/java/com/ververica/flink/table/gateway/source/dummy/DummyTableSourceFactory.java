@@ -17,17 +17,19 @@
  * under the License.
  */
 
-package com.ververica.flink.table.gateway.utils;
+package com.ververica.flink.table.gateway.source.dummy;
+
+import com.ververica.flink.table.gateway.source.TestTableSourceFactoryBase;
 
 /**
- * Dummy table sink factory.
+ * Dummy table source factory.
  */
-public class DummyTableSinkFactory extends TestTableSinkFactoryBase {
+public class DummyTableSourceFactory extends TestTableSourceFactoryBase {
 
-	public static final String CONNECTOR_TYPE_VALUE = "dummy-sink";
+	public static final String CONNECTOR_TYPE_VALUE = "dummy-source";
 	public static final String TEST_PROPERTY = "test-property";
 
-	public DummyTableSinkFactory() {
+	public DummyTableSourceFactory() {
 		super(CONNECTOR_TYPE_VALUE, TEST_PROPERTY);
 	}
 }

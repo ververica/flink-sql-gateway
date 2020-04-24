@@ -58,7 +58,11 @@ public class DropViewOperation implements NonJobOperation {
 		// all the remaining views are OK, so do the ExecutionContext rebuilding to avoid breaking the view dependency.
 		Environment newEnv = env.clone();
 		if (newEnv.getTables().remove(viewName) != null) {
-			context.getExecutionContext().getTableEnvironment().dropTemporaryView(viewName);
+			ExecutionContext<?> oldExecutionContext = context.getExecutionContext();
+			oldExecutionContext.wrapClassLoader(() -> {
+				oldExecutionContext.getTableEnvironment().dropTemporaryView(viewName);
+				return null;
+			});
 			// Renew the ExecutionContext.
 			ExecutionContext<?> newExecutionContext = context
 				.createExecutionContextBuilder(context.getOriginalSessionEnv())

@@ -38,6 +38,7 @@ public class ShowCurrentDatabaseOperation implements NonJobOperation {
 	@Override
 	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
-		return OperationUtil.singleStringToResultSet(tableEnv.getCurrentDatabase(), ConstantNames.DATABASE);
+		return OperationUtil.singleStringToResultSet(
+			context.wrapClassLoader(tableEnv::getCurrentDatabase), ConstantNames.DATABASE);
 	}
 }
