@@ -48,7 +48,7 @@ under the License.
 	<files>
 		<!-- copy flink-dist fat jar -->
 		<file>
-			<source>target/flink-sql-gateway-${project.version}.jar</source>
+			<source>${project.build.directory}/flink-sql-gateway-${project.version}.jar</source>
 			<outputDirectory>lib/</outputDirectory>
 			<fileMode>0644</fileMode>
 		</file>

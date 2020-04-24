@@ -19,14 +19,9 @@
 package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.config.Environment;
-import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
-import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
-
-import org.apache.flink.table.types.logical.VarCharType;
-import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
@@ -74,11 +69,18 @@ public class ExplainOperationTest extends OperationTestBase {
 			"\t\texchange_mode : PIPELINED\n" +
 			"\t\tPartitioning : RANDOM_PARTITIONED\n" +
 			"\n";
-		ResultSet expected = ResultSet.builder()
-			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.EXPLANATION, new VarCharType(false, expectedExplain.length())))
-			.data(Row.of(expectedExplain))
-			.build();
-		assertEquals(expected, resultSet);
+		compareResult(expectedExplain, resultSet);
+	}
+
+	public static void compareResult(String expectedExplain, ResultSet resultSet) {
+		assertEquals(resultSet.getResultKind(), ResultKind.SUCCESS_WITH_CONTENT);
+		String actualExplain = resultSet.getData().get(0).getField(0).toString();
+		assertEquals(
+			replaceStageId(expectedExplain),
+			replaceStageId(actualExplain));
+	}
+
+	private static String replaceStageId(String s) {
+		return s.replaceAll("\\r\\n", "\n").replaceAll("Stage \\d+", "");
 	}
 }

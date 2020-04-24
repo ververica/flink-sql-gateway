@@ -608,6 +608,20 @@ under the License.
                             </descriptors>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>create-my-random-source-jar</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>my-random-source</finalName>
+                            <attach>false</attach>
+                            <descriptors>
+                                <descriptor>src/test/assembly/test-my-random-source.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

@@ -26,7 +26,7 @@ import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
-import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
@@ -60,9 +60,14 @@ public class DescribeOperationTest extends OperationTestBase {
 		ResultSet resultSet = operation.execute();
 
 		TableSchema tableSchema = TableSchema.builder()
-			.field("IntegerField1", Types.INT)
-			.field("StringField1", Types.STRING)
+			.field("IntegerField1", DataTypes.INT())
+			.field("StringField1", DataTypes.STRING())
 			.build();
+
+		compareResult(tableSchema, resultSet);
+	}
+
+	public static void compareResult(TableSchema tableSchema, ResultSet resultSet) throws Exception {
 		String schemaJson = TableSchemaUtil.writeTableSchemaToJson(tableSchema);
 
 		ResultSet expected = ResultSet.builder()

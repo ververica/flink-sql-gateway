@@ -80,6 +80,9 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Mainly for testing classloading of dependencies.
+ *
+ * <p>NOTE: before running this test, please make sure that {@code table-factories-test-jar.jar}
+ * exists in the target directory. If not, run {@code mvn clean package} first.
  */
 public class DependencyTest {
 

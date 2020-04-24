@@ -38,6 +38,7 @@ public class ShowCurrentCatalogOperation implements NonJobOperation {
 	@Override
 	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
-		return OperationUtil.singleStringToResultSet(tableEnv.getCurrentCatalog(), ConstantNames.CATALOG);
+		return OperationUtil.singleStringToResultSet(
+			context.wrapClassLoader(tableEnv::getCurrentCatalog), ConstantNames.CATALOG);
 	}
 }
