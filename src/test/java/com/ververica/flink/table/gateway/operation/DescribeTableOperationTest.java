@@ -31,9 +31,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Tests for {@link DescribeOperation}.
+ * Tests for {@link DescribeTableOperation}.
  */
-public class DescribeOperationTest extends OperationTestBase {
+public class DescribeTableOperationTest extends OperationTestBase {
 
 	private static final String DEFAULTS_ENVIRONMENT_FILE = "test-sql-gateway-defaults.yaml";
 
@@ -48,7 +48,7 @@ public class DescribeOperationTest extends OperationTestBase {
 
 	@Test
 	public void testDescribe() throws Exception {
-		DescribeOperation operation = new DescribeOperation(context, "TableNumber1");
+		DescribeTableOperation operation = new DescribeTableOperation(context, "TableNumber1");
 		ResultSet resultSet = operation.execute();
 
 		TableSchema tableSchema = TableSchema.builder()

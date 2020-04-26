@@ -21,7 +21,6 @@ package com.ververica.flink.table.gateway;
 import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand;
 import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommandCall;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -250,32 +249,37 @@ public class SqlCommandParserTest {
 	}
 
 	@Test
-	public void testDescribe() {
-		String query1 = "describe MyTable";
-		checkCommand(query1, SqlCommand.DESCRIBE, "MyTable");
-	}
-
-	@Ignore
-	@Test
 	public void testDescribeTable() {
 		String query2 = "describe table MyTable";
-		checkCommand(query2, SqlCommand.DESCRIBE, "MyTable");
+		checkCommand(query2, SqlCommand.DESCRIBE_TABLE, "MyTable");
 
 		String query3 = "\n -- comments \n describe \n -- comments \n table  MyTable; -- comments";
-		checkCommand(query3, SqlCommand.DESCRIBE, "MyTable");
+		checkCommand(query3, SqlCommand.DESCRIBE_TABLE, "MyTable");
 	}
 
-	@Test
-	public void testExplain() {
-		String query1 = "explain select * from MyTable";
-		checkCommand(query1, SqlCommand.EXPLAIN, "select * from MyTable");
-	}
-
-	@Ignore
 	@Test
 	public void testExplainPlan() {
 		String query1 = "explain plan for select * from MyTable";
-		checkCommand(query1, SqlCommand.EXPLAIN);
+		checkCommand(query1, SqlCommand.EXPLAIN, "SELECT *\nFROM `MyTable`");
+
+		String query2 = "\n -- comments \n explain \n -- comments \n plan \n -- comments \n for \n " +
+			"-- comments \n select * from MyTable; \n -- comments \n";
+		checkCommand(query2, SqlCommand.EXPLAIN, "SELECT *\nFROM `MyTable`");
+	}
+
+	@Test
+	public void testReset() {
+		String query1 = "reset all";
+		checkCommand(query1, SqlCommand.RESET);
+
+		String query2 = "reset execution.parallelism";
+		checkCommand(query2, SqlCommand.RESET, "execution.parallelism");
+
+		String query3 = "\n -- comments \n reset \n -- comments \n all \n -- comments \n";
+		checkCommand(query3, SqlCommand.RESET);
+
+		String query4 = "\n -- comments \n reset \n -- comments \n execution.parallelism \n -- comments \n";
+		checkCommand(query4, SqlCommand.RESET, "execution.parallelism");
 	}
 
 	@Test
@@ -285,6 +289,31 @@ public class SqlCommandParserTest {
 
 		String query2 = "set";
 		checkCommand(query2, SqlCommand.SET);
+
+		String query3 = "set `a.b-c_d`=`e-f_g.h`";
+		checkCommand(query3, SqlCommand.SET, "a.b-c_d", "e-f_g.h");
+
+		String query4 = "\n -- comments \n set \n -- comments \n execution.parallelism \n" +
+			" -- comments \n = \n -- comments \n 10";
+		checkCommand(query4, SqlCommand.SET, "execution.parallelism", "10");
+	}
+
+	@Test
+	public void testShowModules() {
+		String query = "show       modules";
+		checkCommand(query, SqlCommand.SHOW_MODULES);
+	}
+
+	@Test
+	public void testShowCurrentCatalog() {
+		String query = "show      current  \t catalog";
+		checkCommand(query, SqlCommand.SHOW_CURRENT_CATALOG);
+	}
+
+	@Test
+	public void testShowCurrentDatabase() {
+		String query = "show      current  \t database";
+		checkCommand(query, SqlCommand.SHOW_CURRENT_DATABASE);
 	}
 
 	private void checkCommand(String stmt, SqlCommand expectedCmd, String... expectedOperand) {

@@ -115,8 +115,8 @@ public class DependencyTest {
 		SessionManager sessionManager = new SessionManager(defaultContext);
 		String sessionId = sessionManager.createSession("test", "blink", "streaming", Maps.newConcurrentMap());
 		Session session = sessionManager.getSession(sessionId);
-		Tuple2<ResultSet, SqlCommand> result = session.runStatement("DESCRIBE TableNumber1");
-		assertEquals(SqlCommand.DESCRIBE, result.f1);
+		Tuple2<ResultSet, SqlCommand> result = session.runStatement("DESCRIBE TABLE TableNumber1");
+		assertEquals(SqlCommand.DESCRIBE_TABLE, result.f1);
 		String schemaJson = result.f0.getData().get(0).getField(0).toString();
 		TableSchema schema = TableSchemaUtil.readTableSchemaFromJson(schemaJson);
 

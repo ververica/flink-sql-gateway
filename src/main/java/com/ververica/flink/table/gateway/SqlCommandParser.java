@@ -37,10 +37,13 @@ import org.apache.flink.sql.parser.impl.FlinkSqlParserImpl;
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance;
 
 import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.SqlDescribeTable;
 import org.apache.calcite.sql.SqlDrop;
+import org.apache.calcite.sql.SqlExplain;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlSetOption;
 import org.apache.calcite.sql.parser.SqlParser;
 
 import java.lang.reflect.Field;
@@ -63,14 +66,13 @@ public final class SqlCommandParser {
 	/**
 	 * Parse the given statement and return corresponding SqlCommandCall.
 	 *
-	 * <p>only `show current catalog`, `show current database`, `show modules`, `set`, `reset`,
-	 * `describe`, `explain` are parsed through regex matching,
-	 * other commands are parsed through sql parser.
+	 * <p>only `set`, `show modules`, `show current catalog` and `show current database`
+	 * are parsed through regex matching, other commands are parsed through sql parser.
 	 *
 	 * <p>throw {@link SqlParseException} if the statement contains multiple sub-statements separated by semicolon
 	 * or there is a parse error.
 	 *
-	 * <p>NOTES: sql parser only parses the statement to get the corresponding SqlCommand,
+	 * <p>NOTE: sql parser only parses the statement to get the corresponding SqlCommand,
 	 * do not check whether the statement is valid here.
 	 */
 	public static Optional<SqlCommandCall> parse(String stmt, boolean isBlinkPlanner) {
@@ -128,7 +130,7 @@ public final class SqlCommandParser {
 			operands = new String[] { stmt };
 		} else if (node instanceof SqlShowTables) {
 			cmd = SqlCommand.SHOW_TABLES;
-			operands = null;
+			operands = new String[0];
 		} else if (node instanceof SqlCreateTable) {
 			cmd = SqlCommand.CREATE_TABLE;
 			operands = new String[] { stmt };
@@ -171,7 +173,7 @@ public final class SqlCommandParser {
 			operands = new String[] { dropViewNode.getViewName().toString(), String.valueOf(ifExists) };
 		} else if (node instanceof SqlShowDatabases) {
 			cmd = SqlCommand.SHOW_DATABASES;
-			operands = null;
+			operands = new String[0];
 		} else if (node instanceof SqlCreateDatabase) {
 			cmd = SqlCommand.CREATE_DATABASE;
 			operands = new String[] { stmt };
@@ -183,25 +185,40 @@ public final class SqlCommandParser {
 			operands = new String[] { stmt };
 		} else if (node instanceof SqlShowCatalogs) {
 			cmd = SqlCommand.SHOW_CATALOGS;
-			operands = null;
+			operands = new String[0];
 		} else if (node instanceof SqlShowFunctions) {
 			cmd = SqlCommand.SHOW_FUNCTIONS;
-			operands = null;
+			operands = new String[0];
 		} else if (node instanceof SqlUseCatalog) {
 			cmd = SqlCommand.USE_CATALOG;
 			operands = new String[] { ((SqlUseCatalog) node).getCatalogName() };
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
 			operands = new String[] { ((SqlUseDatabase) node).getDatabaseName().toString() };
-			// TODO remove `DESCRIBE` and supports `DESCRIBE TABLE`
-			// } else if (node instanceof SqlDescribeTable) {
-			//	cmd = SqlCommand.DESCRIBE;
-			// TODO remove `EXPLAIN` and supports `EXPLAIN PLAN`
-			// } else if (node instanceof SqlExplain) {
-			// 	md = SqlCommand.EXPLAIN;
+		} else if (node instanceof SqlDescribeTable) {
+			cmd = SqlCommand.DESCRIBE_TABLE;
+			operands = new String[]{((SqlDescribeTable) node).getTable().toString()};
+		} else if (node instanceof SqlExplain) {
+			cmd = SqlCommand.EXPLAIN;
+			// TODO support explain details
+			operands = new String[] { ((SqlExplain) node).getExplicandum().toString() };
+		} else if (node instanceof SqlSetOption) {
+			SqlSetOption setNode = (SqlSetOption) node;
+			// refer to SqlSetOption#unparseAlterOperation
+			if (setNode.getValue() != null) {
+				cmd = SqlCommand.SET;
+				operands = new String[] { setNode.getName().toString(), setNode.getValue().toString() };
+			} else {
+				cmd = SqlCommand.RESET;
+				if (setNode.getName().toString().toUpperCase().equals("ALL")) {
+					operands = new String[0];
+				} else {
+					operands = new String[] { setNode.getName().toString() };
+				}
+			}
 		} else {
 			cmd = null;
-			operands = null;
+			operands = new String[0];
 		}
 
 		if (cmd == null) {
@@ -209,11 +226,7 @@ public final class SqlCommandParser {
 		} else {
 			// use the origin given statement to make sure
 			// users can find the correct line number when parsing failed
-			if (operands == null) {
-				return Optional.of(new SqlCommandCall(cmd));
-			} else {
-				return Optional.of(new SqlCommandCall(cmd, operands));
-			}
+			return Optional.of(new SqlCommandCall(cmd, operands));
 		}
 	}
 
@@ -243,9 +256,6 @@ public final class SqlCommandParser {
 
 	private static final Function<String[], Optional<String[]>> NO_OPERANDS =
 		(operands) -> Optional.of(new String[0]);
-
-	private static final Function<String[], Optional<String[]>> SINGLE_OPERAND =
-		(operands) -> Optional.of(new String[] { operands[0] });
 
 	private static final int DEFAULT_PATTERN_FLAGS = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
 
@@ -287,15 +297,26 @@ public final class SqlCommandParser {
 
 		SHOW_FUNCTIONS,
 
-		// keep this for compatibility
-		EXPLAIN(
-			"EXPLAIN\\s+(.*)",
-			SINGLE_OPERAND),
+		EXPLAIN,
 
-		// keep this for compatibility
-		DESCRIBE(
-			"DESCRIBE\\s+(.*)",
-			SINGLE_OPERAND),
+		DESCRIBE_TABLE,
+
+		RESET,
+
+		// the following two commands are not supported by SQL parser but are needed by users
+
+		SET(
+			"SET",
+			// `SET` with operands can be parsed by SQL parser
+			// we keep `SET` with no operands here to print all properties
+			NO_OPERANDS),
+
+		SHOW_MODULES(
+			"SHOW\\s+MODULES",
+			NO_OPERANDS),
+
+		// the following two commands are not supported by SQL parser but are needed by JDBC driver
+		// these should not be exposed to the user and should be used internally
 
 		SHOW_CURRENT_CATALOG(
 			"SHOW\\s+CURRENT\\s+CATALOG",
@@ -303,25 +324,6 @@ public final class SqlCommandParser {
 
 		SHOW_CURRENT_DATABASE(
 			"SHOW\\s+CURRENT\\s+DATABASE",
-			NO_OPERANDS),
-
-		SHOW_MODULES(
-			"SHOW\\s+MODULES",
-			NO_OPERANDS),
-
-		SET(
-			"SET(\\s+(\\S+)\\s*=(.*))?", // whitespace is only ignored on the left side of '='
-			(operands) -> {
-				if (operands.length < 3) {
-					return Optional.empty();
-				} else if (operands[0] == null) {
-					return Optional.of(new String[0]);
-				}
-				return Optional.of(new String[] { operands[1], operands[2] });
-			}),
-
-		RESET(
-			"RESET",
 			NO_OPERANDS);
 
 		public final Pattern pattern;
@@ -357,10 +359,6 @@ public final class SqlCommandParser {
 		public SqlCommandCall(SqlCommand command, String[] operands) {
 			this.command = command;
 			this.operands = operands;
-		}
-
-		public SqlCommandCall(SqlCommand command) {
-			this(command, new String[0]);
 		}
 
 		@Override
