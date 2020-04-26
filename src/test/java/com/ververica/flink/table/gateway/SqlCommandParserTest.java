@@ -249,12 +249,21 @@ public class SqlCommandParserTest {
 	}
 
 	@Test
-	public void testDescribeTable() {
-		String query2 = "describe table MyTable";
-		checkCommand(query2, SqlCommand.DESCRIBE_TABLE, "MyTable");
+	public void testDescribe() {
+		String query1 = "describe MyTable";
+		checkCommand(query1, SqlCommand.DESCRIBE_TABLE, "MyTable");
 
-		String query3 = "\n -- comments \n describe \n -- comments \n table  MyTable; -- comments";
-		checkCommand(query3, SqlCommand.DESCRIBE_TABLE, "MyTable");
+		String query2 = "\n -- comments \n describe \n -- comments \n  MyTable; -- comments";
+		checkCommand(query2, SqlCommand.DESCRIBE_TABLE, "MyTable");
+	}
+
+	@Test
+	public void testDescribeTable() {
+		String query1 = "describe table MyTable";
+		checkCommand(query1, SqlCommand.DESCRIBE_TABLE, "MyTable");
+
+		String query2 = "\n -- comments \n describe \n -- comments \n table  MyTable; -- comments";
+		checkCommand(query2, SqlCommand.DESCRIBE_TABLE, "MyTable");
 	}
 
 	@Test

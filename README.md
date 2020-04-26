@@ -190,9 +190,9 @@ The following statements are supported now.
 | DROP VIEW view_name ... | Drop a table with given name |
 | SET xx=yy | Set given key's session property to the specific value |
 | SET | List all session's properties |
-| RESET | Reset all session's properties set by `SET` command |
-| DESCRIBE table_name | Show the schema of a table |
-| EXPLAIN ... | Show string-based explanation about AST and execution plan of the given statement |
+| RESET ALL | Reset all session's properties set by `SET` command |
+| DESCRIBE table_name<br>DESCRIBE TABLE table_name | Show the schema of a table |
+| EXPLAIN PLAN FOR ... | Show string-based explanation about AST and execution plan of the given statement |
 | SELECT ... | Submit a Flink `SELECT` SQL job |
 | INSERT INTO ... | Submit a Flink `INSERT INTO` SQL job |
 | INSERT OVERWRITE ... | Submit a Flink `INSERT OVERWRITE` SQL job |

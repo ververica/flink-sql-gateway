@@ -29,6 +29,7 @@ import org.apache.flink.sql.parser.ddl.SqlDropView;
 import org.apache.flink.sql.parser.ddl.SqlUseCatalog;
 import org.apache.flink.sql.parser.ddl.SqlUseDatabase;
 import org.apache.flink.sql.parser.dml.RichSqlInsert;
+import org.apache.flink.sql.parser.dql.SqlRichDescribeTable;
 import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
 import org.apache.flink.sql.parser.dql.SqlShowDatabases;
 import org.apache.flink.sql.parser.dql.SqlShowFunctions;
@@ -195,9 +196,14 @@ public final class SqlCommandParser {
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
 			operands = new String[] { ((SqlUseDatabase) node).getDatabaseName().toString() };
-		} else if (node instanceof SqlDescribeTable) {
+		} else if (node instanceof SqlDescribeTable || node instanceof SqlRichDescribeTable) {
 			cmd = SqlCommand.DESCRIBE_TABLE;
-			operands = new String[]{((SqlDescribeTable) node).getTable().toString()};
+			if (node instanceof SqlDescribeTable) {
+				operands = new String[] { ((SqlDescribeTable) node).getTable().toString() };
+			} else {
+				// TODO describe extended
+				operands = new String[] { String.join(".", ((SqlRichDescribeTable) node).fullTableName()) };
+			}
 		} else if (node instanceof SqlExplain) {
 			cmd = SqlCommand.EXPLAIN;
 			// TODO support explain details
