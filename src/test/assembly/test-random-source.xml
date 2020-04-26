@@ -28,7 +28,7 @@ under the License.
     <files>
         <!-- Create META-INF/services -->
         <file>
-            <source>src/test/resources/test-my-random-source-file</source>
+            <source>src/test/resources/service-file/test-random-source-file</source>
             <outputDirectory>META-INF/services</outputDirectory>
             <destName>org.apache.flink.table.factories.TableFactory</destName>
             <fileMode>0644</fileMode>

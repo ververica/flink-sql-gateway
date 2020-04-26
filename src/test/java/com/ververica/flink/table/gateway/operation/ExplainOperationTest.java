@@ -22,6 +22,7 @@ import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
+import com.ververica.flink.table.gateway.utils.ResourceFileUtils;
 
 import org.junit.Test;
 
@@ -47,28 +48,12 @@ public class ExplainOperationTest extends OperationTestBase {
 	}
 
 	@Test
-	public void testDescribe() {
+	public void testExplain() {
 		ExplainOperation operation = new ExplainOperation(context, "select * from TableNumber1");
 		ResultSet resultSet = operation.execute();
 
-		String expectedExplain = "== Abstract Syntax Tree ==\n" +
-			"LogicalProject(IntegerField1=[$0], StringField1=[$1])\n" +
-			"  EnumerableTableScan(table=[[default_catalog, default_database, TableNumber1]])\n" +
-			"\n" +
-			"== Optimized Logical Plan ==\n" +
-			"BatchTableSourceScan(table=[[default_catalog, default_database, TableNumber1]], fields=[IntegerField1, StringField1], source=[CsvTableSource(read fields: IntegerField1, StringField1)])\n" +
-			"\n" +
-			"== Physical Execution Plan ==\n" +
-			"Stage 1 : Data Source\n" +
-			"\tcontent : collect elements with CollectionInputFormat\n" +
-			"\tPartitioning : RANDOM_PARTITIONED\n" +
-			"\n" +
-			"\tStage 0 : Data Sink\n" +
-			"\t\tcontent : org.apache.flink.api.java.io.DiscardingOutputFormat\n" +
-			"\t\tship_strategy : Forward\n" +
-			"\t\texchange_mode : PIPELINED\n" +
-			"\t\tPartitioning : RANDOM_PARTITIONED\n" +
-			"\n";
+		String expectedExplain = ResourceFileUtils.readAll(
+			"plan/explain-operation-test.test-explain.expected");
 		compareResult(expectedExplain, resultSet);
 	}
 

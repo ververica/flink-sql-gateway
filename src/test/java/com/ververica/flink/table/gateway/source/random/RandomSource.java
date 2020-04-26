@@ -21,39 +21,33 @@ package com.ververica.flink.table.gateway.source.random;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 
-import java.util.Random;
-
 import static org.apache.flink.table.types.utils.TypeConversions.fromDataTypeToLegacyInfo;
 
 /**
  * A user defined source which generates random data for testing purpose.
- * It's schema must be ( a INT, b BIGINT ).
  */
-public class MyRandomSource implements StreamTableSource<Row> {
+public class RandomSource implements StreamTableSource<Row> {
 
 	private final TableSchema schema;
+	private final long limit;
 
-	private final MyRandomSourceFunction sourceFunction;
+	private final RandomSourceFunction sourceFunction;
 
-	public MyRandomSource(int limit) {
-		this.schema = TableSchema.builder()
-			.field("a", DataTypes.INT())
-			.field("b", DataTypes.BIGINT())
-			.build();
+	public RandomSource(TableSchema schema, long limit) {
+		this.schema = schema;
+		this.limit = limit;
 
-		this.sourceFunction = new MyRandomSourceFunction(limit);
+		this.sourceFunction = new RandomSourceFunction(schema, limit);
 	}
 
 	@Override
 	public boolean isBounded() {
-		return true;
+		return limit > 0;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -71,36 +65,5 @@ public class MyRandomSource implements StreamTableSource<Row> {
 	@Override
 	public TableSchema getTableSchema() {
 		return schema;
-	}
-
-	/**
-	 * Source function of {@link MyRandomSource}.
-	 */
-	public static class MyRandomSourceFunction implements SourceFunction<Row> {
-
-		private final int limit;
-		private boolean running;
-
-		private Random random;
-
-		public MyRandomSourceFunction(int limit) {
-			this.limit = limit;
-			this.running = false;
-
-			this.random = new Random();
-		}
-
-		@Override
-		public void run(SourceContext<Row> ctx) throws Exception {
-			int collected = 0;
-			while (running && collected < limit) {
-				ctx.collect(Row.of(random.nextInt(), random.nextLong()));
-			}
-		}
-
-		@Override
-		public void cancel() {
-			running = false;
-		}
 	}
 }

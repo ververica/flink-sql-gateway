@@ -18,8 +18,10 @@
 
 package com.ververica.flink.table.gateway.source.random;
 
+import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.descriptors.ConnectorDescriptorValidator;
 import org.apache.flink.table.descriptors.DescriptorProperties;
+import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.table.factories.TableSourceFactory;
 import org.apache.flink.table.sources.TableSource;
 import org.apache.flink.types.Row;
@@ -28,26 +30,25 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.flink.table.descriptors.Schema.SCHEMA;
+import java.util.Optional;
 
 /**
- * {@link TableSourceFactory} for creating {@link MyRandomSource}.
+ * {@link TableSourceFactory} for creating {@link RandomSource}.
  */
-public class MyRandomSourceFactory implements TableSourceFactory<Row> {
+public class RandomSourceFactory implements TableSourceFactory<Row> {
 
 	@Override
 	public Map<String, String> requiredContext() {
 		return Collections.singletonMap(
-			ConnectorDescriptorValidator.CONNECTOR_TYPE, MyRandomSourceValidator.CONNECTOR_TYPE_VALUE);
+			ConnectorDescriptorValidator.CONNECTOR_TYPE, RandomSourceValidator.CONNECTOR_TYPE_VALUE);
 	}
 
 	@Override
 	public List<String> supportedProperties() {
 		return Arrays.asList(
-			MyRandomSourceValidator.MY_RANDOM_LIMIT,
-			SCHEMA + ".#." + DescriptorProperties.TABLE_SCHEMA_DATA_TYPE,
-			SCHEMA + ".#." + DescriptorProperties.TABLE_SCHEMA_NAME
+			RandomSourceValidator.RANDOM_LIMIT,
+			Schema.SCHEMA + ".#." + DescriptorProperties.TABLE_SCHEMA_DATA_TYPE,
+			Schema.SCHEMA + ".#." + DescriptorProperties.TABLE_SCHEMA_NAME
 		);
 	}
 
@@ -56,6 +57,8 @@ public class MyRandomSourceFactory implements TableSourceFactory<Row> {
 		DescriptorProperties properties = new DescriptorProperties();
 		properties.putProperties(propertyMap);
 
-		return new MyRandomSource(properties.getInt(MyRandomSourceValidator.MY_RANDOM_LIMIT));
+		TableSchema schema = properties.getTableSchema(Schema.SCHEMA);
+		Optional<Integer> limit = properties.getOptionalInt(RandomSourceValidator.RANDOM_LIMIT);
+		return new RandomSource(schema, limit.orElse(RandomSourceValidator.RANDOM_LIMIT_DEFAULT_VALUE));
 	}
 }

@@ -609,16 +609,16 @@ under the License.
                         </configuration>
                     </execution>
                     <execution>
-                        <id>create-my-random-source-jar</id>
+                        <id>create-random-source-jar</id>
                         <phase>process-test-classes</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>my-random-source</finalName>
+                            <finalName>random-source</finalName>
                             <attach>false</attach>
                             <descriptors>
-                                <descriptor>src/test/assembly/test-my-random-source.xml</descriptor>
+                                <descriptor>src/test/assembly/test-random-source.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

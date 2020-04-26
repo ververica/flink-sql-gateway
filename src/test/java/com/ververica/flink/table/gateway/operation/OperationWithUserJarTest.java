@@ -23,6 +23,7 @@ import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
+import com.ververica.flink.table.gateway.utils.ResourceFileUtils;
 
 import org.apache.flink.client.cli.DefaultCLI;
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
@@ -45,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test for operations when user jars are provided.
  *
- * <p>NOTE: before running this test, please make sure that {@code my-random-source-test-jar.jar}
+ * <p>NOTE: before running this test, please make sure that {@code random-source-test-jar.jar}
  * exists in the target directory. If not, run {@code mvn clean package} first.
  */
 public class OperationWithUserJarTest extends OperationTestBase {
@@ -104,45 +105,29 @@ public class OperationWithUserJarTest extends OperationTestBase {
 		ExplainOperation operation = new ExplainOperation(context, "select * from R");
 		ResultSet resultSet = operation.execute();
 
-		String expectedExplain = "== Abstract Syntax Tree ==\n" +
-			"LogicalProject(a=[$0], b=[$1])\n" +
-			"+- LogicalTableScan(table=[[default_catalog, default_database, R, source: [MyRandomSource(a, b)]]])\n" +
-			"\n" +
-			"== Optimized Logical Plan ==\n" +
-			"TableSourceScan(table=[[default_catalog, default_database, R, source: [MyRandomSource(a, b)]]], fields=[a, b])\n" +
-			"\n" +
-			"== Physical Execution Plan ==\n" +
-			"Stage 1 : Data Source\n" +
-			"\tcontent : Source: Custom Source\n" +
-			"\n" +
-			"\tStage 2 : Operator\n" +
-			"\t\tcontent : SourceConversion(table=[default_catalog.default_database.R, source: [MyRandomSource(a, b)]], fields=[a, b])\n" +
-			"\t\tship_strategy : FORWARD\n" +
-			"\n";
+		String expectedExplain = ResourceFileUtils.readAll(
+			"plan/operation-with-user-jar-test.test-explain.expected");
 		ExplainOperationTest.compareResult(expectedExplain, resultSet);
 	}
 
 	private URL compileUserDefinedSource() {
 		File resourceFile = new File(
-			OperationTestBase.class.getClassLoader().getResource("test-my-random-source-file").getFile());
-		File jarFile = new File(resourceFile.getParent() + "/../my-random-source-test-jar.jar");
+			OperationTestBase.class.getClassLoader().getResource("service-file/test-random-source-file").getFile());
+		File jarFile = new File(resourceFile.getParent() + "/../../random-source-test-jar.jar");
 		try {
 			return jarFile.toURI().toURL();
 		} catch (MalformedURLException e) {
-			throw new RuntimeException("Failed to find jar file of my-random-source", e);
+			throw new RuntimeException("Failed to find jar file of random-source", e);
 		}
 	}
 
 	private void createUserDefinedSource(SessionContext context, String name) {
-		// NOTE: the table schema of "my-random" connector is hard coded
-		// it must be ( a INT, b BIGINT )
-		// see source code in resource directory for details
 		String ddl = "CREATE TABLE " + name + "(\n" +
 			"  a INT,\n" +
 			"  b BIGINT\n" +
 			") WITH (\n" +
-			"  'connector.type' = 'my-random',\n" +
-			"  'my-random.limit' = '10'\n" +
+			"  'connector.type' = 'random',\n" +
+			"  'random.limit' = '10'\n" +
 			")";
 		DDLOperation createTableOperation = new DDLOperation(context, ddl, SqlCommandParser.SqlCommand.CREATE_TABLE);
 		ResultSet createTableResult = createTableOperation.execute();

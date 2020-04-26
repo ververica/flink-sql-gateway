@@ -14,7 +14,7 @@
 # limitations under the License.
 
 #==============================================================================
-# Test file for generating a my random source jar.
+# Test file for generating a random source jar.
 #==============================================================================
 
-com.ververica.flink.table.gateway.source.random.MyRandomSourceFactory
+com.ververica.flink.table.gateway.source.random.RandomSourceFactory

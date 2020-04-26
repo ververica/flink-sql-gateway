@@ -18,41 +18,23 @@
 
 package com.ververica.flink.table.gateway.source.random;
 
-import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.descriptors.ConnectorDescriptorValidator;
 import org.apache.flink.table.descriptors.DescriptorProperties;
-import org.apache.flink.table.descriptors.Schema;
-import org.apache.flink.table.types.DataType;
 
 /**
- * Validator for {@link MyRandomSource}.
+ * Validator for {@link RandomSource}.
  */
-public class MyRandomSourceValidator extends ConnectorDescriptorValidator {
+public class RandomSourceValidator extends ConnectorDescriptorValidator {
 
-	public static final String CONNECTOR_TYPE_VALUE = "my-random";
-	public static final String MY_RANDOM_LIMIT = "my-random.limit";
+	public static final String CONNECTOR_TYPE_VALUE = "random";
+	public static final String RANDOM_LIMIT = "random.limit";
+	// this default value indicates that the random source is an unbounded source
+	public static final int RANDOM_LIMIT_DEFAULT_VALUE = 0;
 
 	@Override
 	public void validate(DescriptorProperties properties) {
 		super.validate(properties);
 		properties.validateValue(CONNECTOR_TYPE, CONNECTOR_TYPE_VALUE, false);
-		properties.validateInt(MY_RANDOM_LIMIT, false);
-		TableSchema schema = properties.getTableSchema(Schema.SCHEMA);
-		if (!validateSchema(schema)) {
-			throw new ValidationException("Invalid table schema. Table schema must be (a INT, b BIGINT)");
-		}
-	}
-
-	private boolean validateSchema(TableSchema schema) {
-		if (schema.getFieldCount() != 2) {
-			return false;
-		}
-
-		String[] fieldNames = schema.getFieldNames();
-		DataType[] fieldTypes = schema.getFieldDataTypes();
-		return "a".equals(fieldNames[0]) && DataTypes.INT().equals(fieldTypes[0]) &&
-			"b".equals(fieldNames[1]) && DataTypes.BIGINT().equals(fieldTypes[1]);
+		properties.validateInt(RANDOM_LIMIT, true, 1);
 	}
 }
