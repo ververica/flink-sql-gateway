@@ -95,7 +95,7 @@ public class OperationWithUserJarTest extends OperationTestBase {
 			.field("b", DataTypes.BIGINT())
 			.build();
 
-		DescribeOperationTest.compareResult(tableSchema, resultSet);
+		OperationTestUtils.compareDescribeResult(tableSchema, resultSet);
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class OperationWithUserJarTest extends OperationTestBase {
 
 		String expectedExplain = ResourceFileUtils.readAll(
 			"plan/operation-with-user-jar-test.test-explain.expected");
-		ExplainOperationTest.compareResult(expectedExplain, resultSet);
+		OperationTestUtils.compareExplainResult(expectedExplain, resultSet);
 	}
 
 	private URL compileUserDefinedSource() {

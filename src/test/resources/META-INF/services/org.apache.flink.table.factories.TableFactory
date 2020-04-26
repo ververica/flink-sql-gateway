@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-com.ververica.flink.table.gateway.utils.DummyTableSinkFactory
+com.ververica.flink.table.gateway.sink.dummy.DummyTableSinkFactory
 com.ververica.flink.table.gateway.utils.SimpleCatalogFactory
 com.ververica.flink.table.gateway.config.DependencyTest$TestCatalogFactory
 com.ververica.flink.table.gateway.config.DependencyTest$TestHiveCatalogFactory

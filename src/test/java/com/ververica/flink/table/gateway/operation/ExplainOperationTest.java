@@ -19,7 +19,6 @@
 package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.config.Environment;
-import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 import com.ververica.flink.table.gateway.utils.ResourceFileUtils;
@@ -28,8 +27,6 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link ExplainOperation}.
@@ -54,18 +51,6 @@ public class ExplainOperationTest extends OperationTestBase {
 
 		String expectedExplain = ResourceFileUtils.readAll(
 			"plan/explain-operation-test.test-explain.expected");
-		compareResult(expectedExplain, resultSet);
-	}
-
-	public static void compareResult(String expectedExplain, ResultSet resultSet) {
-		assertEquals(resultSet.getResultKind(), ResultKind.SUCCESS_WITH_CONTENT);
-		String actualExplain = resultSet.getData().get(0).getField(0).toString();
-		assertEquals(
-			replaceStageId(expectedExplain),
-			replaceStageId(actualExplain));
-	}
-
-	private static String replaceStageId(String s) {
-		return s.replaceAll("\\r\\n", "\n").replaceAll("Stage \\d+", "");
+		OperationTestUtils.compareExplainResult(expectedExplain, resultSet);
 	}
 }

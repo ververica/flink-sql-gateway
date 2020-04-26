@@ -24,9 +24,9 @@ import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
+import com.ververica.flink.table.gateway.sink.TestTableSinkFactoryBase;
+import com.ververica.flink.table.gateway.source.TestTableSourceFactoryBase;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
-import com.ververica.flink.table.gateway.utils.TestTableSinkFactoryBase;
-import com.ververica.flink.table.gateway.utils.TestTableSourceFactoryBase;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.client.cli.DefaultCLI;
