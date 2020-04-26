@@ -19,6 +19,7 @@
 package com.ververica.flink.table.gateway.operation;
 
 import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommandCall;
+import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.SessionContext;
 
 /**
@@ -57,6 +58,9 @@ public class OperationFactory {
 				}
 				break;
 			case RESET:
+				if (call.operands.length > 0) {
+					throw new SqlGatewayException("Only RESET ALL is supported now");
+				}
 				operation = new ResetOperation(context);
 				break;
 			case USE_CATALOG:
@@ -90,14 +94,14 @@ public class OperationFactory {
 			case SHOW_FUNCTIONS:
 				operation = new ShowFunctionOperation(context);
 				break;
-			case DESCRIBE:
-				operation = new DescribeOperation(context, call.operands[0]);
+			case DESCRIBE_TABLE:
+				operation = new DescribeTableOperation(context, call.operands[0]);
 				break;
 			case EXPLAIN:
 				operation = new ExplainOperation(context, call.operands[0]);
 				break;
 			default:
-				throw new RuntimeException("Unsupported command call " + call + ". This is a bug.");
+				throw new SqlGatewayException("Unsupported command call " + call + ". This is a bug.");
 		}
 
 		return operation;

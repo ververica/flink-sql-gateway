@@ -36,13 +36,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Operation for DESCRIBE command.
+ * Operation for DESCRIBE_TABLE command.
  */
-public class DescribeOperation implements NonJobOperation {
+public class DescribeTableOperation implements NonJobOperation {
 	private final ExecutionContext<?> context;
 	private final String tableName;
 
-	public DescribeOperation(SessionContext context, String tableName) {
+	public DescribeTableOperation(SessionContext context, String tableName) {
 		this.context = context.getExecutionContext();
 		this.tableName = tableName;
 	}

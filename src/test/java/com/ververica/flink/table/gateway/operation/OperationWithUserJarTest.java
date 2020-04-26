@@ -87,7 +87,7 @@ public class OperationWithUserJarTest extends OperationTestBase {
 	public void testDescribe() throws Exception {
 		createUserDefinedSource(context, "R");
 
-		DescribeOperation operation = new DescribeOperation(context, "R");
+		DescribeTableOperation operation = new DescribeTableOperation(context, "R");
 		ResultSet resultSet = operation.execute();
 
 		TableSchema tableSchema = TableSchema.builder()

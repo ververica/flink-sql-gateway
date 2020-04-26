@@ -172,9 +172,7 @@ The following statements are supported now.
 |  statement   | comment  |
 |  ----  | ----  |
 | SHOW CATALOGS | List all registered catalogs |
-| SHOW CURRENT CATALOG | Show current catalog (experimental) |
 | SHOW DATABASES | List all databases in the current catalog |
-| SHOW CURRENT DATABASE | Show current database in current catalog (experimental) |
 | SHOW TABLES | List all tables in the current database of the current catalog |
 | SHOW FUNCTIONS | List all functions |
 | SHOW MODULES | List all modules |
@@ -190,9 +188,9 @@ The following statements are supported now.
 | DROP VIEW view_name ... | Drop a table with given name |
 | SET xx=yy | Set given key's session property to the specific value |
 | SET | List all session's properties |
-| RESET | Reset all session's properties set by `SET` command |
-| DESCRIBE table_name | Show the schema of a table |
-| EXPLAIN ... | Show string-based explanation about AST and execution plan of the given statement |
+| RESET ALL | Reset all session's properties set by `SET` command |
+| DESCRIBE [TABLE] table_name | Show the schema of a table |
+| EXPLAIN PLAN FOR ... | Show string-based explanation about AST and execution plan of the given statement |
 | SELECT ... | Submit a Flink `SELECT` SQL job |
 | INSERT INTO ... | Submit a Flink `INSERT INTO` SQL job |
 | INSERT OVERWRITE ... | Submit a Flink `INSERT OVERWRITE` SQL job |
