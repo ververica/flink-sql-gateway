@@ -75,10 +75,15 @@ while read -d '' -r jarfile ; do
     fi
 done < <(find "$FLINK_SQL_GATEWAY_LIB" ! -type d -name '*.jar' -print0 | sort -z)
 
-# build flink class path
-cd "$FLINK_HOME"/bin
-# get flink config
-. ./config.sh
+FLINK_CONFIG_FILE="$FLINK_HOME"/bin/config.sh
+SQL_GATEWAY_CONFIG_FILE="$FLINK_SQL_GATEWAY_HOME"/bin/config.sh
+# replace target="$0" with target="<real_flink_config.sh_path>" and write to a new file
+# this could make sure sql-gateway.sh can be executed anywhere
+cat "$FLINK_CONFIG_FILE" | sed 's|target=\"$0\"|'target="$FLINK_CONFIG_FILE"'|g' > "$SQL_GATEWAY_CONFIG_FILE"
+# execute flink config
+. "$SQL_GATEWAY_CONFIG_FILE"
+# remove it
+rm -f "$SQL_GATEWAY_CONFIG_FILE"
 
 if [ "$FLINK_IDENT_STRING" = "" ]; then
         FLINK_IDENT_STRING="$USER"
