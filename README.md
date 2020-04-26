@@ -172,9 +172,7 @@ The following statements are supported now.
 |  statement   | comment  |
 |  ----  | ----  |
 | SHOW CATALOGS | List all registered catalogs |
-| SHOW CURRENT CATALOG | Show current catalog (experimental) |
 | SHOW DATABASES | List all databases in the current catalog |
-| SHOW CURRENT DATABASE | Show current database in current catalog (experimental) |
 | SHOW TABLES | List all tables in the current database of the current catalog |
 | SHOW FUNCTIONS | List all functions |
 | SHOW MODULES | List all modules |
