@@ -189,7 +189,7 @@ The following statements are supported now.
 | SET xx=yy | Set given key's session property to the specific value |
 | SET | List all session's properties |
 | RESET ALL | Reset all session's properties set by `SET` command |
-| DESCRIBE [TABLE] table_name | Show the schema of a table |
+| DESCRIBE table_name | Show the schema of a table |
 | EXPLAIN PLAN FOR ... | Show string-based explanation about AST and execution plan of the given statement |
 | SELECT ... | Submit a Flink `SELECT` SQL job |
 | INSERT INTO ... | Submit a Flink `INSERT INTO` SQL job |

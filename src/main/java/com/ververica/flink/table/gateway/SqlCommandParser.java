@@ -38,7 +38,6 @@ import org.apache.flink.sql.parser.impl.FlinkSqlParserImpl;
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance;
 
 import org.apache.calcite.config.Lex;
-import org.apache.calcite.sql.SqlDescribeTable;
 import org.apache.calcite.sql.SqlDrop;
 import org.apache.calcite.sql.SqlExplain;
 import org.apache.calcite.sql.SqlKind;
@@ -54,6 +53,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Simple parser for determining the type of command and its parameters.
@@ -196,14 +197,13 @@ public final class SqlCommandParser {
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
 			operands = new String[] { ((SqlUseDatabase) node).getDatabaseName().toString() };
-		} else if (node instanceof SqlDescribeTable || node instanceof SqlRichDescribeTable) {
+		} else if (node instanceof SqlRichDescribeTable) {
 			cmd = SqlCommand.DESCRIBE_TABLE;
-			if (node instanceof SqlDescribeTable) {
-				operands = new String[] { ((SqlDescribeTable) node).getTable().toString() };
-			} else {
-				// TODO describe extended
-				operands = new String[] { String.join(".", ((SqlRichDescribeTable) node).fullTableName()) };
-			}
+			// TODO support describe extended
+			String[] fullTableName = ((SqlRichDescribeTable) node).fullTableName();
+			String escapedName =
+				Stream.of(fullTableName).map(s -> "`" + s + "`").collect(Collectors.joining("."));
+			operands = new String[] { escapedName };
 		} else if (node instanceof SqlExplain) {
 			cmd = SqlCommand.EXPLAIN;
 			// TODO support explain details
