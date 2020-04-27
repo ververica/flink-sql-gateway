@@ -53,6 +53,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Simple parser for determining the type of command and its parameters.
@@ -199,14 +201,9 @@ public final class SqlCommandParser {
 			cmd = SqlCommand.DESCRIBE_TABLE;
 			// TODO support describe extended
 			String[] fullTableName = ((SqlRichDescribeTable) node).fullTableName();
-			StringBuilder escapedNameBuilder = new StringBuilder();
-			for (int i = 0; i < fullTableName.length; i++) {
-				if (i > 0) {
-					escapedNameBuilder.append('.');
-				}
-				escapedNameBuilder.append('`').append(fullTableName[i]).append('`');
-			}
-			operands = new String[] { escapedNameBuilder.toString() };
+			String escapedName =
+				Stream.of(fullTableName).map(s -> "`" + s + "`").collect(Collectors.joining("."));
+			operands = new String[] { escapedName };
 		} else if (node instanceof SqlExplain) {
 			cmd = SqlCommand.EXPLAIN;
 			// TODO support explain details
