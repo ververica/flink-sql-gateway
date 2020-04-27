@@ -51,7 +51,7 @@ public class DescribeTableOperation implements NonJobOperation {
 	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
 		try {
-			TableSchema schema = context.wrapClassLoader(() -> tableEnv.scan(tableName).getSchema());
+			TableSchema schema = context.wrapClassLoader(() -> tableEnv.from(tableName).getSchema());
 			String schemaJson = TableSchemaUtil.writeTableSchemaToJson(schema);
 			int length = schemaJson.length();
 			List<Row> data = new ArrayList<>();
