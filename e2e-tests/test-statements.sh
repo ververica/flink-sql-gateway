@@ -108,9 +108,9 @@ function show_modules() {
 }
 
 function describe() {
-    run_non_job_statement "$SESSION_ID" "DESCRIBE $1" "DESCRIBE"
+    run_non_job_statement "$SESSION_ID" "DESCRIBE $1" "DESCRIBE_TABLE"
 }
 
 function explain() {
-    run_non_job_statement "$SESSION_ID" "EXPLAIN $1" "EXPLAIN"
+    run_non_job_statement "$SESSION_ID" "EXPLAIN PLAN FOR $1" "EXPLAIN"
 }
