@@ -18,8 +18,6 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.config.entries.TableEntry;
-import com.ververica.flink.table.gateway.config.entries.ViewEntry;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -34,7 +32,6 @@ import org.apache.flink.types.Row;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Operation for SHOW TABLE command.
@@ -50,31 +47,17 @@ public class ShowTableOperation implements NonJobOperation {
 	public ResultSet execute() {
 		List<Row> rows = new ArrayList<>();
 		int maxNameLength = 1;
-		List<String> views = new ArrayList<>();
-		for (Map.Entry<String, TableEntry> entry : context.getEnvironment().getTables().entrySet()) {
-			if (entry.getValue() instanceof ViewEntry) {
-				String name = entry.getKey();
-				rows.add(Row.of(name, ConstantNames.VIEW_TYPE));
-				maxNameLength = Math.max(maxNameLength, name.length());
-				views.add(name);
-			}
-		}
 
 		final TableEnvironment tableEnv = context.getTableEnvironment();
 		// listTables will return all tables and views
 		for (String table : context.wrapClassLoader(() -> Arrays.asList(tableEnv.listTables()))) {
-			if (!views.contains(table)) {
-				rows.add(Row.of(table, ConstantNames.TABLE_TYPE));
-				maxNameLength = Math.max(maxNameLength, table.length());
-			}
+			rows.add(Row.of(table));
+			maxNameLength = Math.max(maxNameLength, table.length());
 		}
 
 		return ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(
-				ColumnInfo.create(ConstantNames.TABLES, new VarCharType(false, maxNameLength)),
-				ColumnInfo.create(ConstantNames.TYPE, new VarCharType(
-					false, Math.max(ConstantNames.VIEW_TYPE.length(), ConstantNames.TABLE_TYPE.length()))))
+			.columns(ColumnInfo.create(ConstantNames.TABLES, new VarCharType(false, maxNameLength)))
 			.data(rows)
 			.build();
 	}

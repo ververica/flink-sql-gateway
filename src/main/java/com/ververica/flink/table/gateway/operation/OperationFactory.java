@@ -91,6 +91,9 @@ public class OperationFactory {
 			case SHOW_TABLES:
 				operation = new ShowTableOperation(context);
 				break;
+			case SHOW_VIEWS:
+				operation = new ShowViewOperation(context);
+				break;
 			case SHOW_FUNCTIONS:
 				operation = new ShowFunctionOperation(context);
 				break;

@@ -173,7 +173,8 @@ The following statements are supported now.
 |  ----  | ----  |
 | SHOW CATALOGS | List all registered catalogs |
 | SHOW DATABASES | List all databases in the current catalog |
-| SHOW TABLES | List all tables in the current database of the current catalog |
+| SHOW TABLES | List all tables and views in the current database of the current catalog |
+| SHOW VIEWS | List all views in the current database of the current catalog |
 | SHOW FUNCTIONS | List all functions |
 | SHOW MODULES | List all modules |
 | USE CATALOG catalog_name | Set a catalog with given name as the current catalog |

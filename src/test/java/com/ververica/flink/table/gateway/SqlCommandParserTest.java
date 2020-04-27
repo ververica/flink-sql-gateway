@@ -240,6 +240,12 @@ public class SqlCommandParserTest {
 	}
 
 	@Test
+	public void testShowViews() {
+		String query = "show   \t     views";
+		checkCommand(query, SqlCommand.SHOW_VIEWS);
+	}
+
+	@Test
 	public void testShowFunctions() {
 		String query1 = "show functions";
 		checkCommand(query1, SqlCommand.SHOW_FUNCTIONS);

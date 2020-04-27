@@ -18,56 +18,50 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.config.Environment;
+import com.ververica.flink.table.gateway.config.entries.TableEntry;
+import com.ververica.flink.table.gateway.config.entries.ViewEntry;
+import com.ververica.flink.table.gateway.context.ExecutionContext;
+import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
-import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
-import org.junit.Test;
-
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-
 /**
- * Tests for {@link ShowTableOperation}.
+ * Operation for SHOW VIEW command.
  */
-public class ShowTableOperationTest extends OperationTestBase {
+public class ShowViewOperation implements NonJobOperation {
 
-	private static final String DEFAULTS_ENVIRONMENT_FILE = "test-sql-gateway-defaults.yaml";
+	private final ExecutionContext<?> context;
 
-	@Override
-	protected Environment getSessionEnvironment() throws Exception {
-		final Map<String, String> replaceVars = new HashMap<>();
-		replaceVars.put("$VAR_PLANNER", "old");
-		replaceVars.put("$VAR_EXECUTION_TYPE", "batch");
-		replaceVars.put("$VAR_UPDATE_MODE", "");
-		return EnvironmentFileUtil.parseModified(DEFAULTS_ENVIRONMENT_FILE, replaceVars);
+	public ShowViewOperation(SessionContext context) {
+		this.context = context.getExecutionContext();
 	}
 
-	@Test
-	public void testShowTable() {
-		ShowTableOperation operation = new ShowTableOperation(context);
-		ResultSet resultSet = operation.execute();
+	@Override
+	public ResultSet execute() {
+		List<Row> rows = new ArrayList<>();
+		int maxNameLength = 1;
 
-		ResultSet expected = ResultSet.builder()
+		for (Map.Entry<String, TableEntry> entry : context.getEnvironment().getTables().entrySet()) {
+			if (entry.getValue() instanceof ViewEntry) {
+				String name = entry.getKey();
+				rows.add(Row.of(name));
+				maxNameLength = Math.max(maxNameLength, name.length());
+			}
+		}
+
+		return ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(
-				ColumnInfo.create(ConstantNames.TABLES, new VarCharType(false, 15)))
-			.data(
-				Row.of("TableNumber1"),
-				Row.of("TableNumber2"),
-				Row.of("TableSourceSink"),
-				Row.of("TestView1"),
-				Row.of("TestView2"))
+			.columns(ColumnInfo.create(ConstantNames.VIEWS, new VarCharType(false, maxNameLength)))
+			.data(rows)
 			.build();
-
-		assertEquals(expected, resultSet);
 	}
 }
