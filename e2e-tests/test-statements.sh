@@ -90,6 +90,10 @@ function show_tables() {
     run_non_job_statement "$SESSION_ID" "SHOW TABLES" "SHOW_TABLES"
 }
 
+function show_views() {
+    run_non_job_statement "$SESSION_ID" "SHOW VIEWS" "SHOW_VIEWS"
+}
+
 function select_from() {
     run_job_statement "$SESSION_ID" "SELECT $1" "SELECT" $2
 }

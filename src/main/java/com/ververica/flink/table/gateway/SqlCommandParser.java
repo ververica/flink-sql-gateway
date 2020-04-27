@@ -309,7 +309,7 @@ public final class SqlCommandParser {
 
 		RESET,
 
-		// the following two commands are not supported by SQL parser but are needed by users
+		// the following commands are not supported by SQL parser but are needed by users
 
 		SET(
 			"SET",
@@ -317,11 +317,20 @@ public final class SqlCommandParser {
 			// we keep `SET` with no operands here to print all properties
 			NO_OPERANDS),
 
+		// the following commands will be supported by SQL parser in the future
+		// remove them once they're supported
+
+		// FLINK-17396
 		SHOW_MODULES(
 			"SHOW\\s+MODULES",
 			NO_OPERANDS),
 
-		// the following two commands are not supported by SQL parser but are needed by JDBC driver
+		// FLINK-17111
+		SHOW_VIEWS(
+			"SHOW\\s+VIEWS",
+			NO_OPERANDS),
+
+		// the following commands are not supported by SQL parser but are needed by JDBC driver
 		// these should not be exposed to the user and should be used internally
 
 		SHOW_CURRENT_CATALOG(

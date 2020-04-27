@@ -74,14 +74,14 @@ create_table "$nation_table"
 table_rows=`show_tables`
 assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
 assert_equals_after_sorting \
-    "`make_array "region TABLE" "nation TABLE"`" \
+    "`make_array "region" "nation"`" \
     "$table_rows"
 
 alter_table "region RENAME TO region_new"
 table_rows=`show_tables`
 assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
 assert_equals_after_sorting \
-    "`make_array "region_new TABLE" "nation TABLE"`" \
+    "`make_array "region_new" "nation"`" \
     "$table_rows"
 alter_table "region_new RENAME TO region"
 
@@ -90,13 +90,23 @@ create_view "nation_view AS SELECT * FROM nation"
 table_rows=`show_tables`
 assert_equals 4 "`echo "$table_rows" | grep -c "^"`"
 assert_equals_after_sorting \
-    "`make_array "region TABLE" "nation TABLE" "region_view VIEW" "nation_view VIEW"`" \
+    "`make_array "region" "nation" "region_view" "nation_view"`" \
     "$table_rows"
+view_rows=`show_views`
+assert_equals 2 "`echo "$view_rows" | grep -c "^"`"
+assert_equals_after_sorting \
+    "`make_array "region_view" "nation_view"`" \
+    "$view_rows"
 
 drop_view "nation_view"
 drop_table "nation"
 table_rows=`show_tables`
 assert_equals 2 "`echo "$table_rows" | grep -c "^"`"
 assert_equals_after_sorting \
-    "`make_array "region TABLE" "region_view VIEW"`" \
+    "`make_array "region" "region_view"`" \
     "$table_rows"
+view_rows=`show_views`
+assert_equals 1 "`echo "$view_rows" | grep -c "^"`"
+assert_equals_after_sorting \
+    "`make_array "region_view"`" \
+    "$view_rows"
