@@ -38,10 +38,11 @@ public class HadoopSecurityContext implements SecurityContext {
 
 	@Override
 	public <T> T runSecured(Callable<T> securedCallable) throws Exception {
-		UserGroupInformation ugi = UserGroupInformation.getCurrentUser();
+		UserGroupInformation ugi;
 		if (StringUtils.isNotEmpty(user)){
-			ugi = UserGroupInformation.createProxyUser(user, UserGroupInformation.getCurrentUser());
-			return ugi.doAs((PrivilegedExceptionAction<T>) securedCallable::call);
+			ugi = UserGroupInformation.createProxyUser(user, UserGroupInformation.getLoginUser());
+		}else {
+			ugi = UserGroupInformation.getLoginUser();
 		}
 		return ugi.doAs((PrivilegedExceptionAction<T>) securedCallable::call);
 	}
