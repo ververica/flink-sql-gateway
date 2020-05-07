@@ -24,12 +24,18 @@ import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapter;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
+import com.ververica.flink.table.gateway.security.HadoopSecurityContext;
+import com.ververica.flink.table.gateway.security.NoOpSecurityContext;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.runtime.security.SecurityConfiguration;
+import org.apache.flink.runtime.security.SecurityContext;
+import org.apache.flink.runtime.security.SecurityUtils;
 import org.apache.flink.types.Row;
 
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +45,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 /**
  * A default implementation of JobOperation.
@@ -52,6 +60,7 @@ public abstract class AbstractJobOperation implements JobOperation {
 	protected ClusterDescriptorAdapter<?> clusterDescriptorAdapter;
 	protected final String sessionId;
 	protected volatile JobID jobId;
+	protected Map<String, String> operationConf;
 
 	private long currentToken;
 	private int previousMaxFetchSize;
@@ -208,6 +217,28 @@ public abstract class AbstractJobOperation implements JobOperation {
 				.changeFlags(getLinkedListElementsFromBegin(bufferedChangeFlags, previousResultSetSize))
 				.build()
 		);
+	}
+
+	protected <T> T doAsOwner(final Callable<T> callable) {
+		String user = operationConf.get("proxyUser");
+
+		SecurityContext securityContext;
+		if (UserGroupInformation.isSecurityEnabled()) {
+			try {
+				SecurityUtils.install(new SecurityConfiguration(context.getExecutionContext().getFlinkConfig()));
+			} catch (Exception e) {
+				throw new RuntimeException("Install security context failed.", e);
+			}
+			securityContext = new HadoopSecurityContext(user);
+		} else {
+			securityContext = new NoOpSecurityContext(user);
+		}
+
+		try {
+			return securityContext.runSecured(callable);
+		} catch (Exception e) {
+			throw new RuntimeException("Error running function.", e);
+		}
 	}
 
 	protected abstract Optional<Tuple2<List<Row>, List<Boolean>>> fetchNewJobResults();

@@ -48,6 +48,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -66,17 +67,18 @@ public class InsertOperation extends AbstractJobOperation {
 
 	private boolean fetched = false;
 
-	public InsertOperation(SessionContext context, String statement) {
+	public InsertOperation(SessionContext context, String statement, Map<String, String> operationConf) {
 		super(context);
 		this.statement = statement;
 
 		this.columnInfos = new ArrayList<>();
 		this.columnInfos.add(ColumnInfo.create(ConstantNames.AFFECTED_ROW_COUNT, new BigIntType(false)));
+		this.operationConf = operationConf;
 	}
 
 	@Override
 	public ResultSet execute() {
-		jobId = executeUpdateInternal(context.getExecutionContext());
+		jobId = doAsOwner(() -> executeUpdateInternal(context.getExecutionContext()));
 		String strJobId = jobId.toString();
 		return ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
@@ -118,7 +120,10 @@ public class InsertOperation extends AbstractJobOperation {
 
 	@Override
 	protected void cancelJobInternal() {
-		clusterDescriptorAdapter.cancelJob();
+		doAsOwner(() -> {
+			clusterDescriptorAdapter.cancelJob();
+			return null;
+		});
 	}
 
 	private <C> JobID executeUpdateInternal(ExecutionContext<C> executionContext) {

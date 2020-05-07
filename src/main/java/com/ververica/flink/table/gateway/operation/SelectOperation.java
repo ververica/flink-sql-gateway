@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,16 +76,17 @@ public class SelectOperation extends AbstractJobOperation {
 	private boolean resultFetched;
 	private volatile boolean noMoreResult;
 
-	public SelectOperation(SessionContext context, String query) {
+	public SelectOperation(SessionContext context, String query, Map<String, String> operationConf) {
 		super(context);
 		this.query = query;
 		this.resultFetched = false;
 		this.noMoreResult = false;
+		this.operationConf = operationConf;
 	}
 
 	@Override
 	public ResultSet execute() {
-		resultDescriptor = executeQueryInternal(context.getExecutionContext(), query);
+		resultDescriptor = doAsOwner(() -> executeQueryInternal(context.getExecutionContext(), query));
 		jobId = resultDescriptor.getJobClient().getJobID();
 
 		List<TableColumn> resultSchemaColumns = resultDescriptor.getResultSchema().getTableColumns();
@@ -111,7 +113,10 @@ public class SelectOperation extends AbstractJobOperation {
 			return;
 		}
 
-		clusterDescriptorAdapter.cancelJob();
+		doAsOwner(() -> {
+			clusterDescriptorAdapter.cancelJob();
+			return null;
+		});
 	}
 
 	@Override
@@ -124,9 +129,9 @@ public class SelectOperation extends AbstractJobOperation {
 			}
 
 			if (resultDescriptor.isChangelogResult()) {
-				ret = fetchStreamingResult();
+				ret = doAsOwner(this::fetchStreamingResult);
 			} else {
-				ret = fetchBatchResult();
+				ret = doAsOwner(this::fetchBatchResult);
 			}
 		}
 		resultFetched = true;
