@@ -41,7 +41,7 @@ public class HadoopSecurityContext implements SecurityContext {
 		UserGroupInformation ugi;
 		if (StringUtils.isNotEmpty(user)){
 			ugi = UserGroupInformation.createProxyUser(user, UserGroupInformation.getLoginUser());
-		}else {
+		} else {
 			ugi = UserGroupInformation.getLoginUser();
 		}
 		return ugi.doAs((PrivilegedExceptionAction<T>) securedCallable::call);
