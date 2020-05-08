@@ -26,6 +26,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonPro
 
 import javax.annotation.Nullable;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -47,12 +48,13 @@ public class StatementExecuteRequestBody implements RequestBody {
 	private Long executionTimeout;
 
 	@JsonProperty(FIELD_EXECUTION_CONF)
+	@Nullable
 	private Map<String, String> executionConf;
 
 	public StatementExecuteRequestBody(
 		@Nullable @JsonProperty(FIELD_STATEMENT) String statement,
 		@Nullable @JsonProperty(FIELD_EXECUTION_TIMEOUT) Long executionTimeout,
-		@JsonProperty(FIELD_EXECUTION_CONF) Map<String, String> executionConf) {
+		@Nullable @JsonProperty(FIELD_EXECUTION_CONF) Map<String, String> executionConf) {
 		this.statement = statement;
 		this.executionTimeout = executionTimeout;
 		this.executionConf = executionConf;
@@ -70,8 +72,12 @@ public class StatementExecuteRequestBody implements RequestBody {
 		return executionTimeout;
 	}
 
+	@Nullable
 	@JsonIgnore
 	public Map<String, String> getExecutionConf() {
+		if (executionConf == null){
+			return Collections.emptyMap();
+		}
 		return executionConf;
 	}
 }
