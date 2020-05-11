@@ -26,6 +26,9 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonPro
 
 import javax.annotation.Nullable;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * {@link RequestBody} for executing a statement.
  */
@@ -34,6 +37,7 @@ public class StatementExecuteRequestBody implements RequestBody {
 
 	private static final String FIELD_STATEMENT = "statement";
 	private static final String FIELD_EXECUTION_TIMEOUT = "execution_timeout";
+	private static final String FIELD_EXECUTION_CONF = "execution_conf";
 
 	@JsonProperty(FIELD_STATEMENT)
 	@Nullable
@@ -43,11 +47,17 @@ public class StatementExecuteRequestBody implements RequestBody {
 	@Nullable
 	private Long executionTimeout;
 
+	@JsonProperty(FIELD_EXECUTION_CONF)
+	@Nullable
+	private Map<String, String> executionConf;
+
 	public StatementExecuteRequestBody(
 		@Nullable @JsonProperty(FIELD_STATEMENT) String statement,
-		@Nullable @JsonProperty(FIELD_EXECUTION_TIMEOUT) Long executionTimeout) {
+		@Nullable @JsonProperty(FIELD_EXECUTION_TIMEOUT) Long executionTimeout,
+		@Nullable @JsonProperty(FIELD_EXECUTION_CONF) Map<String, String> executionConf) {
 		this.statement = statement;
 		this.executionTimeout = executionTimeout;
+		this.executionConf = executionConf;
 	}
 
 	@Nullable
@@ -60,5 +70,14 @@ public class StatementExecuteRequestBody implements RequestBody {
 	@JsonIgnore
 	public Long getExecutionTimeout() {
 		return executionTimeout;
+	}
+
+	@Nullable
+	@JsonIgnore
+	public Map<String, String> getExecutionConf() {
+		if (executionConf == null){
+			return Collections.emptyMap();
+		}
+		return executionConf;
 	}
 }

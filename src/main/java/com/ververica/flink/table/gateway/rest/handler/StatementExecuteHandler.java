@@ -76,9 +76,10 @@ public class StatementExecuteHandler
 
 		// TODO supports this
 		Long executionTimeoutMillis = request.getRequestBody().getExecutionTimeout();
+		Map<String, String> executionConf = request.getRequestBody().getExecutionConf();
 
 		try {
-			Tuple2<ResultSet, SqlCommand> tuple2 = sessionManager.getSession(sessionId).runStatement(statement);
+			Tuple2<ResultSet, SqlCommand> tuple2 = sessionManager.getSession(sessionId).runStatement(statement, executionConf);
 			ResultSet resultSet = tuple2.f0;
 			String statementType = tuple2.f1.name();
 

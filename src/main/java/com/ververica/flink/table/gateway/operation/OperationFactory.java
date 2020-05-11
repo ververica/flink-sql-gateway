@@ -22,17 +22,19 @@ import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommandCall;
 import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.SessionContext;
 
+import java.util.Map;
+
 /**
  * The factory to create {@link Operation} based on {@link SqlCommandCall}.
  */
 public class OperationFactory {
 
-	public static Operation createOperation(SqlCommandCall call, SessionContext context) {
+	public static Operation createOperation(SqlCommandCall call, SessionContext context, Map<String, String> operationConf) {
 
 		Operation operation;
 		switch (call.command) {
 			case SELECT:
-				operation = new SelectOperation(context, call.operands[0]);
+				operation = new SelectOperation(context, call.operands[0], operationConf);
 				break;
 			case CREATE_VIEW:
 				operation = new CreateViewOperation(context, call.operands[0], call.operands[1]);
@@ -71,7 +73,7 @@ public class OperationFactory {
 				break;
 			case INSERT_INTO:
 			case INSERT_OVERWRITE:
-				operation = new InsertOperation(context, call.operands[0]);
+				operation = new InsertOperation(context, call.operands[0], operationConf);
 				break;
 			case SHOW_MODULES:
 				operation = new ShowModuleOperation(context);
