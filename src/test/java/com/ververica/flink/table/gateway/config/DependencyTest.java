@@ -57,7 +57,6 @@ import org.apache.flink.table.factories.ModuleFactory;
 import org.apache.flink.table.module.Module;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.BooleanType;
-import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
 import org.apache.flink.shaded.guava18.com.google.common.collect.Maps;
@@ -127,12 +126,12 @@ public class DependencyTest {
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
 			.columns(
-				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, new VarCharType(false, 13)),
-				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, new VarCharType(false, 22)),
-				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType(false)),
-				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, new VarCharType(true, 1)),
-				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, new VarCharType(true, 1)),
-				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, new VarCharType(true, 1)))
+				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, DataTypes.STRING().getLogicalType()))
 			.data(expectedData)
 			.build();
 

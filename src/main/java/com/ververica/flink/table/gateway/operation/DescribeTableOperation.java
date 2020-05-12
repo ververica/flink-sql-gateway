@@ -26,13 +26,13 @@ import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableColumn;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.WatermarkSpec;
 import org.apache.flink.table.types.logical.BooleanType;
 import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
 import org.apache.commons.lang3.StringUtils;
@@ -82,51 +82,29 @@ public class DescribeTableOperation implements NonJobOperation {
 		}
 
 		List<TableColumn> columns = schema.getTableColumns();
-
-		List[] stringValues = new List[5];
-		for (int i = 0; i < stringValues.length; i++) {
-			stringValues[i] = new ArrayList();
-		}
-
 		List<Row> data = new ArrayList<>();
 		for (TableColumn column : columns) {
 			LogicalType logicalType = column.getType().getLogicalType();
 
 			String name = column.getName();
 			String type = StringUtils.removeEnd(logicalType.toString(), " NOT NULL");
+			boolean isNullable = logicalType.isNullable();
 			String key = fieldToPrimaryKey.getOrDefault(column.getName(), null);
 			String computedColumn = column.getExpr().orElse(null);
 			String watermark = fieldToWatermark.getOrDefault(column.getName(), null);
 
-			stringValues[0].add(name);
-			stringValues[1].add(type);
-			stringValues[2].add(key);
-			stringValues[3].add(computedColumn);
-			stringValues[4].add(watermark);
-
-			data.add(Row.of(name, type, logicalType.isNullable(), key, computedColumn, watermark));
-		}
-
-		int[] stringLengths = new int[5];
-		for (int i = 0; i < stringValues.length; i++) {
-			VarCharType varCharType =
-				(VarCharType) OperationUtil
-					.stringListToResultSet(stringValues[i], "")
-					.getColumns()
-					.get(0)
-					.getLogicalType();
-			stringLengths[i] = varCharType.getLength();
+			data.add(Row.of(name, type, isNullable, key, computedColumn, watermark));
 		}
 
 		return ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
 			.columns(
-				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, new VarCharType(false, stringLengths[0])),
-				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, new VarCharType(false, stringLengths[1])),
-				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType(false)),
-				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, new VarCharType(true, stringLengths[2])),
-				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, new VarCharType(true, stringLengths[3])),
-				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, new VarCharType(true, stringLengths[4])))
+				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, DataTypes.STRING().getLogicalType()))
 			.data(data)
 			.build();
 	}
