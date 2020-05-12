@@ -36,10 +36,10 @@ public class SessionContext {
 	private ExecutionContext<?> executionContext;
 
 	public SessionContext(
-		@Nullable String sessionName,
-		String sessionId,
-		Environment originalSessionEnv,
-		DefaultContext defaultContext) {
+			@Nullable String sessionName,
+			String sessionId,
+			Environment originalSessionEnv,
+			DefaultContext defaultContext) {
 		this.sessionName = sessionName;
 		this.sessionId = sessionId;
 		this.originalSessionEnv = originalSessionEnv;

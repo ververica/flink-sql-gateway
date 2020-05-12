@@ -36,9 +36,9 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests for {@link ShowViewOperation}.
+ * Tests for {@link ShowCatalogsOperation}.
  */
-public class ShowViewOperationTest extends OperationTestBase {
+public class ShowCatalogsOperationTest extends OperationTestBase {
 
 	private static final String DEFAULTS_ENVIRONMENT_FILE = "test-sql-gateway-defaults.yaml";
 
@@ -52,19 +52,15 @@ public class ShowViewOperationTest extends OperationTestBase {
 	}
 
 	@Test
-	public void testShowView() {
-		ShowViewOperation operation = new ShowViewOperation(context);
+	public void testShowCatalog() {
+		ShowCatalogsOperation operation = new ShowCatalogsOperation(context);
 		ResultSet resultSet = operation.execute();
 
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(
-				ColumnInfo.create(ConstantNames.VIEWS, new VarCharType(false, 9)))
-			.data(
-				Row.of("TestView1"),
-				Row.of("TestView2"))
+			.columns(ColumnInfo.create(ConstantNames.SHOW_CATALOGS_RESULT, new VarCharType(false, 15)))
+			.data(Row.of("catalog1"), Row.of("default_catalog"), Row.of("simple-catalog"))
 			.build();
-
 		assertEquals(expected, resultSet);
 	}
 }

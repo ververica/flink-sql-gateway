@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlCommandParser;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.context.SessionContext;

@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway.rest;
 
-import com.ververica.flink.table.gateway.SessionManager;
 import com.ververica.flink.table.gateway.rest.handler.GetInfoHandler;
 import com.ververica.flink.table.gateway.rest.handler.GetInfoHeaders;
 import com.ververica.flink.table.gateway.rest.handler.JobCancelHandler;
@@ -35,6 +34,7 @@ import com.ververica.flink.table.gateway.rest.handler.SessionHeartbeatHandler;
 import com.ververica.flink.table.gateway.rest.handler.SessionHeartbeatHeaders;
 import com.ververica.flink.table.gateway.rest.handler.StatementExecuteHandler;
 import com.ververica.flink.table.gateway.rest.handler.StatementExecuteHeaders;
+import com.ververica.flink.table.gateway.rest.session.SessionManager;
 
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.tuple.Tuple2;

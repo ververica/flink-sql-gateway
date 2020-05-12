@@ -35,10 +35,10 @@ public class YarnPerJobClusterDescriptorAdapter<ClusterID> extends ClusterDescri
 	private static final Logger LOG = LoggerFactory.getLogger(YarnPerJobClusterDescriptorAdapter.class);
 
 	public YarnPerJobClusterDescriptorAdapter(
-		ExecutionContext<ClusterID> executionContext,
-		Configuration configuration,
-		String sessionId,
-		JobID jobId) {
+			ExecutionContext<ClusterID> executionContext,
+			Configuration configuration,
+			String sessionId,
+			JobID jobId) {
 		super(executionContext, configuration, sessionId, jobId);
 	}
 

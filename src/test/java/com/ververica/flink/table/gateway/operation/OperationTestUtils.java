@@ -40,7 +40,7 @@ public class OperationTestUtils {
 
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, schemaJson.length())))
+			.columns(ColumnInfo.create(ConstantNames.DESCRIBE_RESULT, new VarCharType(false, schemaJson.length())))
 			.data(Row.of(schemaJson))
 			.build();
 

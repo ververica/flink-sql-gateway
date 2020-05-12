@@ -60,7 +60,7 @@ public class ShowCurrentCatalogOperationTest extends OperationTestBase {
 
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.CATALOG, new VarCharType(false, 14)))
+			.columns(ColumnInfo.create(ConstantNames.SHOW_CURRENT_CATALOG_RESULT, new VarCharType(false, 14)))
 			.data(Row.of("simple-catalog"))
 			.build();
 		assertEquals(expected, resultSet);

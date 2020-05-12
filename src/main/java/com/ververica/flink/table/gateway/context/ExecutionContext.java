@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway.context;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.config.entries.DeploymentEntry;
 import com.ververica.flink.table.gateway.config.entries.ExecutionEntry;
@@ -27,6 +26,7 @@ import com.ververica.flink.table.gateway.config.entries.SourceSinkTableEntry;
 import com.ververica.flink.table.gateway.config.entries.SourceTableEntry;
 import com.ververica.flink.table.gateway.config.entries.TemporalTableEntry;
 import com.ververica.flink.table.gateway.config.entries.ViewEntry;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.time.Time;
@@ -133,13 +133,13 @@ public class ExecutionContext<ClusterID> {
 	private SessionState sessionState;
 
 	private ExecutionContext(
-		Environment environment,
-		@Nullable SessionState sessionState,
-		List<URL> dependencies,
-		Configuration flinkConfig,
-		ClusterClientServiceLoader clusterClientServiceLoader,
-		Options commandLineOptions,
-		List<CustomCommandLine> availableCommandLines) throws FlinkException {
+			Environment environment,
+			@Nullable SessionState sessionState,
+			List<URL> dependencies,
+			Configuration flinkConfig,
+			ClusterClientServiceLoader clusterClientServiceLoader,
+			Options commandLineOptions,
+			List<CustomCommandLine> availableCommandLines) throws FlinkException {
 		this.environment = environment;
 
 		this.flinkConfig = flinkConfig;
@@ -258,13 +258,13 @@ public class ExecutionContext<ClusterID> {
 
 	/** Returns a builder for this {@link ExecutionContext}. */
 	public static Builder builder(
-		Environment defaultEnv,
-		Environment sessionEnv,
-		List<URL> dependencies,
-		Configuration configuration,
-		ClusterClientServiceLoader serviceLoader,
-		Options commandLineOptions,
-		List<CustomCommandLine> commandLines) {
+			Environment defaultEnv,
+			Environment sessionEnv,
+			List<URL> dependencies,
+			Configuration configuration,
+			ClusterClientServiceLoader serviceLoader,
+			Options commandLineOptions,
+			List<CustomCommandLine> commandLines) {
 		return new Builder(defaultEnv, sessionEnv, dependencies, configuration,
 			serviceLoader, commandLineOptions, commandLines);
 	}
@@ -274,10 +274,10 @@ public class ExecutionContext<ClusterID> {
 	//------------------------------------------------------------------------------------------------------------------
 
 	private static Configuration createExecutionConfig(
-		CommandLine commandLine,
-		Options commandLineOptions,
-		List<CustomCommandLine> availableCommandLines,
-		List<URL> dependencies) throws FlinkException {
+			CommandLine commandLine,
+			Options commandLineOptions,
+			List<CustomCommandLine> availableCommandLines,
+			List<URL> dependencies) throws FlinkException {
 		LOG.debug("Available commandline options: {}", commandLineOptions);
 		List<String> options = Stream
 			.of(commandLine.getOptions())
@@ -371,14 +371,13 @@ public class ExecutionContext<ClusterID> {
 	}
 
 	private static TableEnvironment createStreamTableEnvironment(
-		StreamExecutionEnvironment env,
-		EnvironmentSettings settings,
-		TableConfig config,
-		Executor executor,
-		CatalogManager catalogManager,
-		ModuleManager moduleManager,
-		FunctionCatalog functionCatalog) {
-
+			StreamExecutionEnvironment env,
+			EnvironmentSettings settings,
+			TableConfig config,
+			Executor executor,
+			CatalogManager catalogManager,
+			ModuleManager moduleManager,
+			FunctionCatalog functionCatalog) {
 		final Map<String, String> plannerProperties = settings.toPlannerProperties();
 		final Planner planner = ComponentFactoryService.find(PlannerFactory.class, plannerProperties)
 			.create(plannerProperties, executor, config, functionCatalog, catalogManager);
@@ -395,8 +394,8 @@ public class ExecutionContext<ClusterID> {
 	}
 
 	private static Executor lookupExecutor(
-		Map<String, String> executorProperties,
-		StreamExecutionEnvironment executionEnvironment) {
+			Map<String, String> executorProperties,
+			StreamExecutionEnvironment executionEnvironment) {
 		try {
 			ExecutorFactory executorFactory = ComponentFactoryService.find(ExecutorFactory.class, executorProperties);
 			Method createMethod = executorFactory.getClass()
@@ -478,11 +477,11 @@ public class ExecutionContext<ClusterID> {
 	}
 
 	private void createTableEnvironment(
-		EnvironmentSettings settings,
-		TableConfig config,
-		CatalogManager catalogManager,
-		ModuleManager moduleManager,
-		FunctionCatalog functionCatalog) {
+			EnvironmentSettings settings,
+			TableConfig config,
+			CatalogManager catalogManager,
+			ModuleManager moduleManager,
+			FunctionCatalog functionCatalog) {
 		if (environment.getExecution().isStreamingPlanner()) {
 			streamExecEnv = createStreamExecutionEnvironment();
 			execEnv = null;
@@ -683,13 +682,13 @@ public class ExecutionContext<ClusterID> {
 		private SessionState sessionState;
 
 		private Builder(
-			Environment defaultEnv,
-			@Nullable Environment sessionEnv,
-			List<URL> dependencies,
-			Configuration configuration,
-			ClusterClientServiceLoader serviceLoader,
-			Options commandLineOptions,
-			List<CustomCommandLine> commandLines) {
+				Environment defaultEnv,
+				@Nullable Environment sessionEnv,
+				List<URL> dependencies,
+				Configuration configuration,
+				ClusterClientServiceLoader serviceLoader,
+				Options commandLineOptions,
+				List<CustomCommandLine> commandLines) {
 			this.defaultEnv = defaultEnv;
 			this.sessionEnv = sessionEnv;
 			this.dependencies = dependencies;
@@ -733,18 +732,18 @@ public class ExecutionContext<ClusterID> {
 		public final FunctionCatalog functionCatalog;
 
 		private SessionState(
-			CatalogManager catalogManager,
-			ModuleManager moduleManager,
-			FunctionCatalog functionCatalog) {
+				CatalogManager catalogManager,
+				ModuleManager moduleManager,
+				FunctionCatalog functionCatalog) {
 			this.catalogManager = catalogManager;
 			this.moduleManager = moduleManager;
 			this.functionCatalog = functionCatalog;
 		}
 
 		public static SessionState of(
-			CatalogManager catalogManager,
-			ModuleManager moduleManager,
-			FunctionCatalog functionCatalog) {
+				CatalogManager catalogManager,
+				ModuleManager moduleManager,
+				FunctionCatalog functionCatalog) {
 			return new SessionState(catalogManager, moduleManager, functionCatalog);
 		}
 	}

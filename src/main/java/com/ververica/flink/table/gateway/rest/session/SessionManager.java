@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.rest.session;
 
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.config.entries.ExecutionEntry;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

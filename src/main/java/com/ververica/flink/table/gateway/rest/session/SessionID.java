@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.rest.session;
 
 import org.apache.flink.util.AbstractID;
 import org.apache.flink.util.StringUtils;

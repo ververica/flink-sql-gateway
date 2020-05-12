@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.deployment;
 
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.configuration.Configuration;
@@ -50,9 +50,9 @@ public class ProgramDeployer {
 	 * @param pipeline Flink {@link Pipeline} to execute
 	 */
 	public ProgramDeployer(
-		Configuration configuration,
-		String jobName,
-		Pipeline pipeline) {
+			Configuration configuration,
+			String jobName,
+			Pipeline pipeline) {
 		this.configuration = configuration;
 		this.pipeline = pipeline;
 		this.jobName = jobName;

@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand;
-import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommandCall;
+import com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand;
+import com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommandCall;
 
 import org.junit.Test;
 

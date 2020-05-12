@@ -18,9 +18,9 @@
 
 package com.ververica.flink.table.gateway.result;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.sink.CollectStreamTableSink;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.JobExecutionResult;
@@ -65,14 +65,13 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 	private final int maxBufferSize;
 
 	public ChangelogResult(
-		RowTypeInfo outputType,
-		TableSchema tableSchema,
-		ExecutionConfig config,
-		InetAddress gatewayAddress,
-		int gatewayPort,
-		ClassLoader classLoader,
-		int maxBufferSize) {
-
+			RowTypeInfo outputType,
+			TableSchema tableSchema,
+			ExecutionConfig config,
+			InetAddress gatewayAddress,
+			int gatewayPort,
+			ClassLoader classLoader,
+			int maxBufferSize) {
 		resultLock = new Object();
 
 		// create socket stream iterator

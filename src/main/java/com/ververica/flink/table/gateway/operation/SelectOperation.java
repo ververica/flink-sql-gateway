@@ -18,12 +18,10 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.ProgramDeployer;
-import com.ververica.flink.table.gateway.SqlExecutionException;
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.deployment.ClusterDescriptorAdapterFactory;
+import com.ververica.flink.table.gateway.deployment.ProgramDeployer;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
@@ -34,6 +32,8 @@ import com.ververica.flink.table.gateway.result.Result;
 import com.ververica.flink.table.gateway.result.ResultDescriptor;
 import com.ververica.flink.table.gateway.result.ResultUtil;
 import com.ververica.flink.table.gateway.result.TypedResult;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.dag.Pipeline;

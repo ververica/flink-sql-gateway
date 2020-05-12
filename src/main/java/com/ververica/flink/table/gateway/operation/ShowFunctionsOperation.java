@@ -29,19 +29,19 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Operation for SHOW CATALOG command.
+ * Operation for SHOW FUNCTIONS command.
  */
-public class ShowCatalogOperation implements NonJobOperation {
+public class ShowFunctionsOperation implements NonJobOperation {
 	private final ExecutionContext<?> context;
 
-	public ShowCatalogOperation(SessionContext context) {
+	public ShowFunctionsOperation(SessionContext context) {
 		this.context = context.getExecutionContext();
 	}
 
 	@Override
 	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
-		final List<String> catalogs = context.wrapClassLoader(() -> Arrays.asList(tableEnv.listCatalogs()));
-		return OperationUtil.stringListToResultSet(catalogs, ConstantNames.CATALOGS);
+		final List<String> functions = context.wrapClassLoader(() -> Arrays.asList(tableEnv.listFunctions()));
+		return OperationUtil.stringListToResultSet(functions, ConstantNames.SHOW_FUNCTIONS_RESULT);
 	}
 }

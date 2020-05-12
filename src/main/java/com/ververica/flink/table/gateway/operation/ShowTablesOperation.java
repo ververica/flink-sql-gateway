@@ -18,49 +18,47 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.config.Environment;
+import com.ververica.flink.table.gateway.context.ExecutionContext;
+import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
-import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
 
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Tests for {@link ShowCatalogOperation}.
+ * Operation for SHOW TABLES command.
  */
-public class ShowCatalogOperationTest extends OperationTestBase {
+public class ShowTablesOperation implements NonJobOperation {
+	private final ExecutionContext<?> context;
 
-	private static final String DEFAULTS_ENVIRONMENT_FILE = "test-sql-gateway-defaults.yaml";
-
-	@Override
-	protected Environment getSessionEnvironment() throws Exception {
-		final Map<String, String> replaceVars = new HashMap<>();
-		replaceVars.put("$VAR_PLANNER", "old");
-		replaceVars.put("$VAR_EXECUTION_TYPE", "batch");
-		replaceVars.put("$VAR_UPDATE_MODE", "");
-		return EnvironmentFileUtil.parseModified(DEFAULTS_ENVIRONMENT_FILE, replaceVars);
+	public ShowTablesOperation(SessionContext context) {
+		this.context = context.getExecutionContext();
 	}
 
-	@Test
-	public void testShowCatalog() {
-		ShowCatalogOperation operation = new ShowCatalogOperation(context);
-		ResultSet resultSet = operation.execute();
+	@Override
+	public ResultSet execute() {
+		List<Row> rows = new ArrayList<>();
+		int maxNameLength = 1;
 
-		ResultSet expected = ResultSet.builder()
+		final TableEnvironment tableEnv = context.getTableEnvironment();
+		// listTables will return all tables and views
+		for (String table : context.wrapClassLoader(() -> Arrays.asList(tableEnv.listTables()))) {
+			rows.add(Row.of(table));
+			maxNameLength = Math.max(maxNameLength, table.length());
+		}
+
+		return ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.CATALOGS, new VarCharType(false, 15)))
-			.data(Row.of("catalog1"), Row.of("default_catalog"), Row.of("simple-catalog"))
+			.columns(ColumnInfo.create(ConstantNames.SHOW_TABLES_RESULT, new VarCharType(false, maxNameLength)))
+			.data(rows)
 			.build();
-		assertEquals(expected, resultSet);
 	}
 }

@@ -16,20 +16,23 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.operation;
+
+import com.ververica.flink.table.gateway.rest.result.ResultSet;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
- * Exception thrown during parsing SQL statement.
+ * Tests for {@link ShowFunctionsOperation}.
  */
-public class SqlParseException extends RuntimeException {
+public class ShowFunctionsOperationTest extends OperationTestBase {
 
-	private static final long serialVersionUID = 1L;
-
-	public SqlParseException(String message) {
-		super(message);
-	}
-
-	public SqlParseException(String message, Throwable e) {
-		super(message, e);
+	@Test
+	public void testShowFunction() {
+		ShowFunctionsOperation operation = new ShowFunctionsOperation(context);
+		ResultSet resultSet = operation.execute();
+		assertTrue(resultSet.getData().size() > 0);
 	}
 }

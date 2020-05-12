@@ -35,7 +35,6 @@ public class ClusterDescriptorAdapterFactory {
 			Configuration configuration,
 			String sessionId,
 			JobID jobId) {
-
 		String executionTarget = executionContext.getFlinkConfig().getString(DeploymentOptions.TARGET);
 		if (executionTarget == null) {
 			throw new RuntimeException("No execution.target specified in your configuration file.");

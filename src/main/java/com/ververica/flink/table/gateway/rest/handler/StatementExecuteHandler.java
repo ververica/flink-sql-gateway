@@ -18,14 +18,14 @@
 
 package com.ververica.flink.table.gateway.rest.handler;
 
-import com.ververica.flink.table.gateway.SessionManager;
-import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand;
-import com.ververica.flink.table.gateway.SqlGatewayException;
+import com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand;
 import com.ververica.flink.table.gateway.rest.message.SessionIdPathParameter;
 import com.ververica.flink.table.gateway.rest.message.SessionMessageParameters;
 import com.ververica.flink.table.gateway.rest.message.StatementExecuteRequestBody;
 import com.ververica.flink.table.gateway.rest.message.StatementExecuteResponseBody;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
+import com.ververica.flink.table.gateway.rest.session.SessionManager;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.tuple.Tuple2;
