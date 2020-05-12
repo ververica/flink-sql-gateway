@@ -47,7 +47,12 @@ public class ConstantNames {
 
 	public static final String EXPLAIN_RESULT = "explanation";
 
-	public static final String DESCRIBE_RESULT = "schema";
+	public static final String DESCRIBE_NAME = "name";
+	public static final String DESCRIBE_TYPE = "type";
+	public static final String DESCRIBE_NULL = "null";
+	public static final String DESCRIBE_KEY = "key";
+	public static final String DESCRIBE_COMPUTED_COLUMN = "computed_column";
+	public static final String DESCRIBE_WATERMARK = "watermark";
 
 	public static final String SHOW_TABLES_RESULT = "tables";
 

@@ -18,15 +18,8 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
-import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
-import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
-
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.types.logical.VarCharType;
-import org.apache.flink.types.Row;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,18 +27,6 @@ import static org.junit.Assert.assertEquals;
  * Utilities for running operation tests.
  */
 public class OperationTestUtils {
-
-	public static void compareDescribeResult(TableSchema tableSchema, ResultSet resultSet) throws Exception {
-		String schemaJson = TableSchemaUtil.writeTableSchemaToJson(tableSchema);
-
-		ResultSet expected = ResultSet.builder()
-			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.DESCRIBE_RESULT, new VarCharType(false, schemaJson.length())))
-			.data(Row.of(schemaJson))
-			.build();
-
-		assertEquals(expected, resultSet);
-	}
 
 	public static void compareExplainResult(String expectedExplain, ResultSet resultSet) {
 		assertEquals(resultSet.getResultKind(), ResultKind.SUCCESS_WITH_CONTENT);
