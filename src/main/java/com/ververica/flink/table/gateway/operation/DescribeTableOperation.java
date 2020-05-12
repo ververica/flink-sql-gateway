@@ -24,16 +24,23 @@ import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
-import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
 import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.TableColumn;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.types.logical.VarCharType;
+import org.apache.flink.table.api.WatermarkSpec;
+import org.apache.flink.table.types.logical.BooleanType;
+import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.types.Row;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Operation for DESCRIBE TABLE command.
@@ -48,24 +55,57 @@ public class DescribeTableOperation implements NonJobOperation {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public ResultSet execute() {
+		// the implementation should be in sync with Flink, see FLINK-17112
 		final TableEnvironment tableEnv = context.getTableEnvironment();
+		TableSchema schema;
 		try {
-			TableSchema schema = context.wrapClassLoader(() -> tableEnv.from(tableName).getSchema());
-			String schemaJson = TableSchemaUtil.writeTableSchemaToJson(schema);
-			int length = schemaJson.length();
-			List<Row> data = new ArrayList<>();
-			data.add(Row.of(schemaJson));
-
-			return ResultSet.builder()
-				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-				.columns(
-					ColumnInfo.create(ConstantNames.DESCRIBE_RESULT, new VarCharType(false, length)))
-				.data(data)
-				.build();
+			schema = context.wrapClassLoader(() -> tableEnv.from(tableName).getSchema());
 		} catch (Throwable t) {
 			// catch everything such that the query does not crash the executor
 			throw new SqlExecutionException("No table with this name could be found.", t);
 		}
+
+		Map<String, String> fieldToWatermark = new HashMap<>();
+		for (WatermarkSpec spec : schema.getWatermarkSpecs()) {
+			fieldToWatermark.put(spec.getRowtimeAttribute(), spec.getWatermarkExpr());
+		}
+
+		Map<String, String> fieldToPrimaryKey = new HashMap<>();
+		if (schema.getPrimaryKey().isPresent()) {
+			List<String> columns = schema.getPrimaryKey().get().getColumns();
+			String primaryKey = "PRI(" + String.join(", ", columns) + ")";
+			for (String column : columns) {
+				fieldToPrimaryKey.put(column, primaryKey);
+			}
+		}
+
+		List<TableColumn> columns = schema.getTableColumns();
+		List<Row> data = new ArrayList<>();
+		for (TableColumn column : columns) {
+			LogicalType logicalType = column.getType().getLogicalType();
+
+			String name = column.getName();
+			String type = StringUtils.removeEnd(logicalType.toString(), " NOT NULL");
+			boolean isNullable = logicalType.isNullable();
+			String key = fieldToPrimaryKey.getOrDefault(column.getName(), null);
+			String computedColumn = column.getExpr().orElse(null);
+			String watermark = fieldToWatermark.getOrDefault(column.getName(), null);
+
+			data.add(Row.of(name, type, isNullable, key, computedColumn, watermark));
+		}
+
+		return ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
+				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, DataTypes.STRING().getLogicalType()))
+			.data(data)
+			.build();
 	}
 }

@@ -21,6 +21,9 @@ package com.ververica.flink.table.gateway.operation;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
+import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
+import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.ResourceFileUtils;
 
@@ -28,7 +31,8 @@ import org.apache.flink.client.cli.DefaultCLI;
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.types.logical.BooleanType;
+import org.apache.flink.types.Row;
 
 import org.junit.Test;
 
@@ -37,6 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -89,12 +94,22 @@ public class OperationWithUserJarTest extends OperationTestBase {
 		DescribeTableOperation operation = new DescribeTableOperation(context, "R");
 		ResultSet resultSet = operation.execute();
 
-		TableSchema tableSchema = TableSchema.builder()
-			.field("a", DataTypes.INT())
-			.field("b", DataTypes.BIGINT())
+		List<Row> expectedData = Arrays.asList(
+			Row.of("a", "INT", true, null, null, null),
+			Row.of("b", "BIGINT", true, null, null, null));
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
+				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, DataTypes.STRING().getLogicalType()))
+			.data(expectedData)
 			.build();
 
-		OperationTestUtils.compareDescribeResult(tableSchema, resultSet);
+		assertEquals(expected, resultSet);
 	}
 
 	@Test

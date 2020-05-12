@@ -20,8 +20,10 @@ package com.ververica.flink.table.gateway.config;
 
 import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand;
+import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
+import com.ververica.flink.table.gateway.rest.result.ConstantNames;
+import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
-import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
 import com.ververica.flink.table.gateway.rest.session.Session;
 import com.ververica.flink.table.gateway.rest.session.SessionManager;
 import com.ververica.flink.table.gateway.sink.TestTableSinkFactoryBase;
@@ -34,7 +36,6 @@ import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.Types;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.CatalogTable;
@@ -55,9 +56,8 @@ import org.apache.flink.table.factories.CatalogFactory;
 import org.apache.flink.table.factories.ModuleFactory;
 import org.apache.flink.table.module.Module;
 import org.apache.flink.table.types.DataType;
-import org.apache.flink.table.types.logical.TimestampKind;
-import org.apache.flink.table.types.logical.TimestampType;
-import org.apache.flink.table.types.utils.LogicalTypeDataTypeConverter;
+import org.apache.flink.table.types.logical.BooleanType;
+import org.apache.flink.types.Row;
 
 import org.apache.flink.shaded.guava18.com.google.common.collect.Maps;
 
@@ -66,6 +66,7 @@ import org.junit.Test;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -117,17 +118,24 @@ public class DependencyTest {
 		Session session = sessionManager.getSession(sessionId);
 		Tuple2<ResultSet, SqlCommand> result = session.runStatement("DESCRIBE TableNumber1");
 		assertEquals(SqlCommand.DESCRIBE_TABLE, result.f1);
-		String schemaJson = result.f0.getData().get(0).getField(0).toString();
-		TableSchema schema = TableSchemaUtil.readTableSchemaFromJson(schemaJson);
 
-		final TableSchema expected = TableSchema.builder()
-			.field("IntegerField1", Types.INT())
-			.field("StringField1", Types.STRING())
-			.field("rowtimeField",
-				LogicalTypeDataTypeConverter.toDataType(new TimestampType(true, TimestampKind.ROWTIME, 3)))
+		final List<Row> expectedData = Arrays.asList(
+			Row.of("IntegerField1", "INT", true, null, null, null),
+			Row.of("StringField1", "STRING", true, null, null, null),
+			Row.of("rowtimeField", "TIMESTAMP(3) *ROWTIME*", true, null, null, null));
+		ResultSet expected = ResultSet.builder()
+			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
+			.columns(
+				ColumnInfo.create(ConstantNames.DESCRIBE_NAME, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_TYPE, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_NULL, new BooleanType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_KEY, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_COMPUTED_COLUMN, DataTypes.STRING().getLogicalType()),
+				ColumnInfo.create(ConstantNames.DESCRIBE_WATERMARK, DataTypes.STRING().getLogicalType()))
+			.data(expectedData)
 			.build();
 
-		assertEquals(expected, schema);
+		assertEquals(expected, result.f0);
 	}
 
 	// --------------------------------------------------------------------------------------------
