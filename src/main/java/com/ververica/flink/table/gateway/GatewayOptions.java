@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway.options;
+package com.ververica.flink.table.gateway;
 
 import javax.annotation.Nullable;
 
@@ -36,11 +36,11 @@ public class GatewayOptions {
 	private final List<URL> libraryDirs;
 
 	public GatewayOptions(
-		boolean isPrintHelp,
-		@Nullable Integer port,
-		@Nullable URL defaultConfig,
-		@Nullable List<URL> jars,
-		@Nullable List<URL> libraryDirs) {
+			boolean isPrintHelp,
+			@Nullable Integer port,
+			@Nullable URL defaultConfig,
+			@Nullable List<URL> jars,
+			@Nullable List<URL> libraryDirs) {
 		this.isPrintHelp = isPrintHelp;
 		this.port = port;
 		this.defaultConfig = defaultConfig;

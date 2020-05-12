@@ -16,20 +16,20 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.operation;
 
 /**
- * Exception thrown in gateway.
+ * Exception thrown during parsing SQL statement.
  */
-public class SqlGatewayException extends RuntimeException {
+public class SqlParseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public SqlGatewayException(String msg) {
-		super(msg);
+	public SqlParseException(String message) {
+		super(message);
 	}
 
-	public SqlGatewayException(String msg, Throwable cause) {
-		super(msg, cause);
+	public SqlParseException(String message, Throwable e) {
+		super(message, e);
 	}
 }

@@ -61,7 +61,7 @@ public class ShowCurrentDatabaseOperationTest extends OperationTestBase {
 
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.DATABASE, new VarCharType(false, 7)))
+			.columns(ColumnInfo.create(ConstantNames.SHOW_CURRENT_DATABASE_RESULT, new VarCharType(false, 7)))
 			.data(Row.of("default"))
 			.build();
 		assertEquals(expected, resultSet);

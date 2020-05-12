@@ -18,7 +18,7 @@
 
 package com.ververica.flink.table.gateway.rest.message;
 
-import com.ververica.flink.table.gateway.SessionID;
+import com.ververica.flink.table.gateway.rest.session.SessionID;
 
 import org.apache.flink.runtime.rest.messages.ConversionException;
 import org.apache.flink.runtime.rest.messages.MessagePathParameter;

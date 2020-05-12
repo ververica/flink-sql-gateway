@@ -29,12 +29,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Operation for SHOW DATABASE command.
+ * Operation for SHOW DATABASES command.
  */
-public class ShowDatabaseOperation implements NonJobOperation {
+public class ShowDatabasesOperation implements NonJobOperation {
 	private final ExecutionContext<?> context;
 
-	public ShowDatabaseOperation(SessionContext context) {
+	public ShowDatabasesOperation(SessionContext context) {
 		this.context = context.getExecutionContext();
 	}
 
@@ -42,6 +42,6 @@ public class ShowDatabaseOperation implements NonJobOperation {
 	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
 		final List<String> databases = context.wrapClassLoader(() -> Arrays.asList(tableEnv.listDatabases()));
-		return OperationUtil.stringListToResultSet(databases, ConstantNames.DATABASES);
+		return OperationUtil.stringListToResultSet(databases, ConstantNames.SHOW_DATABASES_RESULT);
 	}
 }

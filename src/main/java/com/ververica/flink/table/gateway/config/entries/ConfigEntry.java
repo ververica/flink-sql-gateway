@@ -18,7 +18,7 @@
 
 package com.ververica.flink.table.gateway.config.entries;
 
-import com.ververica.flink.table.gateway.SqlGatewayException;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.descriptors.DescriptorProperties;

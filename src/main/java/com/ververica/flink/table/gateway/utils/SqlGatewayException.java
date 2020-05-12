@@ -16,20 +16,20 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.utils;
 
 /**
- * Exception thrown during the execution of SQL statements.
+ * Exception thrown in gateway.
  */
-public class SqlExecutionException extends RuntimeException {
+public class SqlGatewayException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public SqlExecutionException(String message) {
-		super(message);
+	public SqlGatewayException(String msg) {
+		super(msg);
 	}
 
-	public SqlExecutionException(String message, Throwable e) {
-		super(message, e);
+	public SqlGatewayException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 }

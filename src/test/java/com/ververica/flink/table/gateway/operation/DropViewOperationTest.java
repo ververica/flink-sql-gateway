@@ -18,7 +18,7 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
 import org.junit.Test;
 

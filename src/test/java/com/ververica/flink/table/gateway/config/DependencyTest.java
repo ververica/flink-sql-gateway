@@ -18,12 +18,12 @@
 
 package com.ververica.flink.table.gateway.config;
 
-import com.ververica.flink.table.gateway.Session;
-import com.ververica.flink.table.gateway.SessionManager;
-import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand;
 import com.ververica.flink.table.gateway.context.DefaultContext;
+import com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
+import com.ververica.flink.table.gateway.rest.session.Session;
+import com.ververica.flink.table.gateway.rest.session.SessionManager;
 import com.ververica.flink.table.gateway.sink.TestTableSinkFactoryBase;
 import com.ververica.flink.table.gateway.source.TestTableSourceFactoryBase;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;

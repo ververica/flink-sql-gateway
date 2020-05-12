@@ -29,19 +29,19 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Operation for SHOW FUNCTION command.
+ * Operation for SHOW MODULES command.
  */
-public class ShowFunctionOperation implements NonJobOperation {
+public class ShowModulesOperation implements NonJobOperation {
 	private final ExecutionContext<?> context;
 
-	public ShowFunctionOperation(SessionContext context) {
+	public ShowModulesOperation(SessionContext context) {
 		this.context = context.getExecutionContext();
 	}
 
 	@Override
 	public ResultSet execute() {
 		final TableEnvironment tableEnv = context.getTableEnvironment();
-		final List<String> functions = context.wrapClassLoader(() -> Arrays.asList(tableEnv.listFunctions()));
-		return OperationUtil.stringListToResultSet(functions, ConstantNames.FUNCTIONS);
+		final List<String> modules = context.wrapClassLoader(() -> Arrays.asList(tableEnv.listModules()));
+		return OperationUtil.stringListToResultSet(modules, ConstantNames.SHOW_MODULES_RESULT);
 	}
 }

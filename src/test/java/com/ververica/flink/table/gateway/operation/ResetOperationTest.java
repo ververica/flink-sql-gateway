@@ -72,8 +72,8 @@ public class ResetOperationTest extends OperationTestBase {
 		ResultSet expected1 = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
 			.columns(
-				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+				ColumnInfo.create(ConstantNames.SET_KEY, new VarCharType(true, 36)),
+				ColumnInfo.create(ConstantNames.SET_VALUE, new VarCharType(true, 5)))
 			.data(properties)
 			.build();
 
@@ -98,8 +98,8 @@ public class ResetOperationTest extends OperationTestBase {
 		ResultSet expected2 = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
 			.columns(
-				ColumnInfo.create(ConstantNames.KEY, new VarCharType(true, 36)),
-				ColumnInfo.create(ConstantNames.VALUE, new VarCharType(true, 5)))
+				ColumnInfo.create(ConstantNames.SET_KEY, new VarCharType(true, 36)),
+				ColumnInfo.create(ConstantNames.SET_VALUE, new VarCharType(true, 5)))
 			.data(properties)
 			.build();
 

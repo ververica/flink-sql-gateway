@@ -18,8 +18,8 @@
 
 package com.ververica.flink.table.gateway.result;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.sink.CollectBatchTableSink;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.JobExecutionResult;
@@ -56,11 +56,10 @@ public class BatchResult<C> extends AbstractResult<C, Row> {
 	private boolean allResultRetrieved = false;
 
 	public BatchResult(
-		TableSchema tableSchema,
-		RowTypeInfo outputType,
-		ExecutionConfig config,
-		ClassLoader classLoader) {
-
+			TableSchema tableSchema,
+			RowTypeInfo outputType,
+			ExecutionConfig config,
+			ClassLoader classLoader) {
 		// TODO supports large result set
 		accumulatorName = new AbstractID().toString();
 		tableSink = new CollectBatchTableSink(accumulatorName, outputType.createSerializer(config), tableSchema);

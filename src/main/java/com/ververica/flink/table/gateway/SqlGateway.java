@@ -20,9 +20,9 @@ package com.ververica.flink.table.gateway;
 
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
-import com.ververica.flink.table.gateway.options.GatewayOptions;
-import com.ververica.flink.table.gateway.options.GatewayOptionsParser;
 import com.ververica.flink.table.gateway.rest.SqlGatewayEndpoint;
+import com.ververica.flink.table.gateway.rest.session.SessionManager;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;

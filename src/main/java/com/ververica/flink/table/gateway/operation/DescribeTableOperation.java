@@ -18,7 +18,6 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
@@ -26,6 +25,7 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.rest.result.TableSchemaUtil;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableSchema;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Operation for DESCRIBE_TABLE command.
+ * Operation for DESCRIBE TABLE command.
  */
 public class DescribeTableOperation implements NonJobOperation {
 	private final ExecutionContext<?> context;
@@ -59,7 +59,8 @@ public class DescribeTableOperation implements NonJobOperation {
 
 			return ResultSet.builder()
 				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-				.columns(ColumnInfo.create(ConstantNames.SCHEMA, new VarCharType(false, length)))
+				.columns(
+					ColumnInfo.create(ConstantNames.DESCRIBE_RESULT, new VarCharType(false, length)))
 				.data(data)
 				.build();
 		} catch (Throwable t) {

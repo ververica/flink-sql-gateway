@@ -18,8 +18,8 @@
 
 package com.ververica.flink.table.gateway.context;
 
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.config.Environment;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.client.cli.CliFrontend;

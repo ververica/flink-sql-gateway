@@ -18,9 +18,6 @@
 
 package com.ververica.flink.table.gateway.rest.handler;
 
-import com.ververica.flink.table.gateway.Session;
-import com.ververica.flink.table.gateway.SessionManager;
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.rest.message.JobIdPathParameter;
 import com.ververica.flink.table.gateway.rest.message.ResultFetchMessageParameters;
 import com.ververica.flink.table.gateway.rest.message.ResultFetchRequestBody;
@@ -28,6 +25,9 @@ import com.ververica.flink.table.gateway.rest.message.ResultFetchResponseBody;
 import com.ververica.flink.table.gateway.rest.message.ResultTokenPathParameter;
 import com.ververica.flink.table.gateway.rest.message.SessionIdPathParameter;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
+import com.ververica.flink.table.gateway.rest.session.Session;
+import com.ververica.flink.table.gateway.rest.session.SessionManager;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.time.Time;

@@ -18,9 +18,9 @@
 
 package com.ververica.flink.table.gateway.deployment;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;

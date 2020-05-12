@@ -16,15 +16,18 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway;
+package com.ververica.flink.table.gateway.rest.session;
 
-import com.ververica.flink.table.gateway.SqlCommandParser.SqlCommandCall;
 import com.ververica.flink.table.gateway.config.entries.ExecutionEntry;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.operation.JobOperation;
 import com.ververica.flink.table.gateway.operation.Operation;
 import com.ververica.flink.table.gateway.operation.OperationFactory;
+import com.ververica.flink.table.gateway.operation.SqlCommandParser;
+import com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommandCall;
+import com.ververica.flink.table.gateway.operation.SqlParseException;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;

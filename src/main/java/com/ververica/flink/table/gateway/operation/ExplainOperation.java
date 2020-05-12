@@ -18,13 +18,13 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import com.ververica.flink.table.gateway.SqlExecutionException;
 import com.ververica.flink.table.gateway.context.ExecutionContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
+import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
@@ -52,7 +52,7 @@ public class ExplainOperation implements NonJobOperation {
 			String explanation = context.wrapClassLoader(() -> tableEnv.explain(table));
 			return ResultSet.builder()
 				.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-				.columns(ColumnInfo.create(ConstantNames.EXPLANATION, new VarCharType(false, explanation.length())))
+				.columns(ColumnInfo.create(ConstantNames.EXPLAIN_RESULT, new VarCharType(false, explanation.length())))
 				.data(Row.of(explanation))
 				.build();
 		} catch (Throwable t) {

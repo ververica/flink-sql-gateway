@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package com.ververica.flink.table.gateway.options;
+package com.ververica.flink.table.gateway;
 
-import com.ververica.flink.table.gateway.SqlGatewayException;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.core.fs.Path;
 

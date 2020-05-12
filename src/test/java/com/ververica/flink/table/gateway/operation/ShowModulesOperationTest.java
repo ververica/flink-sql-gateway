@@ -36,32 +36,29 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests for {@link ShowDatabaseOperation}.
+ * Tests for {@link ShowModulesOperation}.
  */
-public class ShowDatabaseOperationTest extends OperationTestBase {
+public class ShowModulesOperationTest extends OperationTestBase {
 
-	private static final String DEFAULTS_ENVIRONMENT_FILE = "test-sql-gateway-defaults.yaml";
+	private static final String DEFAULTS_ENVIRONMENT_FILE = "test-sql-gateway-modules.yaml";
 
 	@Override
 	protected Environment getSessionEnvironment() throws Exception {
 		final Map<String, String> replaceVars = new HashMap<>();
 		replaceVars.put("$VAR_PLANNER", "old");
 		replaceVars.put("$VAR_EXECUTION_TYPE", "batch");
-		replaceVars.put("$VAR_UPDATE_MODE", "");
 		return EnvironmentFileUtil.parseModified(DEFAULTS_ENVIRONMENT_FILE, replaceVars);
 	}
 
 	@Test
-	public void testShowDatabase() {
-		context.getExecutionContext().getTableEnvironment().useCatalog("catalog1");
-
-		ShowDatabaseOperation operation = new ShowDatabaseOperation(context);
+	public void testShowModule() {
+		ShowModulesOperation operation = new ShowModulesOperation(context);
 		ResultSet resultSet = operation.execute();
 
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
-			.columns(ColumnInfo.create(ConstantNames.DATABASES, new VarCharType(false, 7)))
-			.data(Row.of("default"))
+			.columns(ColumnInfo.create(ConstantNames.SHOW_MODULES_RESULT, new VarCharType(false, 8)))
+			.data(Row.of("core"), Row.of("mymodule"), Row.of("myhive"), Row.of("myhive2"))
 			.build();
 		assertEquals(expected, resultSet);
 	}

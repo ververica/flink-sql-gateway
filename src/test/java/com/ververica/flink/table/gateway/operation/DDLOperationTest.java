@@ -22,9 +22,9 @@ import com.ververica.flink.table.gateway.rest.result.ResultSet;
 
 import org.junit.Test;
 
-import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_DATABASE;
-import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.CREATE_TABLE;
-import static com.ververica.flink.table.gateway.SqlCommandParser.SqlCommand.DROP_TABLE;
+import static com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand.CREATE_DATABASE;
+import static com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand.CREATE_TABLE;
+import static com.ververica.flink.table.gateway.operation.SqlCommandParser.SqlCommand.DROP_TABLE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 

@@ -18,9 +18,9 @@
 
 package com.ververica.flink.table.gateway.result;
 
-import com.ververica.flink.table.gateway.SqlGatewayException;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.config.entries.DeploymentEntry;
+import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -42,9 +42,9 @@ import java.util.stream.Stream;
 public class ResultUtil {
 
 	public static <C> BatchResult<C> createBatchResult(
-		TableSchema schema,
-		ExecutionConfig config,
-		ClassLoader classLoader) {
+			TableSchema schema,
+			ExecutionConfig config,
+			ClassLoader classLoader) {
 		final TypeInformation[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
 			.map(TypeInfoDataTypeConverter::fromDataTypeToTypeInfo)
 			.toArray(TypeInformation[]::new);
@@ -54,11 +54,11 @@ public class ResultUtil {
 	}
 
 	public static <C> ChangelogResult<C> createChangelogResult(
-		Configuration flinkConfig,
-		Environment env,
-		TableSchema schema,
-		ExecutionConfig config,
-		ClassLoader classLoader) {
+			Configuration flinkConfig,
+			Environment env,
+			TableSchema schema,
+			ExecutionConfig config,
+			ClassLoader classLoader) {
 		final TypeInformation[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
 			.map(TypeInfoDataTypeConverter::fromDataTypeToTypeInfo)
 			.toArray(TypeInformation[]::new);

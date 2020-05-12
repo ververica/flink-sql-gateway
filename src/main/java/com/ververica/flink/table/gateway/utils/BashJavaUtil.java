@@ -18,10 +18,10 @@
 
 package com.ververica.flink.table.gateway.utils;
 
+import com.ververica.flink.table.gateway.GatewayOptions;
+import com.ververica.flink.table.gateway.GatewayOptionsParser;
 import com.ververica.flink.table.gateway.config.Environment;
 import com.ververica.flink.table.gateway.context.DefaultContext;
-import com.ververica.flink.table.gateway.options.GatewayOptions;
-import com.ververica.flink.table.gateway.options.GatewayOptionsParser;
 
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.DeploymentOptions;
@@ -38,7 +38,7 @@ import static org.apache.flink.util.Preconditions.checkArgument;
 public class BashJavaUtil {
 	private static final String EXECUTION_PREFIX = "BASH_JAVA_UTILS_EXEC_RESULT:";
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		checkArgument(args.length > 0, "Command not specified.");
 
 		switch (Command.valueOf(args[0])) {
