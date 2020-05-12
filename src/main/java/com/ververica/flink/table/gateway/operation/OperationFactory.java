@@ -71,7 +71,7 @@ public class OperationFactory {
 				break;
 			case INSERT_INTO:
 			case INSERT_OVERWRITE:
-				operation = new InsertOperation(context, call.operands[0]);
+				operation = new InsertOperation(context, call.operands[0], call.operands[1]);
 				break;
 			case SHOW_MODULES:
 				operation = new ShowModulesOperation(context);

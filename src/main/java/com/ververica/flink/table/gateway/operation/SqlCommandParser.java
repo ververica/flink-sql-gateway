@@ -128,8 +128,9 @@ public final class SqlCommandParser {
 			cmd = SqlCommand.SELECT;
 			operands = new String[] { stmt };
 		} else if (node instanceof RichSqlInsert) {
-			cmd = ((RichSqlInsert) node).isOverwrite() ? SqlCommand.INSERT_OVERWRITE : SqlCommand.INSERT_INTO;
-			operands = new String[] { stmt };
+			RichSqlInsert insertNode = (RichSqlInsert) node;
+			cmd = insertNode.isOverwrite() ? SqlCommand.INSERT_OVERWRITE : SqlCommand.INSERT_INTO;
+			operands = new String[] { stmt, insertNode.getTargetTable().toString() };
 		} else if (node instanceof SqlShowTables) {
 			cmd = SqlCommand.SHOW_TABLES;
 			operands = new String[0];

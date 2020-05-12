@@ -26,9 +26,6 @@ public class ConstantNames {
 	// for statement execution
 	public static final String JOB_ID = "job_id";
 
-	// for DMLs
-	public static final String AFFECTED_ROW_COUNT = "affected_row_count";
-
 	// for results with SUCCESS result kind
 	public static final String RESULT = "result";
 	public static final String OK = "OK";

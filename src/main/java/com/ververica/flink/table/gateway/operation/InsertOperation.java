@@ -45,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -66,12 +65,12 @@ public class InsertOperation extends AbstractJobOperation {
 
 	private boolean fetched = false;
 
-	public InsertOperation(SessionContext context, String statement) {
+	public InsertOperation(SessionContext context, String statement, String tableIdentifier) {
 		super(context);
 		this.statement = statement;
 
-		this.columnInfos = new ArrayList<>();
-		this.columnInfos.add(ColumnInfo.create(ConstantNames.AFFECTED_ROW_COUNT, new BigIntType(false)));
+		this.columnInfos = Collections.singletonList(
+			ColumnInfo.create(tableIdentifier, new BigIntType(false)));
 	}
 
 	@Override

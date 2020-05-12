@@ -88,21 +88,21 @@ public class SqlCommandParserTest {
 	@Test
 	public void testInsert() {
 		String query1 = "insert into MySink select * from MyTable where a > 10";
-		checkCommand(query1, SqlCommand.INSERT_INTO, query1);
+		checkCommand(query1, SqlCommand.INSERT_INTO, query1, "MySink");
 
 		String query2 = "\n -- single-line comment \n insert into MySink select * from MyTable where a > 10 " +
 			"/* multi-line comments \n more comments */ \n";
-		checkCommand(query2, SqlCommand.INSERT_INTO, query2);
+		checkCommand(query2, SqlCommand.INSERT_INTO, query2, "MySink");
 	}
 
 	@Test
 	public void testInsertOverwrite() {
 		String query1 = "insert overwrite MySink select * from MyTable where a > 10";
-		checkCommand(query1, SqlCommand.INSERT_OVERWRITE, query1);
+		checkCommand(query1, SqlCommand.INSERT_OVERWRITE, query1, "MySink");
 
 		String query2 = "\n -- single-line comment \n insert overwrite MySink select * from MyTable where a > 10 " +
 			"/* multi-line comments \n more comments */ \n";
-		checkCommand(query2, SqlCommand.INSERT_OVERWRITE, query2);
+		checkCommand(query2, SqlCommand.INSERT_OVERWRITE, query2, "MySink");
 	}
 
 	@Test
