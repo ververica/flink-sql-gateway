@@ -93,6 +93,10 @@ public class SqlCommandParserTest {
 		String query2 = "\n -- single-line comment \n insert into MySink select * from MyTable where a > 10 " +
 			"/* multi-line comments \n more comments */ \n";
 		checkCommand(query2, SqlCommand.INSERT_INTO, query2, "MySink");
+
+		String query3 = "\n -- single-line comment \n insert into MyCat.MyDb.MySink " +
+			"select * from MyTable where a > 10 /* multi-line comments \n more comments */ \n";
+		checkCommand(query3, SqlCommand.INSERT_INTO, query3, "MyCat.MyDb.MySink");
 	}
 
 	@Test
