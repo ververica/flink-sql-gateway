@@ -65,8 +65,8 @@ public class SessionEntry extends ConfigEntry {
 	 * overwritten by the second one.
 	 */
 	public static SessionEntry merge(SessionEntry session1, SessionEntry session2) {
-		final Map<String, String> mergedProperties = new HashMap<>(session1.asTopLevelMap());
-		mergedProperties.putAll(session2.asTopLevelMap());
+		final Map<String, String> mergedProperties = new HashMap<>(session1.asMap());
+		mergedProperties.putAll(session2.asMap());
 
 		final DescriptorProperties properties = new DescriptorProperties(true);
 		properties.putProperties(mergedProperties);
