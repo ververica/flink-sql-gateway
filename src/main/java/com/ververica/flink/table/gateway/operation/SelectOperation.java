@@ -212,7 +212,7 @@ public class SelectOperation extends AbstractJobOperation {
 			// writing to a sink requires an optimization step that might reference UDFs during code compilation
 			executionContext.wrapClassLoader(() -> {
 				executionContext.getTableEnvironment().registerTableSink(tableName, result.getTableSink());
-				table.insertInto(executionContext.getQueryConfig(), tableName);
+				table.insertInto(tableName);
 				return null;
 			});
 			pipeline = executionContext.createPipeline(jobName);

@@ -34,9 +34,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.core.execution.JobClient;
-import org.apache.flink.table.api.StreamQueryConfig;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.types.logical.BigIntType;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
@@ -125,12 +123,7 @@ public class InsertOperation extends AbstractJobOperation {
 		// parse and validate statement
 		try {
 			executionContext.wrapClassLoader(() -> {
-				if (tableEnv instanceof StreamTableEnvironment) {
-					((StreamTableEnvironment) tableEnv)
-						.sqlUpdate(statement, (StreamQueryConfig) executionContext.getQueryConfig());
-				} else {
-					tableEnv.sqlUpdate(statement);
-				}
+				tableEnv.sqlUpdate(statement);
 				return null;
 			});
 		} catch (Throwable t) {

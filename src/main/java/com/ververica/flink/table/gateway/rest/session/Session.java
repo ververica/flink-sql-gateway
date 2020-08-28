@@ -32,7 +32,10 @@ import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.table.planner.plan.metadata.FlinkDefaultRelMetadataProvider;
 
+import org.apache.calcite.rel.metadata.JaninoRelMetadataProvider;
+import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +79,11 @@ public class Session {
 	}
 
 	public Tuple2<ResultSet, SqlCommandParser.SqlCommand> runStatement(String statement) {
+		// TODO: This is a temporary fix to avoid NPE.
+		//  In SQL gateway, TableEnvironment is created and used by different threads, thus causing this problem.
+		RelMetadataQuery.THREAD_PROVIDERS
+			.set(JaninoRelMetadataProvider.of(FlinkDefaultRelMetadataProvider.INSTANCE()));
+
 		LOG.info("Session: {}, run statement: {}", sessionId, statement);
 		boolean isBlinkPlanner = context.getExecutionContext().getEnvironment().getExecution().getPlanner()
 			.equalsIgnoreCase(ExecutionEntry.EXECUTION_PLANNER_VALUE_BLINK);

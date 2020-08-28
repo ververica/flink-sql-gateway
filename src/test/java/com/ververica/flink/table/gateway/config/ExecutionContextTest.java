@@ -30,9 +30,9 @@ import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.execution.librarycache.FlinkUserCodeClassLoaders;
 import org.apache.flink.table.api.TableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.api.config.ExecutionConfigOptions;
 import org.apache.flink.table.api.config.OptimizerConfigOptions;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.GenericInMemoryCatalog;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.flink.util.FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -346,10 +347,19 @@ public class ExecutionContextTest {
 	// a catalog that requires the thread context class loader to be a user code classloader during construction and opening
 	private static class TestClassLoaderCatalog extends GenericInMemoryCatalog {
 
-		private static final Class parentFirstCL = FlinkUserCodeClassLoaders.parentFirst(
-			new URL[0], TestClassLoaderCatalog.class.getClassLoader()).getClass();
-		private static final Class childFirstCL = FlinkUserCodeClassLoaders.childFirst(
-			new URL[0], TestClassLoaderCatalog.class.getClassLoader(), new String[0]).getClass();
+		private static final Class parentFirstCL = FlinkUserCodeClassLoaders
+			.parentFirst(
+				new URL[0],
+				TestClassLoaderCatalog.class.getClassLoader(),
+				NOOP_EXCEPTION_HANDLER)
+			.getClass();
+		private static final Class childFirstCL = FlinkUserCodeClassLoaders
+			.childFirst(
+				new URL[0],
+				TestClassLoaderCatalog.class.getClassLoader(),
+				new String[0],
+				NOOP_EXCEPTION_HANDLER)
+			.getClass();
 
 		TestClassLoaderCatalog(String name) {
 			super(name);

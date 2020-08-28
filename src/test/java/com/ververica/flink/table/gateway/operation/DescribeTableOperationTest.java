@@ -122,7 +122,7 @@ public class DescribeTableOperationTest extends OperationTestBase {
 			Row.of("f24", "INT", false, null, null, null),
 			Row.of("f25", "STRING", false, null, null, null),
 			Row.of("f26", "ROW<`f0` INT NOT NULL, `f1` INT>", false, null, null, null),
-			Row.of("ts", "TIMESTAMP(3)", true, null, "TO_TIMESTAMP(`f25`)", "`ts` - INTERVAL '1' SECOND"));
+			Row.of("ts", "TIMESTAMP(3) *ROWTIME*", true, null, "TO_TIMESTAMP(`f25`)", "`ts` - INTERVAL '1' SECOND"));
 		ResultSet expected = ResultSet.builder()
 			.resultKind(ResultKind.SUCCESS_WITH_CONTENT)
 			.columns(
