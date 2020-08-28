@@ -24,7 +24,7 @@ under the License.
     <artifactId>flink-sql-gateway</artifactId>
     <groupId>com.ververica</groupId>
     <name>flink-sql-gateway</name>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
 
     <description>
         Flink SQL gateway is a service that allows other applications
