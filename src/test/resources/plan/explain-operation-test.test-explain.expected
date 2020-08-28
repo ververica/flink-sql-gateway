@@ -1,6 +1,6 @@
 == Abstract Syntax Tree ==
 LogicalProject(IntegerField1=[$0], StringField1=[$1])
-  EnumerableTableScan(table=[[default_catalog, default_database, TableNumber1]])
+  LogicalTableScan(table=[[default_catalog, default_database, TableNumber1]])
 
 == Optimized Logical Plan ==
 BatchTableSourceScan(table=[[default_catalog, default_database, TableNumber1]], fields=[IntegerField1, StringField1], source=[CsvTableSource(read fields: IntegerField1, StringField1)])

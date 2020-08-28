@@ -47,8 +47,8 @@ public class RandomSourceFactory implements TableSourceFactory<Row> {
 	public List<String> supportedProperties() {
 		return Arrays.asList(
 			RandomSourceValidator.RANDOM_LIMIT,
-			Schema.SCHEMA + ".#." + DescriptorProperties.TABLE_SCHEMA_DATA_TYPE,
-			Schema.SCHEMA + ".#." + DescriptorProperties.TABLE_SCHEMA_NAME
+			Schema.SCHEMA + ".#." + DescriptorProperties.DATA_TYPE,
+			Schema.SCHEMA + ".#." + DescriptorProperties.NAME
 		);
 	}
 

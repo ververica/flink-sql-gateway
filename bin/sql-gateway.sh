@@ -95,7 +95,7 @@ FULL_CLASSPATH="`manglePathList "$CC_CLASSPATH:$INTERNAL_HADOOP_CLASSPATHS:$FLIN
 
 # build log config
 log=$FLINK_SQL_GATEWAY_LOG/flink-sql-gateway-$FLINK_IDENT_STRING-$HOSTNAME.log
-log_setting=(-Dlog.file="$log" -Dlog4j.configuration=file:"$FLINK_SQL_GATEWAY_CONF"/log4j.properties -Dlogback.configurationFile=file:"$FLINK_SQL_GATEWAY_CONF"/logback.xml)
+log_setting=(-Dlog.file="$log" -Dlog4j.configurationFile=file:"$FLINK_SQL_GATEWAY_CONF"/log4j.properties -Dlog4j.configuration=file:"$FLINK_SQL_GATEWAY_CONF"/log4j.properties -Dlogback.configurationFile=file:"$FLINK_SQL_GATEWAY_CONF"/logback.xml)
 
 # read jvm args from config
 #
@@ -106,7 +106,7 @@ if [[ $? -ne 0 ]]; then
     echo "$jvm_args_output" 1>&2
     exit 1
 fi
-JVM_ARGS=`extractExecutionParams "$jvm_args_output"`
+JVM_ARGS=`extractExecutionResults "$jvm_args_output" 1`
 
 
 if [ -n "$FLINK_SQL_GATEWAY_JAR" ]; then

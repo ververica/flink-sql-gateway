@@ -20,6 +20,7 @@ package com.ververica.flink.table.gateway.sink;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.descriptors.DescriptorProperties;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.table.descriptors.ConnectorDescriptorValidator.CONNECTOR_TYPE;
-import static org.apache.flink.table.descriptors.DescriptorProperties.TABLE_SCHEMA_EXPR;
+import static org.apache.flink.table.descriptors.DescriptorProperties.EXPR;
 import static org.apache.flink.table.descriptors.DescriptorProperties.WATERMARK;
 import static org.apache.flink.table.descriptors.DescriptorProperties.WATERMARK_ROWTIME;
 import static org.apache.flink.table.descriptors.DescriptorProperties.WATERMARK_STRATEGY_DATA_TYPE;
@@ -80,7 +81,7 @@ public abstract class TestTableSinkFactoryBase implements StreamTableSinkFactory
 		properties.add(SCHEMA + ".#." + SCHEMA_DATA_TYPE);
 		properties.add(SCHEMA + ".#." + SCHEMA_TYPE);
 		properties.add(SCHEMA + ".#." + SCHEMA_NAME);
-		properties.add(SCHEMA + ".#." + TABLE_SCHEMA_EXPR);
+		properties.add(SCHEMA + ".#." + EXPR);
 		properties.add(SCHEMA + ".#." + ROWTIME_TIMESTAMPS_TYPE);
 		properties.add(SCHEMA + ".#." + ROWTIME_TIMESTAMPS_FROM);
 		properties.add(SCHEMA + ".#." + ROWTIME_WATERMARKS_TYPE);
@@ -141,8 +142,8 @@ public abstract class TestTableSinkFactoryBase implements StreamTableSinkFactory
 		}
 
 		@Override
-		public void emitDataStream(DataStream<Row> dataStream) {
-			// do nothing
+		public DataStreamSink<?> consumeDataStream(DataStream<Row> dataStream) {
+			return null;
 		}
 	}
 }

@@ -24,6 +24,10 @@ import com.ververica.flink.table.gateway.context.DefaultContext;
 import com.ververica.flink.table.gateway.context.SessionContext;
 import com.ververica.flink.table.gateway.utils.SqlGatewayException;
 
+import org.apache.flink.table.planner.plan.metadata.FlinkDefaultRelMetadataProvider;
+
+import org.apache.calcite.rel.metadata.JaninoRelMetadataProvider;
+import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +143,11 @@ public class SessionManager {
 	}
 
 	public Session getSession(String sessionId) {
+		// TODO: This is a temporary fix to avoid NPE.
+		//  In SQL gateway, TableEnvironment is created and used by different threads, thus causing this problem.
+		RelMetadataQuery.THREAD_PROVIDERS
+			.set(JaninoRelMetadataProvider.of(FlinkDefaultRelMetadataProvider.INSTANCE()));
+
 		// TODO lock sessions to prevent fetching an expired session?
 		Session session = sessions.get(sessionId);
 		if (session == null) {
