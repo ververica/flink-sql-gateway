@@ -18,33 +18,14 @@
 
 package com.ververica.flink.table.gateway.operation;
 
-import org.apache.flink.sql.parser.ddl.SqlAlterDatabase;
-import org.apache.flink.sql.parser.ddl.SqlAlterTable;
-import org.apache.flink.sql.parser.ddl.SqlCreateDatabase;
-import org.apache.flink.sql.parser.ddl.SqlCreateTable;
-import org.apache.flink.sql.parser.ddl.SqlCreateView;
-import org.apache.flink.sql.parser.ddl.SqlDropDatabase;
-import org.apache.flink.sql.parser.ddl.SqlDropTable;
-import org.apache.flink.sql.parser.ddl.SqlDropView;
-import org.apache.flink.sql.parser.ddl.SqlUseCatalog;
-import org.apache.flink.sql.parser.ddl.SqlUseDatabase;
+import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.*;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.flink.sql.parser.ddl.*;
 import org.apache.flink.sql.parser.dml.RichSqlInsert;
-import org.apache.flink.sql.parser.dql.SqlRichDescribeTable;
-import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
-import org.apache.flink.sql.parser.dql.SqlShowDatabases;
-import org.apache.flink.sql.parser.dql.SqlShowFunctions;
-import org.apache.flink.sql.parser.dql.SqlShowTables;
+import org.apache.flink.sql.parser.dql.*;
 import org.apache.flink.sql.parser.impl.FlinkSqlParserImpl;
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance;
-
-import org.apache.calcite.config.Lex;
-import org.apache.calcite.sql.SqlDrop;
-import org.apache.calcite.sql.SqlExplain;
-import org.apache.calcite.sql.SqlKind;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlSetOption;
-import org.apache.calcite.sql.parser.SqlParser;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -194,7 +175,7 @@ public final class SqlCommandParser {
 			operands = new String[0];
 		} else if (node instanceof SqlUseCatalog) {
 			cmd = SqlCommand.USE_CATALOG;
-			operands = new String[] { ((SqlUseCatalog) node).getCatalogName() };
+			operands = new String[] { ((SqlUseCatalog) node).getCatalogName().getSimple() };
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
 			operands = new String[] { ((SqlUseDatabase) node).getDatabaseName().toString() };

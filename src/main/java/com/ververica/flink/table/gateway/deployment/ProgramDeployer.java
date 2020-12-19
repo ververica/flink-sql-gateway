@@ -21,12 +21,7 @@ package com.ververica.flink.table.gateway.deployment;
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
-import org.apache.flink.core.execution.DefaultExecutorServiceLoader;
-import org.apache.flink.core.execution.JobClient;
-import org.apache.flink.core.execution.PipelineExecutor;
-import org.apache.flink.core.execution.PipelineExecutorFactory;
-import org.apache.flink.core.execution.PipelineExecutorServiceLoader;
-
+import org.apache.flink.core.execution.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +36,7 @@ public class ProgramDeployer {
 	private final Configuration configuration;
 	private final Pipeline pipeline;
 	private final String jobName;
+	private final ClassLoader userCodeClassloader;
 
 	/**
 	 * Deploys a table program on the cluster.
@@ -52,10 +48,12 @@ public class ProgramDeployer {
 	public ProgramDeployer(
 			Configuration configuration,
 			String jobName,
-			Pipeline pipeline) {
+			Pipeline pipeline,
+			ClassLoader userCodeClassloader) {
 		this.configuration = configuration;
 		this.pipeline = pipeline;
 		this.jobName = jobName;
+		this.userCodeClassloader = userCodeClassloader;
 	}
 
 	public CompletableFuture<JobClient> deploy() {
@@ -78,7 +76,7 @@ public class ProgramDeployer {
 
 		final PipelineExecutor executor = executorFactory.getExecutor(configuration);
 		try {
-			return executor.execute(pipeline, configuration);
+			return executor.execute(pipeline, configuration, userCodeClassloader);
 		} catch (Exception e) {
 			throw new RuntimeException("Could not execute program.", e);
 		}
