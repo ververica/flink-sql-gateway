@@ -85,10 +85,10 @@ public class DescribeTableOperation implements NonJobOperation {
 			boolean isNullable = logicalType.isNullable();
 			String key = fieldToPrimaryKey.getOrDefault(column.getName(), null);
 
-			/**
-			 * todo
-			 */
-			String computedColumn = ((TableColumn.ComputedColumn)column).getExpression();
+			String computedColumn = null;
+			if (column instanceof TableColumn.ComputedColumn) {
+				computedColumn = ((TableColumn.ComputedColumn) column).getExpression();
+			}
 			String watermark = fieldToWatermark.getOrDefault(column.getName(), null);
 
 			data.add(Row.of(name, type, isNullable, key, computedColumn, watermark));
