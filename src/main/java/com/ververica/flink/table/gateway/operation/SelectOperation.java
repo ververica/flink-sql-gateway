@@ -26,15 +26,9 @@ import com.ververica.flink.table.gateway.rest.result.ColumnInfo;
 import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
-import com.ververica.flink.table.gateway.result.BatchResult;
-import com.ververica.flink.table.gateway.result.ChangelogResult;
-import com.ververica.flink.table.gateway.result.Result;
-import com.ververica.flink.table.gateway.result.ResultDescriptor;
-import com.ververica.flink.table.gateway.result.ResultUtil;
-import com.ververica.flink.table.gateway.result.TypedResult;
+import com.ververica.flink.table.gateway.result.*;
 import com.ververica.flink.table.gateway.utils.SqlExecutionException;
 import com.ververica.flink.table.gateway.utils.SqlGatewayException;
-
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -45,20 +39,16 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableColumn;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.api.internal.TableEnvironmentInternal;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.table.types.logical.utils.LogicalTypeUtils;
 import org.apache.flink.table.types.utils.DataTypeUtils;
 import org.apache.flink.types.Row;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Operation for SELECT command.
@@ -211,7 +201,7 @@ public class SelectOperation extends AbstractJobOperation {
 		try {
 			// writing to a sink requires an optimization step that might reference UDFs during code compilation
 			executionContext.wrapClassLoader(() -> {
-				executionContext.getTableEnvironment().registerTableSink(tableName, result.getTableSink());
+				((TableEnvironmentInternal) executionContext.getTableEnvironment()).registerTableSinkInternal(tableName, result.getTableSink());
 				table.insertInto(tableName);
 				return null;
 			});
@@ -239,7 +229,7 @@ public class SelectOperation extends AbstractJobOperation {
 		configuration.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, true);
 
 		// create execution
-		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline);
+		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline, executionContext.getClassLoader());
 
 		JobClient jobClient;
 		// blocking deployment

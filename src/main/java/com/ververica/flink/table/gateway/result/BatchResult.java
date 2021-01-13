@@ -20,7 +20,6 @@ package com.ververica.flink.table.gateway.result;
 
 import com.ververica.flink.table.gateway.sink.CollectBatchTableSink;
 import com.ververica.flink.table.gateway.utils.SqlExecutionException;
-
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.accumulators.SerializedListAccumulator;
@@ -70,7 +69,7 @@ public class BatchResult<C> extends AbstractResult<C, Row> {
 	@Override
 	public void startRetrieval(JobClient jobClient) {
 		CompletableFuture.completedFuture(jobClient)
-			.thenCompose(client -> client.getJobExecutionResult(classLoader))
+			.thenCompose(client -> client.getJobExecutionResult())
 			.thenAccept(new ResultRetrievalHandler())
 			.whenComplete((unused, throwable) -> {
 				if (throwable != null) {

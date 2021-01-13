@@ -24,7 +24,7 @@ under the License.
     <artifactId>flink-sql-gateway</artifactId>
     <groupId>com.ververica</groupId>
     <name>flink-sql-gateway</name>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
 
     <description>
         Flink SQL gateway is a service that allows other applications
@@ -34,7 +34,7 @@ under the License.
     <packaging>jar</packaging>
 
     <properties>
-        <flink.version>1.11.1</flink.version>
+        <flink.version>1.12.0</flink.version>
         <java.version>1.8</java.version>
         <slf4j.version>1.7.15</slf4j.version>
         <log4j.version>1.2.17</log4j.version>
@@ -626,35 +626,35 @@ under the License.
             </plugin>
 
             <!-- Checkstyle -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <!-- Note: match version with docs/flinkDev/ide_setup.md -->
-                        <version>8.14</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <suppressionsLocation>/tools/maven/suppressions.xml</suppressionsLocation>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <configLocation>/tools/maven/checkstyle.xml</configLocation>
-                    <logViolationsToConsole>true</logViolationsToConsole>
-                    <failOnViolation>true</failOnViolation>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
+<!--                <version>2.17</version>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>com.puppycrawl.tools</groupId>-->
+<!--                        <artifactId>checkstyle</artifactId>-->
+<!--                        &lt;!&ndash; Note: match version with docs/flinkDev/ide_setup.md &ndash;&gt;-->
+<!--                        <version>8.14</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>validate</id>-->
+<!--                        <phase>validate</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <suppressionsLocation>/tools/maven/suppressions.xml</suppressionsLocation>-->
+<!--                    <includeTestSourceDirectory>true</includeTestSourceDirectory>-->
+<!--                    <configLocation>/tools/maven/checkstyle.xml</configLocation>-->
+<!--                    <logViolationsToConsole>true</logViolationsToConsole>-->
+<!--                    <failOnViolation>true</failOnViolation>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 

@@ -19,15 +19,10 @@
 package com.ververica.flink.table.gateway.context;
 
 import com.ververica.flink.table.gateway.config.Environment;
-import com.ververica.flink.table.gateway.config.entries.DeploymentEntry;
-import com.ververica.flink.table.gateway.config.entries.ExecutionEntry;
-import com.ververica.flink.table.gateway.config.entries.SinkTableEntry;
-import com.ververica.flink.table.gateway.config.entries.SourceSinkTableEntry;
-import com.ververica.flink.table.gateway.config.entries.SourceTableEntry;
-import com.ververica.flink.table.gateway.config.entries.TemporalTableEntry;
-import com.ververica.flink.table.gateway.config.entries.ViewEntry;
+import com.ververica.flink.table.gateway.config.entries.*;
 import com.ververica.flink.table.gateway.utils.SqlExecutionException;
-
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.dag.Pipeline;
 import org.apache.flink.api.java.ExecutionEnvironment;
@@ -42,60 +37,33 @@ import org.apache.flink.client.deployment.ClusterDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableConfig;
-import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.TableException;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.BatchTableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.api.bridge.java.internal.BatchTableEnvironmentImpl;
 import org.apache.flink.table.api.bridge.java.internal.StreamTableEnvironmentImpl;
-import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.CatalogManager;
-import org.apache.flink.table.catalog.FunctionCatalog;
-import org.apache.flink.table.catalog.GenericInMemoryCatalog;
+import org.apache.flink.table.api.internal.TableEnvironmentInternal;
+import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.delegation.Executor;
 import org.apache.flink.table.delegation.ExecutorFactory;
 import org.apache.flink.table.delegation.Planner;
 import org.apache.flink.table.delegation.PlannerFactory;
 import org.apache.flink.table.descriptors.CoreModuleDescriptorValidator;
-import org.apache.flink.table.factories.BatchTableSinkFactory;
-import org.apache.flink.table.factories.BatchTableSourceFactory;
-import org.apache.flink.table.factories.CatalogFactory;
-import org.apache.flink.table.factories.ComponentFactoryService;
-import org.apache.flink.table.factories.ModuleFactory;
-import org.apache.flink.table.factories.TableFactoryService;
-import org.apache.flink.table.factories.TableSinkFactory;
-import org.apache.flink.table.factories.TableSourceFactory;
-import org.apache.flink.table.functions.AggregateFunction;
-import org.apache.flink.table.functions.FunctionDefinition;
-import org.apache.flink.table.functions.FunctionService;
-import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.flink.table.functions.TableFunction;
-import org.apache.flink.table.functions.UserDefinedFunction;
+import org.apache.flink.table.factories.*;
+import org.apache.flink.table.functions.*;
 import org.apache.flink.table.module.Module;
 import org.apache.flink.table.module.ModuleManager;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.table.sources.TableSource;
 import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.TemporaryClassLoaderContext;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -281,8 +249,7 @@ public class ExecutionContext<ClusterID> {
 			availableCommandLines,
 			activeCommandLine);
 
-		Configuration executionConfig = activeCommandLine.applyCommandLineOptionsToConfiguration(
-			commandLine);
+		Configuration executionConfig = activeCommandLine.toConfiguration(commandLine);
 
 		try {
 			final ProgramOptions programOptions = ProgramOptions.create(commandLine);
@@ -327,33 +294,72 @@ public class ExecutionContext<ClusterID> {
 		return factory.createCatalog(name, catalogProperties);
 	}
 
-	private static TableSource<?> createTableSource(ExecutionEntry execution, Map<String, String> sourceProperties,
-		ClassLoader classLoader) {
-		if (execution.isStreamingPlanner()) {
+	private TableSource<?> createTableSource(String name, Map<String, String> sourceProperties) {
+		if (environment.getExecution().isStreamingPlanner()) {
 			final TableSourceFactory<?> factory = (TableSourceFactory<?>)
-				TableFactoryService.find(TableSourceFactory.class, sourceProperties, classLoader);
-			return factory.createTableSource(sourceProperties);
-		} else if (execution.isBatchPlanner()) {
+					TableFactoryService.find(TableSourceFactory.class, sourceProperties, classLoader);
+			return factory.createTableSource(new TableSourceFactoryContextImpl(
+					ObjectIdentifier.of(
+							tableEnv.getCurrentCatalog(),
+							tableEnv.getCurrentDatabase(),
+							name),
+					CatalogTableImpl.fromProperties(sourceProperties),
+					tableEnv.getConfig().getConfiguration(), true));
+		} else if (environment.getExecution().isBatchPlanner()) {
 			final BatchTableSourceFactory<?> factory = (BatchTableSourceFactory<?>)
-				TableFactoryService.find(BatchTableSourceFactory.class, sourceProperties, classLoader);
+					TableFactoryService.find(BatchTableSourceFactory.class, sourceProperties, classLoader);
 			return factory.createBatchTableSource(sourceProperties);
 		}
 		throw new SqlExecutionException("Unsupported execution type for sources.");
 	}
 
-	private static TableSink<?> createTableSink(ExecutionEntry execution, Map<String, String> sinkProperties,
-		ClassLoader classLoader) {
-		if (execution.isStreamingPlanner()) {
+	private TableSink<?> createTableSink(String name, Map<String, String> sinkProperties) {
+		if (environment.getExecution().isStreamingPlanner()) {
 			final TableSinkFactory<?> factory = (TableSinkFactory<?>)
-				TableFactoryService.find(TableSinkFactory.class, sinkProperties, classLoader);
-			return factory.createTableSink(sinkProperties);
-		} else if (execution.isBatchPlanner()) {
+					TableFactoryService.find(TableSinkFactory.class, sinkProperties, classLoader);
+			return factory.createTableSink(new TableSinkFactoryContextImpl(
+					ObjectIdentifier.of(
+							tableEnv.getCurrentCatalog(),
+							tableEnv.getCurrentDatabase(),
+							name),
+					CatalogTableImpl.fromProperties(sinkProperties),
+					tableEnv.getConfig().getConfiguration(),
+					!environment.getExecution().inStreamingMode(), true));
+		} else if (environment.getExecution().isBatchPlanner()) {
 			final BatchTableSinkFactory<?> factory = (BatchTableSinkFactory<?>)
-				TableFactoryService.find(BatchTableSinkFactory.class, sinkProperties, classLoader);
+					TableFactoryService.find(BatchTableSinkFactory.class, sinkProperties, classLoader);
 			return factory.createBatchTableSink(sinkProperties);
 		}
 		throw new SqlExecutionException("Unsupported execution type for sinks.");
 	}
+
+//	private static TableSource<?> createTableSource(ExecutionEntry execution, Map<String, String> sourceProperties,
+//		ClassLoader classLoader) {
+//		if (execution.isStreamingPlanner()) {
+//			final TableSourceFactory<?> factory = (TableSourceFactory<?>)
+//				TableFactoryService.find(TableSourceFactory.class, sourceProperties, classLoader);
+//			return factory.createTableSource(sourceProperties);
+//		} else if (execution.isBatchPlanner()) {
+//			final BatchTableSourceFactory<?> factory = (BatchTableSourceFactory<?>)
+//				TableFactoryService.find(BatchTableSourceFactory.class, sourceProperties, classLoader);
+//			return factory.createBatchTableSource(sourceProperties);
+//		}
+//		throw new SqlExecutionException("Unsupported execution type for sources.");
+//	}
+//
+//	private static TableSink<?> createTableSink(ExecutionEntry execution, Map<String, String> sinkProperties,
+//		ClassLoader classLoader) {
+//		if (execution.isStreamingPlanner()) {
+//			final TableSinkFactory<?> factory = (TableSinkFactory<?>)
+//				TableFactoryService.find(TableSinkFactory.class, sinkProperties, classLoader);
+//			return factory.createTableSink(sinkProperties);
+//		} else if (execution.isBatchPlanner()) {
+//			final BatchTableSinkFactory<?> factory = (BatchTableSinkFactory<?>)
+//				TableFactoryService.find(BatchTableSinkFactory.class, sinkProperties, classLoader);
+//			return factory.createBatchTableSink(sinkProperties);
+//		}
+//		throw new SqlExecutionException("Unsupported execution type for sinks.");
+//	}
 
 	private TableEnvironment createStreamTableEnvironment(
 			StreamExecutionEnvironment env,
@@ -514,20 +520,21 @@ public class ExecutionContext<ClusterID> {
 		//--------------------------------------------------------------------------------------------------------------
 		// Step.2 create table sources & sinks, and register them.
 		//--------------------------------------------------------------------------------------------------------------
-		Map<String, TableSource<?>> tableSources = new HashMap<>();
-		Map<String, TableSink<?>> tableSinks = new HashMap<>();
+		Map<String, TableSource> tableSources = new HashMap<>();
+		Map<String, TableSink> tableSinks = new HashMap<>();
+
 		environment.getTables().forEach((name, entry) -> {
 			if (entry instanceof SourceTableEntry || entry instanceof SourceSinkTableEntry) {
-				tableSources.put(name, createTableSource(environment.getExecution(), entry.asMap(), classLoader));
+				tableSources.put(name, createTableSource(name, entry.asMap()));
 			}
 			if (entry instanceof SinkTableEntry || entry instanceof SourceSinkTableEntry) {
-				tableSinks.put(name, createTableSink(environment.getExecution(), entry.asMap(), classLoader));
+				tableSinks.put(name, createTableSink(name, entry.asMap()));
 			}
 		});
 		// register table sources
-		tableSources.forEach(tableEnv::registerTableSource);
+		tableSources.forEach(((TableEnvironmentInternal) tableEnv)::registerTableSourceInternal);
 		// register table sinks
-		tableSinks.forEach(tableEnv::registerTableSink);
+		tableSinks.forEach(((TableEnvironmentInternal) tableEnv)::registerTableSinkInternal);
 
 		//--------------------------------------------------------------------------------------------------------------
 		// Step.4 Register temporal tables.

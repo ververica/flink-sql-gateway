@@ -26,14 +26,12 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.ResourceFileUtils;
-
 import org.apache.flink.client.cli.DefaultCLI;
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.types.logical.BooleanType;
 import org.apache.flink.types.Row;
-
 import org.junit.Test;
 
 import java.io.File;
@@ -43,9 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test for operations when user jars are provided.
@@ -62,7 +58,7 @@ public class OperationWithUserJarTest extends OperationTestBase {
 			new Environment(),
 			Collections.singletonList(jarUrl),
 			new Configuration(),
-			new DefaultCLI(new Configuration()),
+			new DefaultCLI(),
 			new DefaultClusterClientServiceLoader());
 	}
 

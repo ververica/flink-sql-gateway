@@ -29,19 +29,14 @@ import com.ververica.flink.table.gateway.rest.session.SessionManager;
 import com.ververica.flink.table.gateway.sink.TestTableSinkFactoryBase;
 import com.ververica.flink.table.gateway.source.TestTableSourceFactoryBase;
 import com.ververica.flink.table.gateway.utils.EnvironmentFileUtil;
-
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.client.cli.DefaultCLI;
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.shaded.guava18.com.google.common.collect.Maps;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.CatalogDatabaseImpl;
-import org.apache.flink.table.catalog.CatalogTable;
-import org.apache.flink.table.catalog.CatalogTableImpl;
-import org.apache.flink.table.catalog.GenericInMemoryCatalog;
-import org.apache.flink.table.catalog.ObjectPath;
+import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.catalog.config.CatalogConfig;
 import org.apache.flink.table.catalog.exceptions.CatalogException;
 import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
@@ -58,20 +53,11 @@ import org.apache.flink.table.module.Module;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.BooleanType;
 import org.apache.flink.types.Row;
-
-import org.apache.flink.shaded.guava18.com.google.common.collect.Maps;
-
 import org.junit.Test;
 
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.apache.flink.table.descriptors.CatalogDescriptorValidator.CATALOG_DEFAULT_DATABASE;
 import static org.apache.flink.table.descriptors.CatalogDescriptorValidator.CATALOG_TYPE;
@@ -110,7 +96,7 @@ public class DependencyTest {
 			env,
 			Collections.singletonList(dependency),
 			new Configuration(),
-			new DefaultCLI(new Configuration()),
+			new DefaultCLI(),
 			new DefaultClusterClientServiceLoader());
 		SessionManager sessionManager = new SessionManager(defaultContext);
 		String sessionId = sessionManager.createSession("test", "blink", "streaming", Maps.newConcurrentMap());

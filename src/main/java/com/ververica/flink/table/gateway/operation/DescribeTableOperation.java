@@ -25,17 +25,11 @@ import com.ververica.flink.table.gateway.rest.result.ConstantNames;
 import com.ververica.flink.table.gateway.rest.result.ResultKind;
 import com.ververica.flink.table.gateway.rest.result.ResultSet;
 import com.ververica.flink.table.gateway.utils.SqlExecutionException;
-
-import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.TableColumn;
-import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.WatermarkSpec;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.types.logical.BooleanType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.types.Row;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,7 +84,11 @@ public class DescribeTableOperation implements NonJobOperation {
 			String type = StringUtils.removeEnd(logicalType.toString(), " NOT NULL");
 			boolean isNullable = logicalType.isNullable();
 			String key = fieldToPrimaryKey.getOrDefault(column.getName(), null);
-			String computedColumn = column.getExpr().orElse(null);
+
+			String computedColumn = null;
+			if (column instanceof TableColumn.ComputedColumn) {
+				computedColumn = ((TableColumn.ComputedColumn) column).getExpression();
+			}
 			String watermark = fieldToWatermark.getOrDefault(column.getName(), null);
 
 			data.add(Row.of(name, type, isNullable, key, computedColumn, watermark));
