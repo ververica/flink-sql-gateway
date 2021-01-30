@@ -202,6 +202,7 @@ You might want to run the gateway on a standalone Flink cluster or with Yarn / K
 * **[Flink on Yarn Session](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html#flink-yarn-session)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
     ```
     execution.target: yarn-session
+    yarn.application.id: <your-session-cluster-appliction-id>
     ```
 * **[Flink on Yarn per Job](https://ci.apache.org/projects/flink/flink-docs-release-1.10/ops/deployment/yarn_setup.html#run-a-single-flink-job-on-yarn)**: Set the following options in `$FLINK_HOME/conf/flink-conf.yaml` to use this executor.
     ```
