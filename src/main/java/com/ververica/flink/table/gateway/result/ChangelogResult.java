@@ -44,8 +44,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.apache.flink.util.Preconditions.checkNotNull;
-
 /**
  * A result that works similarly to {@link DataStreamUtils#collect(DataStream)}.
  *
@@ -56,7 +54,6 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 	private final SocketStreamIterator<Tuple2<Boolean, Row>> iterator;
 	private final CollectStreamTableSink collectTableSink;
 	private final ResultRetrievalThread retrievalThread;
-	private final ClassLoader classLoader;
 	private CompletableFuture<JobExecutionResult> jobExecutionResultFuture;
 
 	private final Object resultLock;
@@ -70,7 +67,6 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 			ExecutionConfig config,
 			InetAddress gatewayAddress,
 			int gatewayPort,
-			ClassLoader classLoader,
 			int maxBufferSize) {
 		resultLock = new Object();
 
@@ -90,8 +86,6 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 			iterator.getBindAddress(), iterator.getPort(), serializer, tableSchema);
 		retrievalThread = new ResultRetrievalThread();
 
-		this.classLoader = checkNotNull(classLoader);
-
 		// prepare for changelog
 		changeRecordBuffer = new ArrayList<>();
 		this.maxBufferSize = maxBufferSize;
@@ -103,7 +97,7 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 		retrievalThread.start();
 
 		jobExecutionResultFuture = CompletableFuture.completedFuture(jobClient)
-			.thenCompose(client -> client.getJobExecutionResult(classLoader))
+			.thenCompose(JobClient::getJobExecutionResult)
 			.whenComplete((unused, throwable) -> {
 				if (throwable != null) {
 					executionException.compareAndSet(

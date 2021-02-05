@@ -62,7 +62,7 @@ public class OperationWithUserJarTest extends OperationTestBase {
 			new Environment(),
 			Collections.singletonList(jarUrl),
 			new Configuration(),
-			new DefaultCLI(new Configuration()),
+			new DefaultCLI(),
 			new DefaultClusterClientServiceLoader());
 	}
 

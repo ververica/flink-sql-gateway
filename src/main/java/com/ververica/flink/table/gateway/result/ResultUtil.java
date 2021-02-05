@@ -43,22 +43,20 @@ public class ResultUtil {
 
 	public static <C> BatchResult<C> createBatchResult(
 			TableSchema schema,
-			ExecutionConfig config,
-			ClassLoader classLoader) {
+			ExecutionConfig config) {
 		final TypeInformation[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
 			.map(TypeInfoDataTypeConverter::fromDataTypeToTypeInfo)
 			.toArray(TypeInformation[]::new);
 		final RowTypeInfo outputType = new RowTypeInfo(schemaTypeInfos, schema.getFieldNames());
 
-		return new BatchResult<>(schema, outputType, config, classLoader);
+		return new BatchResult<>(schema, outputType, config);
 	}
 
 	public static <C> ChangelogResult<C> createChangelogResult(
 			Configuration flinkConfig,
 			Environment env,
 			TableSchema schema,
-			ExecutionConfig config,
-			ClassLoader classLoader) {
+			ExecutionConfig config) {
 		final TypeInformation[] schemaTypeInfos = Stream.of(schema.getFieldDataTypes())
 			.map(TypeInfoDataTypeConverter::fromDataTypeToTypeInfo)
 			.toArray(TypeInformation[]::new);
@@ -75,7 +73,6 @@ public class ResultUtil {
 			config,
 			gatewayAddress,
 			gatewayPort,
-			classLoader,
 			maxBufferSize);
 	}
 

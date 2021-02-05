@@ -110,7 +110,7 @@ public class DependencyTest {
 			env,
 			Collections.singletonList(dependency),
 			new Configuration(),
-			new DefaultCLI(new Configuration()),
+			new DefaultCLI(),
 			new DefaultClusterClientServiceLoader());
 		SessionManager sessionManager = new SessionManager(defaultContext);
 		String sessionId = sessionManager.createSession("test", "blink", "streaming", Maps.newConcurrentMap());

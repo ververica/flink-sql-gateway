@@ -194,7 +194,7 @@ public final class SqlCommandParser {
 			operands = new String[0];
 		} else if (node instanceof SqlUseCatalog) {
 			cmd = SqlCommand.USE_CATALOG;
-			operands = new String[] { ((SqlUseCatalog) node).getCatalogName() };
+			operands = new String[] { ((SqlUseCatalog) node).getCatalogName().toString() };
 		} else if (node instanceof SqlUseDatabase) {
 			cmd = SqlCommand.USE;
 			operands = new String[] { ((SqlUseDatabase) node).getDatabaseName().toString() };

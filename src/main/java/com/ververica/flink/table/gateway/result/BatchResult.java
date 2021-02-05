@@ -38,8 +38,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static org.apache.flink.util.Preconditions.checkNotNull;
-
 /**
  * Collects results using accumulators and returns them as table snapshots.
  */
@@ -48,7 +46,6 @@ public class BatchResult<C> extends AbstractResult<C, Row> {
 	private final String accumulatorName;
 	private final CollectBatchTableSink tableSink;
 	private final Object resultLock;
-	private final ClassLoader classLoader;
 
 	private AtomicReference<SqlExecutionException> executionException = new AtomicReference<>();
 	private List<Row> resultTable;
@@ -58,19 +55,17 @@ public class BatchResult<C> extends AbstractResult<C, Row> {
 	public BatchResult(
 			TableSchema tableSchema,
 			RowTypeInfo outputType,
-			ExecutionConfig config,
-			ClassLoader classLoader) {
+			ExecutionConfig config) {
 		// TODO supports large result set
 		accumulatorName = new AbstractID().toString();
 		tableSink = new CollectBatchTableSink(accumulatorName, outputType.createSerializer(config), tableSchema);
 		resultLock = new Object();
-		this.classLoader = checkNotNull(classLoader);
 	}
 
 	@Override
 	public void startRetrieval(JobClient jobClient) {
 		CompletableFuture.completedFuture(jobClient)
-			.thenCompose(client -> client.getJobExecutionResult(classLoader))
+			.thenCompose(JobClient::getJobExecutionResult)
 			.thenAccept(new ResultRetrievalHandler())
 			.whenComplete((unused, throwable) -> {
 				if (throwable != null) {
