@@ -74,9 +74,6 @@ public class StatementExecuteHandler
 			throw new RestHandlerException("Statement must be provided.", HttpResponseStatus.BAD_REQUEST);
 		}
 
-		// TODO supports this
-		Long executionTimeoutMillis = request.getRequestBody().getExecutionTimeout();
-
 		try {
 			Tuple2<ResultSet, SqlCommand> tuple2 = sessionManager.getSession(sessionId).runStatement(statement);
 			ResultSet resultSet = tuple2.f0;

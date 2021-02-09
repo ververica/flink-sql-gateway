@@ -33,32 +33,19 @@ import javax.annotation.Nullable;
 public class StatementExecuteRequestBody implements RequestBody {
 
 	private static final String FIELD_STATEMENT = "statement";
-	private static final String FIELD_EXECUTION_TIMEOUT = "execution_timeout";
 
 	@JsonProperty(FIELD_STATEMENT)
 	@Nullable
 	private String statement;
 
-	@JsonProperty(FIELD_EXECUTION_TIMEOUT)
-	@Nullable
-	private Long executionTimeout;
-
 	public StatementExecuteRequestBody(
-		@Nullable @JsonProperty(FIELD_STATEMENT) String statement,
-		@Nullable @JsonProperty(FIELD_EXECUTION_TIMEOUT) Long executionTimeout) {
+		@Nullable @JsonProperty(FIELD_STATEMENT) String statement) {
 		this.statement = statement;
-		this.executionTimeout = executionTimeout;
 	}
 
 	@Nullable
 	@JsonIgnore
 	public String getStatement() {
 		return statement;
-	}
-
-	@Nullable
-	@JsonIgnore
-	public Long getExecutionTimeout() {
-		return executionTimeout;
 	}
 }
