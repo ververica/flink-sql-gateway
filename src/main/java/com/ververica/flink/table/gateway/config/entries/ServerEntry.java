@@ -72,8 +72,8 @@ public class ServerEntry extends ConfigEntry {
 	 * overwritten by the second one.
 	 */
 	public static ServerEntry merge(ServerEntry gateway1, ServerEntry gateway2) {
-		final Map<String, String> mergedProperties = new HashMap<>(gateway1.asTopLevelMap());
-		mergedProperties.putAll(gateway2.asTopLevelMap());
+		final Map<String, String> mergedProperties = new HashMap<>(gateway1.asMap());
+		mergedProperties.putAll(gateway2.asMap());
 
 		final DescriptorProperties properties = new DescriptorProperties(true);
 		properties.putProperties(mergedProperties);
