@@ -30,10 +30,14 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.runtime.net.ConnectionUtils;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.runtime.types.TypeInfoDataTypeConverter;
+import org.apache.flink.util.NetUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 /**
@@ -79,8 +83,30 @@ public class ResultUtil {
 	// --------------------------------------------------------------------------------------------
 
 	private static int getGatewayPort(DeploymentEntry deploy) {
+		String portRange = deploy.getGatewayPort();
 		// try to get address from deployment configuration
-		return deploy.getGatewayPort();
+		Iterator<Integer> portsIterator;
+		try {
+			portsIterator = NetUtils.getPortRangeFromString(portRange);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(
+					"Invalid port range definition: " + portRange);
+		}
+
+		int port = -1;
+		while (portsIterator.hasNext()) {
+				int candidatePort = portsIterator.next();
+				try (ServerSocket ignored = new ServerSocket(candidatePort)) {
+					port = candidatePort;
+					break;
+				} catch (final IOException e) {
+					// port is not available, find next
+				}
+		}
+		if (port < 0) {
+			throw new SqlGatewayException("No available port found in gateway port range: " + portRange);
+		}
+		return port;
 	}
 
 	private static InetAddress getGatewayAddress(DeploymentEntry deploy, Configuration flinkConfig) {

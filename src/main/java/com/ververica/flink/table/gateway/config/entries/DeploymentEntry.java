@@ -65,7 +65,7 @@ public class DeploymentEntry extends ConfigEntry {
 	protected void validate(DescriptorProperties properties) {
 		properties.validateLong(DEPLOYMENT_RESPONSE_TIMEOUT, true, 0);
 		properties.validateString(DEPLOYMENT_GATEWAY_ADDRESS, true, 0);
-		properties.validateInt(DEPLOYMENT_GATEWAY_PORT, true, 0, 65535);
+		properties.validateString(DEPLOYMENT_GATEWAY_PORT, true, 0);
 	}
 
 	public long getResponseTimeout() {
@@ -78,9 +78,9 @@ public class DeploymentEntry extends ConfigEntry {
 			.orElseGet(() -> useDefaultValue(DEPLOYMENT_GATEWAY_ADDRESS, ""));
 	}
 
-	public int getGatewayPort() {
-		return properties.getOptionalInt(DEPLOYMENT_GATEWAY_PORT)
-			.orElseGet(() -> useDefaultValue(DEPLOYMENT_GATEWAY_PORT, 0));
+	public String getGatewayPort() {
+		return properties.getOptionalString(DEPLOYMENT_GATEWAY_PORT)
+			.orElseGet(() -> useDefaultValue(DEPLOYMENT_GATEWAY_PORT, "0"));
 	}
 
 	/**
