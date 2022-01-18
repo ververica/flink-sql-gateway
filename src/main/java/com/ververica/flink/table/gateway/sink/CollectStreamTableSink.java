@@ -48,7 +48,7 @@ public class CollectStreamTableSink implements RetractStreamTableSink<Row> {
 		this.targetAddress = targetAddress;
 		this.targetPort = targetPort;
 		this.serializer = serializer;
-		this.tableSchema = TableSchemaUtils.checkNoGeneratedColumns(tableSchema);
+		this.tableSchema = TableSchemaUtils.checkOnlyPhysicalColumns(tableSchema);
 	}
 
 	@Override

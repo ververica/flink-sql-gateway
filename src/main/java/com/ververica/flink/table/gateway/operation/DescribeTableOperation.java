@@ -90,7 +90,7 @@ public class DescribeTableOperation implements NonJobOperation {
 			String type = StringUtils.removeEnd(logicalType.toString(), " NOT NULL");
 			boolean isNullable = logicalType.isNullable();
 			String key = fieldToPrimaryKey.getOrDefault(column.getName(), null);
-			String computedColumn = column.getExpr().orElse(null);
+			String computedColumn = column.explainExtras().orElse(null);
 			String watermark = fieldToWatermark.getOrDefault(column.getName(), null);
 
 			data.add(Row.of(name, type, isNullable, key, computedColumn, watermark));

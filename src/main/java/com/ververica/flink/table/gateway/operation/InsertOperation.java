@@ -155,7 +155,7 @@ public class InsertOperation extends AbstractJobOperation {
 		configuration.set(DeploymentOptions.ATTACHED, false);
 
 		// create execution
-		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline);
+		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline, context.getExecutionContext().getClassLoader());
 
 		// blocking deployment
 		try {

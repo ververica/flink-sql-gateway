@@ -70,7 +70,7 @@ public class BatchResult<C> extends AbstractResult<C, Row> {
 	@Override
 	public void startRetrieval(JobClient jobClient) {
 		CompletableFuture.completedFuture(jobClient)
-			.thenCompose(client -> client.getJobExecutionResult(classLoader))
+			.thenCompose(client -> client.getJobExecutionResult())
 			.thenAccept(new ResultRetrievalHandler())
 			.whenComplete((unused, throwable) -> {
 				if (throwable != null) {

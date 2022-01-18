@@ -55,7 +55,7 @@ public class OperationTestBase {
 			new Environment(),
 			Collections.emptyList(),
 			new Configuration(),
-			new DefaultCLI(new Configuration()),
+			new DefaultCLI(),
 			new DefaultClusterClientServiceLoader());
 	}
 
