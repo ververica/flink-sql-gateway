@@ -45,12 +45,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableConfig;
-import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableException;
 import org.apache.flink.table.api.bridge.java.BatchTableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.api.bridge.java.internal.BatchTableEnvironmentImpl;
 import org.apache.flink.table.api.bridge.java.internal.StreamTableEnvironmentImpl;
+import org.apache.flink.table.api.internal.TableEnvironmentInternal;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogManager;
 import org.apache.flink.table.catalog.FunctionCatalog;
@@ -120,7 +120,7 @@ public class ExecutionContext<ClusterID> {
 	private final Configuration flinkConfig;
 	private final ClusterClientFactory<ClusterID> clusterClientFactory;
 
-	private TableEnvironment tableEnv;
+	private TableEnvironmentInternal tableEnv;
 	private ExecutionEnvironment execEnv;
 	private StreamExecutionEnvironment streamExecEnv;
 	private Executor executor;
@@ -212,7 +212,7 @@ public class ExecutionContext<ClusterID> {
 		}
 	}
 
-	public TableEnvironment getTableEnvironment() {
+	public TableEnvironmentInternal getTableEnvironment() {
 		return tableEnv;
 	}
 
@@ -281,8 +281,7 @@ public class ExecutionContext<ClusterID> {
 			availableCommandLines,
 			activeCommandLine);
 
-		Configuration executionConfig = activeCommandLine.applyCommandLineOptionsToConfiguration(
-			commandLine);
+		Configuration executionConfig = activeCommandLine.toConfiguration(commandLine);
 
 		try {
 			final ProgramOptions programOptions = ProgramOptions.create(commandLine);
@@ -355,7 +354,7 @@ public class ExecutionContext<ClusterID> {
 		throw new SqlExecutionException("Unsupported execution type for sinks.");
 	}
 
-	private TableEnvironment createStreamTableEnvironment(
+	private TableEnvironmentInternal createStreamTableEnvironment(
 			StreamExecutionEnvironment env,
 			EnvironmentSettings settings,
 			TableConfig config,
@@ -525,9 +524,9 @@ public class ExecutionContext<ClusterID> {
 			}
 		});
 		// register table sources
-		tableSources.forEach(tableEnv::registerTableSource);
+		tableSources.forEach(tableEnv::registerTableSourceInternal);
 		// register table sinks
-		tableSinks.forEach(tableEnv::registerTableSink);
+		tableSinks.forEach(tableEnv::registerTableSinkInternal);
 
 		//--------------------------------------------------------------------------------------------------------------
 		// Step.4 Register temporal tables.

@@ -211,7 +211,7 @@ public class SelectOperation extends AbstractJobOperation {
 		try {
 			// writing to a sink requires an optimization step that might reference UDFs during code compilation
 			executionContext.wrapClassLoader(() -> {
-				executionContext.getTableEnvironment().registerTableSink(tableName, result.getTableSink());
+				executionContext.getTableEnvironment().registerTableSinkInternal(tableName, result.getTableSink());
 				table.insertInto(tableName);
 				return null;
 			});
@@ -239,7 +239,7 @@ public class SelectOperation extends AbstractJobOperation {
 		configuration.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, true);
 
 		// create execution
-		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline);
+		final ProgramDeployer deployer = new ProgramDeployer(configuration, jobName, pipeline, context.getExecutionContext().getClassLoader());
 
 		JobClient jobClient;
 		// blocking deployment

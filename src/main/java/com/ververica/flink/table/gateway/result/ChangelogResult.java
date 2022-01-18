@@ -103,7 +103,7 @@ public class ChangelogResult<C> extends AbstractResult<C, Tuple2<Boolean, Row>> 
 		retrievalThread.start();
 
 		jobExecutionResultFuture = CompletableFuture.completedFuture(jobClient)
-			.thenCompose(client -> client.getJobExecutionResult(classLoader))
+			.thenCompose(client -> client.getJobExecutionResult())
 			.whenComplete((unused, throwable) -> {
 				if (throwable != null) {
 					executionException.compareAndSet(
