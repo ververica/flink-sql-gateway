@@ -46,7 +46,7 @@ under the License.
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <hive.version>2.3.4</hive.version>
-        <hivemetastore.hadoop.version>2.7.5</hivemetastore.hadoop.version>
+        <hivemetastore.hadoop.version>2.10.1</hivemetastore.hadoop.version>
         <orc.version>1.4.3</orc.version>
         <junit.version>4.12</junit.version>
     </properties>
